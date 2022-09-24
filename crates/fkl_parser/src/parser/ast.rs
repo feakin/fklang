@@ -169,20 +169,20 @@ pub struct ValueObjectDecl {
 // Binding To Function
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Parameter {
+pub struct Trait {
   pub name: String,
-  pub param_type: String,
+  pub methods: Vec<Function>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Trait {
+pub struct Function {
   pub name: String,
   pub description: String,
   pub parameters: Vec<Parameter>,
   pub return_type: Vec<Parameter>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct RestApi {
   pub name: String,
   pub method: HttpMethod,
@@ -198,6 +198,19 @@ pub enum HttpMethod {
   Put,
   Delete,
   Patch,
+  Custom(String)
+}
+
+impl Default for HttpMethod {
+  fn default() -> Self {
+    HttpMethod::Get
+  }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Parameter {
+  pub name: String,
+  pub param_type: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
