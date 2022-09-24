@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod test {
-  use crate::{mir, parse};
+  use crate::mir;
   use crate::mir::{BoundedContext, ContextRelation, ContextState};
   use crate::mir::ConnectionDirection::PositiveDirected;
+  use crate::parse;
 
   #[test]
   fn test() {
