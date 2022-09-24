@@ -172,18 +172,23 @@ ValueObject Notifications { }
         BoundedContext {
           name: "User".to_string(),
           aggregates: vec![
-            Aggregate { name: "User".to_string(), description: "".to_string(), entities: vec![
-              Entity {
-                name: "User".to_string(),
-                description: "".to_string(),
-                is_aggregate_root: false,
-                identify: Field {
-                  name: "".to_string(),
-                  value: "".to_string(),
-                  type_type: "".to_string(),
-                },
-                fields: vec![] }
-            ] }
+            Aggregate {
+              name: "User".to_string(),
+              description: "".to_string(),
+              entities: vec![
+                Entity {
+                  name: "User".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                }
+              ],
+            }
           ],
         }],
       relations: vec![
