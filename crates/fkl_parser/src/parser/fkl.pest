@@ -67,11 +67,15 @@ inline_doc = {
 
 // Entity should be like a concept
 entity_decl = {
-  ("Concept" | "Entity" ) ~ identifier ~ "{" ~ (constructor_decl | value_object_decl | inline_doc)* ~ "}"
+  ("Concept" | "Entity" ) ~ identifier ~ "{" ~ (constructor_decl | struct_decl | value_object_decl | inline_doc)* ~ "}"
 }
 
 constructor_decl = {
   "constructor" ~ "(" ~ parameters_decl ~ ")"
+}
+
+struct_decl = {
+  ("struct" | "Struct") ~ "{" ~ fields_decl ~ "}"
 }
 
 value_object_decl = {
@@ -79,11 +83,23 @@ value_object_decl = {
 }
 
 parameters_decl = {
-  (parameter_decl ~ ","?)*
+  (name_type_def ~ ","?)*
 }
 
-parameter_decl = {
-  identifier ~ ":" ~ param_type
+fields_decl = {
+  (name_type_def ~ ";"?)*
+}
+
+// list?
+name_type_def = {
+  identifier ~ ":" ~ param_type ~ ("=" ~ value)?
+}
+
+value = {
+  identifier ~ "." ~ identifier // enum
+  | identifier
+  | number
+  | string
 }
 
 param_type = {
@@ -108,7 +124,9 @@ attr_value = {
   identifier | string
 }
 
-list = { ("List" | "Vec") }
+list = {
+ "List" | "Vec" | "Set" | identifier
+}
 
 keywords = _{
   // DDD Keywords

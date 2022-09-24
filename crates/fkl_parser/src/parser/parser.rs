@@ -206,6 +206,9 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
       Rule::constructor_decl => {
         entity.fields = consume_constructor(p);
       }
+      Rule::struct_decl => {
+        entity.fields = consume_struct(p);
+      }
       Rule::inline_doc => {
         entity.inline_doc = parse_inline_doc(p);
       }
@@ -225,7 +228,27 @@ fn consume_constructor(pair: Pair<Rule>) -> Vec<Field> {
       Rule::parameters_decl => {
         for p in p.into_inner() {
           match p.as_rule() {
-            Rule::parameter_decl => {
+            Rule::name_type_def => {
+              fields.push(consume_parameter(p));
+            }
+            _ => println!("unreachable parameter_decl rule: {:?}", p.as_rule())
+          }
+        }
+      }
+      _ => println!("unreachable constructor rule: {:?}", p.as_rule())
+    };
+  }
+  return fields;
+}
+
+fn consume_struct(pair: Pair<Rule>) -> Vec<Field> {
+  let mut fields: Vec<Field> = vec![];
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::fields_decl => {
+        for p in p.into_inner() {
+          match p.as_rule() {
+            Rule::name_type_def => {
               fields.push(consume_parameter(p));
             }
             _ => println!("unreachable parameter_decl rule: {:?}", p.as_rule())
@@ -687,5 +710,47 @@ Component SalesComponent {
   SalesContext [ OHS ] <-> [rel = "ACL, OHS" ] OrderContext;
 }"#).unwrap();
     assert_eq!(order2[0], except);
+  }
+
+  #[test]
+  fn rel_with_context_map_with_inline_doc() {
+    let decls = parse(r#"Entity Reservation  {
+  Struct {
+    id: String;
+    token: UUID;
+    status: ReservationStatus = ReservationStatus.OPEN;
+    expiresAt: LocalDateTime;
+    createdAt: LocalDateTime;
+    screeningId: String;
+    screeningStartTime: LocalDateTime;
+    name: String;
+    surname: String;
+    tickets: Set<Ticket>;
+    totalPrice: BigDecimal;
+  }
+}"#).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Entity(EntityDecl {
+      is_aggregate_root: false,
+      name: "Reservation".to_string(),
+      identify: Field {
+        name: "".to_string(),
+        field_type: "".to_string(),
+      },
+      inline_doc: "".to_string(),
+      fields: vec![
+        Field { name: "id".to_string(), field_type: "String".to_string() },
+        Field { name: "token".to_string(), field_type: "UUID".to_string() },
+        Field { name: "status".to_string(), field_type: "ReservationStatus".to_string() },
+        Field { name: "expiresAt".to_string(), field_type: "LocalDateTime".to_string() },
+        Field { name: "createdAt".to_string(), field_type: "LocalDateTime".to_string() },
+        Field { name: "screeningId".to_string(), field_type: "String".to_string() },
+        Field { name: "screeningStartTime".to_string(), field_type: "LocalDateTime".to_string() },
+        Field { name: "name".to_string(), field_type: "String".to_string() },
+        Field { name: "surname".to_string(), field_type: "String".to_string() },
+        Field { name: "tickets".to_string(), field_type: "Set<Ticket>".to_string() },
+        Field { name: "totalPrice".to_string(), field_type: "BigDecimal".to_string() }],
+      value_objects: vec![],
+    }));
   }
 }
