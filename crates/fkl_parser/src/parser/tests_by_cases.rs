@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-  use crate::{parse, ParseError};
+  use crate::parse;
 
   #[test]
   fn test() {
@@ -65,23 +65,19 @@ Entity User {
 }
 
 ValueObject Payment {
-  id: UUID;
-  payment_type: PaymentType;
-  description: String;
+  Struct {
+    id: UUID;
+    amount: BigDecimal;
+    currency: Currency;
+    status: PaymentStatus;
+    createdAt: LocalDateTime;
+  }
 }
 
 ValueObject Price { }
 ValueObject Notifications { }
 "#;
 
-    match parse(booking_ticket) {
-      Ok(_) => {}
-      Err(err) => {
-        if let ParseError { kind, .. } = err {
-          println!("Error: {:?}", kind);
-        }
-      }
-    }
-
+    parse(booking_ticket).unwrap();
   }
 }

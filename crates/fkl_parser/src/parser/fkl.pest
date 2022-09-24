@@ -6,6 +6,7 @@ declaration = {
   | ext_module_decl
   | aggregate_decl
   | entity_decl
+  | value_object_decl
   | component_decl
 }
 
@@ -58,16 +59,19 @@ ext_module_decl = {
 }
 
 aggregate_decl = {
-  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc)* ~ "}"
+  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc | use_domain_object_decl )* ~ "}"
 }
 
-inline_doc = {
-  "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""
+use_domain_object_decl = {
+  ("Concept" | "Entity" | "VO" | "ValueObject" ) ~ identifier ~ ("," ~ identifier)* ~ ";"
 }
 
-// Entity should be like a concept
 entity_decl = {
   ("Concept" | "Entity" ) ~ identifier ~ "{" ~ (constructor_decl | struct_decl | value_object_decl | inline_doc)* ~ "}"
+}
+
+value_object_decl = {
+  ("VO" | "ValueObject") ~ identifier ~ ("{" ~ (constructor_decl | struct_decl)* ~ "}")?
 }
 
 constructor_decl = {
@@ -76,10 +80,6 @@ constructor_decl = {
 
 struct_decl = {
   ("struct" | "Struct") ~ "{" ~ fields_decl ~ "}"
-}
-
-value_object_decl = {
-  ("VO" | "ValueObject") ~ identifier ~ ("{" ~ param_type* ~ "}")?
 }
 
 parameters_decl = {
@@ -164,6 +164,11 @@ string = @{
 }
 number = @{ '0'..'9'+ }
 int = @{ number | "-" ~ "0"* ~ '1'..'9' ~ number? }
+
+
+inline_doc = {
+  "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""
+}
 
 // comments
 newline    = _{ "\n" | "\r\n" }

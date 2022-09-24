@@ -191,6 +191,7 @@ pub struct RestApi {
   pub return_type: Vec<Parameter>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HttpMethod {
   Get,

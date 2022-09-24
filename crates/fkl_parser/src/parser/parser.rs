@@ -1,8 +1,9 @@
 use std::collections::HashMap;
+
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, AttributeDefinition, RelationDirection, Identifier, Loc};
-use crate::parser::parse_result::{ParseError, ParseResult, SyntaxError};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, RelationDirection, ValueObjectDecl, VariableDefinition};
+use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
 #[derive(Parser)]
@@ -359,8 +360,8 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::parser::ast::{AggregateDecl, ContextRelation, BoundedContextDecl, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, ComponentType, AttributeDefinition, Identifier, Loc};
-  use crate::parser::ast::RelationDirection::{PositiveDirected, BiDirected};
+  use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ComponentType, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, ValueObjectDecl, VariableDefinition};
+  use crate::parser::ast::RelationDirection::{BiDirected, PositiveDirected};
   use crate::parser::parser::parse;
 
   #[test]
