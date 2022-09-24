@@ -6,7 +6,7 @@ pub use parser::parse as ast_parse;
 
 use crate::mir::ContextMap;
 use crate::parser::parse_result::ParseError;
-use crate::transform::Transform;
+use crate::transform::MirTransform;
 
 pub mod parser;
 pub mod mir;
@@ -15,5 +15,5 @@ mod transform;
 mod tests;
 
 pub fn parse(rule_content: &str) -> Result<ContextMap, ParseError> {
-  Ok(Transform::mir(rule_content)?)
+  Ok(MirTransform::mir(rule_content)?)
 }

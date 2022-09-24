@@ -5,63 +5,71 @@ use crate::mir::{BoundedContext, ConnectionDirection, ContextRelationType};
 use crate::parser::parse as ast_parse;
 use crate::parser::ast::{FklDeclaration, RelationDirection};
 
-pub struct Transform {
+pub struct MirTransform {
+  pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
   pub relations: Vec<mir::ContextRelation>,
 }
 
-impl Transform {
+impl MirTransform {
   pub fn mir(str: &str) -> Result<ContextMap, ParseError> {
-    let mut transform = Transform {
+    let mut transform = MirTransform {
+      context_map_name: "".to_string(),
       contexts: Default::default(),
       relations: vec![],
     };
 
     match ast_parse(str) {
       Ok(decls) => {
-        decls.iter().for_each(|decl| {
-          match decl {
-            FklDeclaration::None => {}
-            FklDeclaration::ContextMap(context_map) => {
-              context_map.contexts.iter().for_each(|context| {
-                let bounded_context = mir::BoundedContext::new(&context.name);
-                transform.contexts.insert(bounded_context.name.clone(), bounded_context);
-              });
-
-              context_map.relations.iter().for_each(|relation| {
-                let rel = mir::ContextRelation {
-                  source: relation.source.clone(),
-                  target: relation.target.clone(),
-                  connection_type: transform_connection(&relation.direction),
-                  source_type: ContextRelationType::list(&relation.source_types),
-                  target_type: ContextRelationType::list(&relation.target_types),
-                };
-                transform.relations.push(rel);
-              });
-            }
-            FklDeclaration::BoundedContext(bc) => {
-              let bounded_context = mir::BoundedContext::new(&bc.name);
-              transform.contexts.insert(bounded_context.name.clone(), bounded_context);
-            }
-            FklDeclaration::Domain(_) => {}
-            FklDeclaration::Aggregate(_) => {}
-            FklDeclaration::DomainService(_) => {}
-            FklDeclaration::ApplicationService(_) => {}
-            FklDeclaration::Entity(_) => {}
-            FklDeclaration::ValueObject(_) => {}
-            FklDeclaration::Component(_) => {}
-          }
-        });
+        transform.lower_decls(decls);
       }
       Err(e) => return Err(e),
     };
 
     Ok(ContextMap {
-      name: "".to_string(),
+      name: transform.context_map_name,
       state: Default::default(),
       contexts: transform.contexts.values().map(|context| context.clone()).collect(),
       relations: transform.relations,
     })
+  }
+
+  fn lower_decls(&mut self, decls: Vec<FklDeclaration>) {
+    decls.iter().for_each(|decl| {
+      match decl {
+        FklDeclaration::None => {}
+        FklDeclaration::ContextMap(context_map) => {
+          self.context_map_name = context_map.name.name.clone();
+
+          context_map.contexts.iter().for_each(|context| {
+            let bounded_context = mir::BoundedContext::new(&context.name);
+            self.contexts.insert(bounded_context.name.clone(), bounded_context);
+          });
+
+          context_map.relations.iter().for_each(|relation| {
+            let rel = mir::ContextRelation {
+              source: relation.source.clone(),
+              target: relation.target.clone(),
+              connection_type: transform_connection(&relation.direction),
+              source_type: ContextRelationType::list(&relation.source_types),
+              target_type: ContextRelationType::list(&relation.target_types),
+            };
+            self.relations.push(rel);
+          });
+        }
+        FklDeclaration::BoundedContext(bc) => {
+          let bounded_context = mir::BoundedContext::new(&bc.name);
+          self.contexts.insert(bounded_context.name.clone(), bounded_context);
+        }
+        FklDeclaration::Domain(_) => {}
+        FklDeclaration::Aggregate(_) => {}
+        FklDeclaration::DomainService(_) => {}
+        FklDeclaration::ApplicationService(_) => {}
+        FklDeclaration::Entity(_) => {}
+        FklDeclaration::ValueObject(_) => {}
+        FklDeclaration::Component(_) => {}
+      }
+    });
   }
 }
 
@@ -78,7 +86,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 mod tests {
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::{ContextRelation, ContextRelationType};
-  use crate::transform::Transform;
+  use crate::transform::MirTransform;
 
   #[test]
   fn basic_mir() {
@@ -88,7 +96,7 @@ ContextMap {
   ShoppingCartContext <-> MallContext;
 }
 "#;
-    let context_map = Transform::mir(str).unwrap();
+    let context_map = MirTransform::mir(str).unwrap();
 
     assert_eq!(context_map.contexts.len(), 2);
     assert_eq!(context_map.relations.len(), 2);
@@ -110,7 +118,7 @@ Context OrderContext {
 
 }
 "#;
-    let context_map = Transform::mir(str).unwrap();
+    let context_map = MirTransform::mir(str).unwrap();
 
     assert_eq!(context_map.contexts.len(), 3);
     assert_eq!(context_map.relations.len(), 2);
@@ -123,7 +131,7 @@ ContextMap {
   ShoppingCartContext [acl] -> MallContext [acl];
 }
 "#;
-    let context_map = Transform::mir(str).unwrap();
+    let context_map = MirTransform::mir(str).unwrap();
 
     assert_eq!(context_map.contexts.len(), 2);
     assert_eq!(context_map.relations, vec![

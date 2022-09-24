@@ -83,7 +83,7 @@ ValueObject Notifications { }
 
     let decls = parse(booking_ticket).unwrap();
     assert_eq!(decls, mir::ContextMap {
-      name: "".to_string(),
+      name: "TicketBooking".to_string(),
       state: ContextState::ToBe,
       contexts: vec![
         BoundedContext { name: "Cinema".to_string() },
