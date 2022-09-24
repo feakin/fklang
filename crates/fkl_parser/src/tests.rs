@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
   use crate::mir;
-  use crate::mir::{BoundedContext, ContextRelation, ContextState};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextState};
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::parse;
 
@@ -12,6 +12,10 @@ ContextMap TicketBooking {
   Reservation -> Cinema;
   Reservation -> Movie;
   Reservation -> User;
+}
+
+Context Reservation {
+  Aggregate Reservation;
 }
 
 Aggregate Reservation {
@@ -36,6 +40,10 @@ Entity Reservation  {
 
 Entity Ticket  {}
 
+Context Cinema {
+  Aggregate Cinema;
+}
+
 Aggregate Cinema {
   Entity Cinema, ScreeningRoom, Seat;
 }
@@ -44,6 +52,10 @@ Entity Cinema { }
 Entity ScreeningRoom { }
 Entity Seat { }
 
+Context Movie {
+  Aggregate Movie;
+}
+
 Aggregate Movie {
   Entity Movie, Actor, Publisher;
 }
@@ -51,6 +63,10 @@ Aggregate Movie {
 Entity Movie { }
 Entity Actor { }
 Entity Publisher { }
+
+Context User {
+  Aggregate User;
+}
 
 Aggregate User {
   Entity User;
@@ -86,10 +102,30 @@ ValueObject Notifications { }
       name: "TicketBooking".to_string(),
       state: ContextState::ToBe,
       contexts: vec![
-        BoundedContext { name: "Cinema".to_string() },
-        BoundedContext { name: "Movie".to_string() },
-        BoundedContext { name: "Reservation".to_string() },
-        BoundedContext { name: "User".to_string() }],
+        BoundedContext {
+          name: "Cinema".to_string(),
+          aggregates: vec![
+            Aggregate { name: "Cinema".to_string(), description: "".to_string(), entities: vec![] }
+          ],
+        },
+        BoundedContext {
+          name: "Movie".to_string(),
+          aggregates: vec![
+            Aggregate { name: "Movie".to_string(), description: "".to_string(), entities: vec![] }
+          ],
+        },
+        BoundedContext {
+          name: "Reservation".to_string(),
+          aggregates: vec![
+            Aggregate { name: "Reservation".to_string(), description: "".to_string(), entities: vec![] }
+          ],
+        },
+        BoundedContext {
+          name: "User".to_string(),
+          aggregates: vec![
+            Aggregate { name: "User".to_string(), description: "".to_string(), entities: vec![] }
+          ],
+        }],
       relations: vec![
         ContextRelation {
           source: "Reservation".to_string(),

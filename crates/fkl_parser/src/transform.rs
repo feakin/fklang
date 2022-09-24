@@ -2,12 +2,14 @@ use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
 use crate::mir::{BoundedContext, ConnectionDirection, ContextRelationType};
+use crate::mir::tactic::aggregate::Aggregate;
+use crate::parser::ast::{AggregateDecl, FklDeclaration, RelationDirection};
 use crate::parser::parse as ast_parse;
-use crate::parser::ast::{FklDeclaration, RelationDirection};
 
 pub struct MirTransform {
   pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
+  pub aggregates: IndexMap<String, Aggregate>,
   pub relations: Vec<mir::ContextRelation>,
 }
 
@@ -16,6 +18,7 @@ impl MirTransform {
     let mut transform = MirTransform {
       context_map_name: "".to_string(),
       contexts: Default::default(),
+      aggregates: Default::default(),
       relations: vec![],
     };
 
@@ -35,8 +38,8 @@ impl MirTransform {
   }
 
   fn lower_decls(&mut self, decls: Vec<FklDeclaration>) {
-    decls.iter().for_each(|decl| {
-      match decl {
+    decls.iter().for_each(|declaration| {
+      match declaration {
         FklDeclaration::None => {}
         FklDeclaration::ContextMap(context_map) => {
           self.context_map_name = context_map.name.name.clone();
@@ -58,11 +61,17 @@ impl MirTransform {
           });
         }
         FklDeclaration::BoundedContext(bc) => {
-          let bounded_context = mir::BoundedContext::new(&bc.name);
+          let mut bounded_context = mir::BoundedContext::new(&bc.name);
+          bc.use_domain_objects.iter().for_each(|domain_object| {
+            let aggregate = Aggregate::new(&domain_object.name);
+            bounded_context.aggregates.push(aggregate);
+          });
           self.contexts.insert(bounded_context.name.clone(), bounded_context);
         }
         FklDeclaration::Domain(_) => {}
-        FklDeclaration::Aggregate(_) => {}
+        FklDeclaration::Aggregate(decl) => {
+          self.transform_aggregate(&decl);
+        }
         FklDeclaration::DomainService(_) => {}
         FklDeclaration::ApplicationService(_) => {}
         FklDeclaration::Entity(_) => {}
@@ -71,6 +80,20 @@ impl MirTransform {
       }
     });
   }
+
+  fn transform_aggregate(&mut self, decl: &AggregateDecl) -> mir::Aggregate {
+    let mut aggregate = mir::Aggregate::new(&decl.name);
+    self.aggregates.insert(aggregate.name.clone(), aggregate.clone());
+    // decl.entities.iter().for_each(|entity| {
+    // });
+
+    aggregate
+  }
+
+  // fn transform_entity(decl: &EntityDecl) -> mir::Entity {
+  //   let entity = mir::Entity::new(&decl.name);
+  //   entity
+  // }
 }
 
 fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
@@ -84,8 +107,8 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::{ContextRelation, ContextRelationType};
+  use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::transform::MirTransform;
 
   #[test]

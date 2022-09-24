@@ -85,6 +85,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
               context_decl_map.insert(context_name.clone(), BoundedContextDecl {
                 name: context_name,
                 aggregates: vec![],
+                use_domain_objects: vec![],
               });
             }
             Rule::rel_symbol => {
@@ -175,6 +176,9 @@ fn consume_context(pair: Pair<Rule>) -> BoundedContextDecl {
       }
       Rule::aggregate_decl => {
         context.aggregates.push(consume_aggregate(p));
+      }
+      Rule::use_domain_object_decl => {
+        context.use_domain_objects.push(consume_use_domain_object(p));
       }
       _ => println!("unreachable context rule: {:?}", p.as_rule())
     };
@@ -405,16 +409,18 @@ Context ShoppingCarContext {
     assert_eq!(decls[0], FklDeclaration::ContextMap(ContextMapDecl {
       name: Identifier {
         name: "".to_string(),
-        loc: Default::default()
+        loc: Default::default(),
       },
       contexts: vec![
         BoundedContextDecl {
           name: "MallContext".to_string(),
           aggregates: vec![],
+          use_domain_objects: vec![],
         },
         BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
           aggregates: vec![],
+          use_domain_objects: vec![],
         },
       ],
       relations: vec![
@@ -436,7 +442,6 @@ just for test
 
     assert_eq!(decls[0], FklDeclaration::Aggregate(AggregateDecl {
       name: "Sample".to_string(),
-      is_root: false,
       inline_doc: r#" inline doc sample
 just for test
 "#.to_string(),
@@ -458,7 +463,6 @@ Aggregate ShoppingCart {
 
     assert_eq!(decls[0], FklDeclaration::Aggregate(AggregateDecl {
       name: "ShoppingCart".to_string(),
-      is_root: false,
       inline_doc: "".to_string(),
       used_domain_objects: vec![],
       entities: vec![EntityDecl {
@@ -640,7 +644,6 @@ Entity SalesPerson {
       aggregates: vec![
         AggregateDecl {
           name: "Cart".to_string(),
-          is_root: false,
           inline_doc: "".to_string(),
           used_domain_objects: vec![],
           entities: vec![EntityDecl {
@@ -690,6 +693,7 @@ Entity SalesPerson {
           value_objects: vec![],
         }
       ],
+      use_domain_objects: vec![],
     }));
   }
 
@@ -728,11 +732,11 @@ Component SalesComponent {
     let except = FklDeclaration::ContextMap(ContextMapDecl {
       name: Identifier {
         name: "Mall".to_string(),
-        loc: Loc(11, 15)
+        loc: Loc(11, 15),
       },
       contexts: vec![
-        BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![] },
-        BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![] },
+        BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![], use_domain_objects: vec![] },
+        BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![], use_domain_objects: vec![] },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),

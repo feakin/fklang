@@ -1,6 +1,9 @@
+use std::fmt::{Display, Formatter};
+
 use serde::Deserialize;
 use serde::Serialize;
-use std::fmt::{Display, Formatter};
+
+use crate::mir::tactic::aggregate::Aggregate;
 
 // # Bounded Context
 // A description of a boundary (typically a subsystem, or the work of a particular team) within
@@ -8,11 +11,12 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct BoundedContext {
   pub name: String,
+  pub aggregates: Vec<Aggregate>,
 }
 
 impl BoundedContext {
   pub fn new(name: &str) -> Self {
-    BoundedContext { name: name.to_string() }
+    BoundedContext { name: name.to_string(), aggregates: vec![] }
   }
 }
 

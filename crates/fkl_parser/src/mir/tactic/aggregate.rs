@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
+use crate::mir::tactic::entity::Entity;
 
 // Cluster the entities and value objects into aggregates and define boundaries around each.
 // Choose one entity to be the root of each aggregate, and allow external objects to hold
@@ -10,5 +11,12 @@ use serde::Serialize;
 pub struct Aggregate {
   pub name: String,
   pub description: String,
+  pub entities: Vec<Entity>,
+}
+
+impl Aggregate {
+  pub fn new(name: &str) -> Self {
+    Aggregate { name: name.to_string(), description: "".to_string(), entities: vec![] }
+  }
 }
 

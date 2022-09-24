@@ -15,11 +15,11 @@ context_map_decl = {
 }
 
 context_decl = {
-  "Context" ~ identifier ~ "{" ~ (module_decl | aggregate_decl | inline_doc)* ~ "}"
+  "Context" ~ identifier ~ "{" ~ (module_decl | aggregate_decl | use_domain_object_decl | inline_doc)* ~ "}"
 }
 
 context_node_decl = {
-  "context" ~ identifier
+  ("Context" | "context") ~ identifier
 }
 
 context_node_rel = {
@@ -63,7 +63,7 @@ aggregate_decl = {
 }
 
 use_domain_object_decl = {
-  ("Concept" | "Entity" | "VO" | "ValueObject" ) ~ identifier ~ ("," ~ identifier)* ~ ";"
+  ("Concept" | "Entity" | "VO" | "ValueObject" | "Aggregate" ) ~ identifier ~ ("," ~ identifier)* ~ ";"
 }
 
 entity_decl = {
@@ -108,11 +108,7 @@ param_type = {
 }
 
 component_decl = {
-  "Component" ~ identifier ~ "{" ~ (attr_decl | inline_doc | use_aggregate )* ~ "}"
-}
-
-use_aggregate = {
-  "Aggregate" ~ identifier ~ ";"?
+  "Component" ~ identifier ~ "{" ~ (attr_decl | inline_doc | use_domain_object_decl )* ~ "}"
 }
 
 attr_decl = {
