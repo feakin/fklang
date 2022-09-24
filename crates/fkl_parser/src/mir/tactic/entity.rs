@@ -11,3 +11,10 @@ pub struct Entity {
   pub identify: Field,
   pub fields: Vec<Field>,
 }
+
+impl Entity {
+  pub fn new(name: &str) -> Self {
+    Entity { name: name.to_string(), description: "".to_string(), is_aggregate_root: false, identify: Field::default(), fields: vec![] }
+  }
+}
+

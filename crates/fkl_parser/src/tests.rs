@@ -1,8 +1,9 @@
 #[cfg(test)]
 mod test {
   use crate::mir;
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextState};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextState, Entity};
   use crate::mir::ConnectionDirection::PositiveDirected;
+  use crate::mir::tactic::block::Field;
   use crate::parse;
 
   #[test]
@@ -105,25 +106,84 @@ ValueObject Notifications { }
         BoundedContext {
           name: "Cinema".to_string(),
           aggregates: vec![
-            Aggregate { name: "Cinema".to_string(), description: "".to_string(), entities: vec![] }
+            Aggregate {
+              name: "Cinema".to_string(),
+              description: "".to_string(),
+              entities: vec![
+                Entity {
+                  name: "Seat".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                }
+              ],
+            }
           ],
         },
         BoundedContext {
           name: "Movie".to_string(),
           aggregates: vec![
-            Aggregate { name: "Movie".to_string(), description: "".to_string(), entities: vec![] }
+            Aggregate {
+              name: "Movie".to_string(),
+              description: "".to_string(),
+              entities: vec![
+                Entity {
+                  name: "Publisher".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                }
+              ],
+            }
           ],
         },
         BoundedContext {
           name: "Reservation".to_string(),
           aggregates: vec![
-            Aggregate { name: "Reservation".to_string(), description: "".to_string(), entities: vec![] }
+            Aggregate {
+              name: "Reservation".to_string(),
+              description: "".to_string(),
+              entities: vec![
+                Entity {
+                  name: "Reservation".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                }
+              ],
+            }
           ],
         },
         BoundedContext {
           name: "User".to_string(),
           aggregates: vec![
-            Aggregate { name: "User".to_string(), description: "".to_string(), entities: vec![] }
+            Aggregate { name: "User".to_string(), description: "".to_string(), entities: vec![
+              Entity {
+                name: "User".to_string(),
+                description: "".to_string(),
+                is_aggregate_root: false,
+                identify: Field {
+                  name: "".to_string(),
+                  value: "".to_string(),
+                  type_type: "".to_string(),
+                },
+                fields: vec![] }
+            ] }
           ],
         }],
       relations: vec![
@@ -140,8 +200,7 @@ ValueObject Notifications { }
           connection_type: PositiveDirected,
           source_type: vec![],
           target_type: vec![],
-        }
-        ,
+        },
         ContextRelation {
           source: "Reservation".to_string(),
           target: "User".to_string(),
