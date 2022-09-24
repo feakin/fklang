@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use pest::iterators::{Pair, Pairs};
 
 use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, AttributeDefinition, RelationDirection, Identifier, Loc};
-use crate::parser::parse_result::{ParseError, ParseResult};
+use crate::parser::parse_result::{ParseError, ParseResult, SyntaxError};
 use crate::pest::Parser;
 
 #[derive(Parser)]

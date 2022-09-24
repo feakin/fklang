@@ -5,7 +5,19 @@ use std::fmt;
 pub enum ErrorKind {
   Msg(String),
   // Json(serde_json::Error),
+  // todo: for includes file
   Io(std::io::ErrorKind),
+  SyntaxError(SyntaxError),
+  // InvalidToken
+  // ExtraToken
+}
+
+#[derive(Debug)]
+pub struct SyntaxError {
+  line: String,
+  message: String,
+  location: (usize),
+  line_col: (usize, usize),
 }
 
 #[derive(Debug)]
@@ -18,11 +30,14 @@ pub struct ParseError {
 
 impl fmt::Display for ParseError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    match self.kind {
-      ErrorKind::Msg(ref message) => write!(f, "{}", message),
+    match &self.kind {
+      ErrorKind::Msg(ref message) => write!(f, "{:?}", message),
       // ErrorKind::Json(ref e) => write!(f, "{}", e),
       ErrorKind::Io(ref io_error) => {
         write!(f, "Io error while writing rendered value to output: {:?}", io_error)
+      }
+      ErrorKind::SyntaxError(token) => {
+        write!(f, "Unrecognized token `{:?}`", token)
       }
     }
   }
@@ -42,6 +57,13 @@ impl ParseError {
 
   pub fn io_error(error: std::io::Error) -> Self {
     Self { kind: ErrorKind::Io(error.kind()), source: Some(Box::new(error)) }
+  }
+
+  pub fn syntax_error(error: SyntaxError) -> ParseError {
+    ParseError {
+      kind: ErrorKind::SyntaxError(error),
+      source: None,
+    }
   }
 
   // pub fn json(value: serde_json::Error) -> Self {
