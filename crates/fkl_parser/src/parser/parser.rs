@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, AttributeDefinition, RelationDirection};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, AttributeDefinition, RelationDirection, Identifier, Loc};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -58,13 +58,14 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
   let mut context_decl_map: HashMap<String, BoundedContextDecl> = HashMap::new();
-  let mut context_name = String::new();
+  let mut identify = Identifier::default();
   let mut relations: Vec<ContextRelation> = Vec::new();
 
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
-        context_name = p.as_str().to_string();
+        identify.name = p.as_str().to_string();
+        identify.loc = Loc::from_pair(p.as_span());
       }
       Rule::context_node_rel => {
         let mut names: Vec<String> = vec![];
@@ -141,7 +142,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
   contexts.sort_by(|a, b| a.name.cmp(&b.name));
 
   return ContextMapDecl {
-    name: context_name,
+    name: identify,
     contexts,
     relations,
   };
@@ -358,7 +359,7 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::parser::ast::{AggregateDecl, ContextRelation, BoundedContextDecl, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, ComponentType, AttributeDefinition};
+  use crate::parser::ast::{AggregateDecl, ContextRelation, BoundedContextDecl, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, ComponentType, AttributeDefinition, Identifier, Loc};
   use crate::parser::ast::RelationDirection::{PositiveDirected, BiDirected};
   use crate::parser::parser::parse;
 
@@ -376,7 +377,10 @@ Context ShoppingCarContext {
 "#).unwrap();
 
     assert_eq!(decls[0], FklDeclaration::ContextMap(ContextMapDecl {
-      name: "".to_string(),
+      name: Identifier {
+        name: "".to_string(),
+        loc: Default::default()
+      },
       contexts: vec![
         BoundedContextDecl {
           name: "MallContext".to_string(),
@@ -696,7 +700,10 @@ Component SalesComponent {
 }"#).unwrap();
 
     let except = FklDeclaration::ContextMap(ContextMapDecl {
-      name: "Mall".to_string(),
+      name: Identifier {
+        name: "Mall".to_string(),
+        loc: Loc(11, 15)
+      },
       contexts: vec![
         BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![] },
         BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![] },

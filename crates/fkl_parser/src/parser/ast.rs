@@ -1,23 +1,20 @@
 use std::collections::HashMap;
+use pest::Span;
 
 // Todo: add Loc support
-#[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Hash, Clone, Copy)]
-pub struct Loc(pub usize, pub usize, pub usize);
+#[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Hash, Clone, Copy, Default)]
+pub struct Loc(pub usize, pub usize);
 
 impl Loc {
-  pub fn begin(&self) -> Self {
-    Loc(self.0, self.1, self.1)
-  }
-
-  pub fn end(&self) -> Self {
-    Loc(self.0, self.2, self.2)
+  pub(crate) fn from_pair(range: Span) -> Loc {
+    Loc(range.start(), range.end())
   }
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Identifier {
-  pub loc: Loc,
   pub name: String,
+  pub loc: Loc,
 }
 
 // strategy DDD
@@ -67,7 +64,7 @@ pub struct SubDomain {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ContextMapDecl {
-  pub name: String,
+  pub name: Identifier,
   pub contexts: Vec<BoundedContextDecl>,
   pub relations: Vec<ContextRelation>,
 }
@@ -133,8 +130,8 @@ pub struct DomainEvent {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct EntityDecl {
-  pub is_aggregate_root: bool,
   pub name: String,
+  pub is_aggregate_root: bool,
   pub identify: VariableDefinition,
   pub inline_doc: String,
   pub fields: Vec<VariableDefinition>,
