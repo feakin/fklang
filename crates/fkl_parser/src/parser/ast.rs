@@ -118,10 +118,16 @@ pub struct AggregateDecl {
   pub name: String,
   pub is_root: bool,
   pub inline_doc: String,
-  pub used_context: String,
+  pub used_domain_objects: Vec<UsedDomainObject>,
   pub entities: Vec<EntityDecl>,
   pub value_objects: Vec<ValueObjectDecl>,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct UsedDomainObject {
+  pub name: String,
+}
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DomainEvent {

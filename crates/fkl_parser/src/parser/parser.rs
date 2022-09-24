@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, RelationDirection, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, RelationDirection, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -49,6 +49,9 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         }
         Rule::component_decl => {
           decl = FklDeclaration::Component(consume_component(p));
+        }
+        Rule::value_object_decl => {
+          decl = FklDeclaration::ValueObject(consume_value_object(p));
         }
         _ => println!("unreachable content rule: {:?}", p.as_rule())
       };
@@ -192,6 +195,9 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
       Rule::entity_decl => {
         aggregate.entities.push(consume_entity(p));
       }
+      Rule::use_domain_object_decl => {
+        aggregate.used_domain_objects.push(consume_use_domain_object(p));
+      }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
     };
   }
@@ -221,6 +227,19 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
     };
   }
   return entity;
+}
+
+fn consume_use_domain_object(pair: Pair<Rule>) -> UsedDomainObject {
+  let mut use_domain_object = UsedDomainObject::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        use_domain_object.name = p.as_str().to_string();
+      }
+      _ => println!("unreachable use_domain_object rule: {:?}", p.as_rule())
+    };
+  }
+  return use_domain_object;
 }
 
 fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
@@ -288,6 +307,12 @@ fn consume_value_object(pair: Pair<Rule>) -> ValueObjectDecl {
     match p.as_rule() {
       Rule::identifier => {
         value_object.name = p.as_str().to_string();
+      }
+      Rule::constructor_decl => {
+        value_object.fields = consume_constructor_decl(p);
+      }
+      Rule::struct_decl => {
+        value_object.fields = consume_struct_decl(p);
       }
       _ => println!("unreachable value_object rule: {:?}", p.as_rule())
     };
@@ -415,7 +440,7 @@ just for test
       inline_doc: r#" inline doc sample
 just for test
 "#.to_string(),
-      used_context: "".to_string(),
+      used_domain_objects: vec![],
       entities: vec![],
       value_objects: vec![],
     }));
@@ -435,7 +460,7 @@ Aggregate ShoppingCart {
       name: "ShoppingCart".to_string(),
       is_root: false,
       inline_doc: "".to_string(),
-      used_context: "".to_string(),
+      used_domain_objects: vec![],
       entities: vec![EntityDecl {
         is_aggregate_root: false,
         name: "Product".to_string(),
@@ -617,7 +642,7 @@ Entity SalesPerson {
           name: "Cart".to_string(),
           is_root: false,
           inline_doc: "".to_string(),
-          used_context: "".to_string(),
+          used_domain_objects: vec![],
           entities: vec![EntityDecl {
             is_aggregate_root: false,
             name: "Cart".to_string(),

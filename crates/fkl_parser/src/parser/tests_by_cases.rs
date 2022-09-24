@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod test {
-  use crate::parse;
+  use crate::{mir, parse};
+  use crate::mir::{BoundedContext, ContextRelation, ContextState};
+  use crate::mir::ConnectionDirection::PositiveDirected;
 
   #[test]
   fn test() {
@@ -78,6 +80,38 @@ ValueObject Price { }
 ValueObject Notifications { }
 "#;
 
-    parse(booking_ticket).unwrap();
+    let decls = parse(booking_ticket).unwrap();
+    assert_eq!(decls, mir::ContextMap {
+      name: "".to_string(),
+      state: ContextState::ToBe,
+      contexts: vec![
+        BoundedContext { name: "Cinema".to_string() },
+        BoundedContext { name: "Movie".to_string() },
+        BoundedContext { name: "Reservation".to_string() },
+        BoundedContext { name: "User".to_string() }],
+      relations: vec![
+        ContextRelation {
+          source: "Reservation".to_string(),
+          target: "Cinema".to_string(),
+          connection_type: PositiveDirected,
+          source_type: vec![],
+          target_type: vec![],
+        },
+        ContextRelation {
+          source: "Reservation".to_string(),
+          target: "Movie".to_string(),
+          connection_type: PositiveDirected,
+          source_type: vec![],
+          target_type: vec![],
+        }
+        ,
+        ContextRelation {
+          source: "Reservation".to_string(),
+          target: "User".to_string(),
+          connection_type: PositiveDirected,
+          source_type: vec![],
+          target_type: vec![],
+        }],
+    });
   }
 }
