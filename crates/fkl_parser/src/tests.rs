@@ -111,6 +111,20 @@ ValueObject Notifications { }
               description: "".to_string(),
               entities: vec![
                 Entity {
+                  name: "Cinema".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field { name: "".to_string(), value: "".to_string(), type_type: "".to_string() },
+                  fields: vec![],
+                },
+                Entity {
+                  name: "ScreeningRoom".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field { name: "".to_string(), value: "".to_string(), type_type: "".to_string() },
+                  fields: vec![],
+                },
+                Entity {
                   name: "Seat".to_string(),
                   description: "".to_string(),
                   is_aggregate_root: false,
@@ -120,7 +134,7 @@ ValueObject Notifications { }
                     type_type: "".to_string(),
                   },
                   fields: vec![],
-                }
+                },
               ],
             }
           ],
@@ -133,6 +147,28 @@ ValueObject Notifications { }
               description: "".to_string(),
               entities: vec![
                 Entity {
+                  name: "Movie".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                },
+                Entity {
+                  name: "Actor".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![],
+                },
+                Entity {
                   name: "Publisher".to_string(),
                   description: "".to_string(),
                   is_aggregate_root: false,
@@ -142,7 +178,7 @@ ValueObject Notifications { }
                     type_type: "".to_string(),
                   },
                   fields: vec![],
-                }
+                },
               ],
             }
           ],
@@ -155,6 +191,17 @@ ValueObject Notifications { }
               description: "".to_string(),
               entities: vec![
                 Entity {
+                  name: "Ticket".to_string(),
+                  description: "".to_string(),
+                  is_aggregate_root: false,
+                  identify: Field {
+                    name: "".to_string(),
+                    value: "".to_string(),
+                    type_type: "".to_string(),
+                  },
+                  fields: vec![]
+                },
+                Entity {
                   name: "Reservation".to_string(),
                   description: "".to_string(),
                   is_aggregate_root: false,
@@ -164,7 +211,7 @@ ValueObject Notifications { }
                     type_type: "".to_string(),
                   },
                   fields: vec![],
-                }
+                },
               ],
             }
           ],

@@ -85,7 +85,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
               context_decl_map.insert(context_name.clone(), BoundedContextDecl {
                 name: context_name,
                 aggregates: vec![],
-                use_domain_objects: vec![],
+                used_domain_objects: vec![],
               });
             }
             Rule::rel_symbol => {
@@ -177,8 +177,9 @@ fn consume_context(pair: Pair<Rule>) -> BoundedContextDecl {
       Rule::aggregate_decl => {
         context.aggregates.push(consume_aggregate(p));
       }
-      Rule::use_domain_object_decl => {
-        context.use_domain_objects.push(consume_use_domain_object(p));
+      Rule::used_domain_objects_decl => {
+        let vec = consume_use_domain_object(p);
+        context.used_domain_objects = [context.used_domain_objects, vec].concat();
       }
       _ => println!("unreachable context rule: {:?}", p.as_rule())
     };
@@ -199,12 +200,13 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
       Rule::entity_decl => {
         aggregate.entities.push(consume_entity(p));
       }
-      Rule::use_domain_object_decl => {
-        aggregate.used_domain_objects.push(consume_use_domain_object(p));
+      Rule::used_domain_objects_decl => {
+        aggregate.used_domain_objects = [aggregate.used_domain_objects, consume_use_domain_object(p)].concat();
       }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
     };
   }
+
   return aggregate;
 }
 
@@ -233,17 +235,20 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
   return entity;
 }
 
-fn consume_use_domain_object(pair: Pair<Rule>) -> UsedDomainObject {
-  let mut use_domain_object = UsedDomainObject::default();
+fn consume_use_domain_object(pair: Pair<Rule>) -> Vec<UsedDomainObject> {
+  let mut used_domain_objects: Vec<UsedDomainObject> = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
-        use_domain_object.name = p.as_str().to_string();
+        used_domain_objects.push(UsedDomainObject {
+          name: p.as_str().to_string()
+        });
       }
       _ => println!("unreachable use_domain_object rule: {:?}", p.as_rule())
     };
   }
-  return use_domain_object;
+
+  used_domain_objects
 }
 
 fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
@@ -389,7 +394,7 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ComponentType, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, ValueObjectDecl, VariableDefinition};
+  use crate::parser::ast::*;
   use crate::parser::ast::RelationDirection::{BiDirected, PositiveDirected};
   use crate::parser::parser::parse;
 
@@ -415,12 +420,12 @@ Context ShoppingCarContext {
         BoundedContextDecl {
           name: "MallContext".to_string(),
           aggregates: vec![],
-          use_domain_objects: vec![],
+          used_domain_objects: vec![],
         },
         BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
           aggregates: vec![],
-          use_domain_objects: vec![],
+          used_domain_objects: vec![],
         },
       ],
       relations: vec![
@@ -693,7 +698,7 @@ Entity SalesPerson {
           value_objects: vec![],
         }
       ],
-      use_domain_objects: vec![],
+      used_domain_objects: vec![],
     }));
   }
 
@@ -735,8 +740,8 @@ Component SalesComponent {
         loc: Loc(11, 15),
       },
       contexts: vec![
-        BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![], use_domain_objects: vec![] },
-        BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![], use_domain_objects: vec![] },
+        BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![], used_domain_objects: vec![] },
+        BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![], used_domain_objects: vec![] },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),
@@ -795,5 +800,30 @@ Component SalesComponent {
         VariableDefinition { name: "totalPrice".to_string(), field_type: "BigDecimal".to_string(), initializer: None }],
       value_objects: vec![],
     }));
+  }
+
+  #[test]
+  fn use_vo() {
+    let decls = parse(r#"Context Cinema {
+  Aggregate Cinema;
+}
+
+Aggregate Cinema {
+  Entity Cinema, ScreeningRoom, Seat;
+}
+"#).unwrap();
+
+    assert_eq!(decls[1], FklDeclaration::Aggregate(
+      AggregateDecl {
+        name: "Cinema".to_string(),
+        inline_doc: "".to_string(),
+        used_domain_objects: vec![
+          UsedDomainObject { name: "Cinema".to_string() },
+          UsedDomainObject { name: "ScreeningRoom".to_string() },
+          UsedDomainObject { name: "Seat".to_string() }],
+        entities: vec![],
+        value_objects: vec![],
+      })
+    );
   }
 }

@@ -97,6 +97,11 @@ impl MirTransform {
         FklDeclaration::Domain(_) => {}
         FklDeclaration::Aggregate(decl) => {
           let aggregate = self.transform_aggregate(&decl);
+          // decl.used_domain_objects.iter().for_each(|used_domain_object| {
+          //   let entity = mir::Entity::new(&used_domain_object.name);
+          //   aggregate.entities.push( entity);
+          // });
+
           self.aggregates.insert(aggregate.name.clone(), aggregate.clone());
         }
         FklDeclaration::DomainService(_) => {}
@@ -113,7 +118,7 @@ impl MirTransform {
 
   fn transform_bounded_context(context_decl: &&BoundedContextDecl) -> BoundedContext {
     let mut bounded_context = mir::BoundedContext::new(&context_decl.name);
-    context_decl.use_domain_objects.iter().for_each(|domain_object| {
+    context_decl.used_domain_objects.iter().for_each(|domain_object| {
       bounded_context.aggregates.push(Aggregate::new(&domain_object.name.clone()));
     });
 
