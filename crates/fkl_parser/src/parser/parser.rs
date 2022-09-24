@@ -204,10 +204,10 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
         entity.name = p.as_str().to_string();
       }
       Rule::constructor_decl => {
-        entity.fields = consume_constructor(p);
+        entity.fields = consume_constructor_decl(p);
       }
       Rule::struct_decl => {
-        entity.fields = consume_struct(p);
+        entity.fields = consume_struct_decl(p);
       }
       Rule::inline_doc => {
         entity.inline_doc = parse_inline_doc(p);
@@ -221,7 +221,7 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
   return entity;
 }
 
-fn consume_constructor(pair: Pair<Rule>) -> Vec<Field> {
+fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<Field> {
   let mut fields: Vec<Field> = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
@@ -241,7 +241,7 @@ fn consume_constructor(pair: Pair<Rule>) -> Vec<Field> {
   return fields;
 }
 
-fn consume_struct(pair: Pair<Rule>) -> Vec<Field> {
+fn consume_struct_decl(pair: Pair<Rule>) -> Vec<Field> {
   let mut fields: Vec<Field> = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
@@ -251,11 +251,11 @@ fn consume_struct(pair: Pair<Rule>) -> Vec<Field> {
             Rule::name_type_def => {
               fields.push(consume_parameter(p));
             }
-            _ => println!("unreachable parameter_decl rule: {:?}", p.as_rule())
+            _ => println!("unreachable struct_decl rule: {:?}", p.as_rule())
           }
         }
       }
-      _ => println!("unreachable constructor rule: {:?}", p.as_rule())
+      _ => println!("unreachable struct rule: {:?}", p.as_rule())
     };
   }
   return fields;
