@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, Field, FklDeclaration, ValueObjectDecl, ComponentDecl, Attribute, RelationDirection};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, ContextRelation, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, AttributeDefinition, RelationDirection};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -221,8 +221,8 @@ fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
   return entity;
 }
 
-fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<Field> {
-  let mut fields: Vec<Field> = vec![];
+fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
+  let mut fields: Vec<VariableDefinition> = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::parameters_decl => {
@@ -241,8 +241,8 @@ fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<Field> {
   return fields;
 }
 
-fn consume_struct_decl(pair: Pair<Rule>) -> Vec<Field> {
-  let mut fields: Vec<Field> = vec![];
+fn consume_struct_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
+  let mut fields: Vec<VariableDefinition> = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::fields_decl => {
@@ -261,8 +261,8 @@ fn consume_struct_decl(pair: Pair<Rule>) -> Vec<Field> {
   return fields;
 }
 
-fn consume_parameter(pair: Pair<Rule>) -> Field {
-  let mut field = Field::default();
+fn consume_parameter(pair: Pair<Rule>) -> VariableDefinition {
+  let mut field = VariableDefinition::default();
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -270,6 +270,9 @@ fn consume_parameter(pair: Pair<Rule>) -> Field {
       }
       Rule::param_type => {
         field.field_type = p.as_str().to_string();
+      }
+      Rule::value => {
+        field.initializer = Some(p.as_str().to_string());
       }
       _ => println!("unreachable parameter rule: {:?}", p.as_rule())
     };
@@ -309,8 +312,8 @@ fn consume_component(pair: Pair<Rule>) -> ComponentDecl {
   return component;
 }
 
-fn consume_attribute(pair: Pair<Rule>) -> Attribute {
-  let mut attribute = Attribute::default();
+fn consume_attribute(pair: Pair<Rule>) -> AttributeDefinition {
+  let mut attribute = AttributeDefinition::default();
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -355,7 +358,7 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::parser::ast::{AggregateDecl, ContextRelation, BoundedContextDecl, ContextMapDecl, EntityDecl, Field, FklDeclaration, ValueObjectDecl, ComponentDecl, ComponentType, Attribute};
+  use crate::parser::ast::{AggregateDecl, ContextRelation, BoundedContextDecl, ContextMapDecl, EntityDecl, VariableDefinition, FklDeclaration, ValueObjectDecl, ComponentDecl, ComponentType, AttributeDefinition};
   use crate::parser::ast::RelationDirection::{PositiveDirected, BiDirected};
   use crate::parser::parser::parse;
 
@@ -434,13 +437,15 @@ Aggregate ShoppingCart {
         identify: Default::default(),
         inline_doc: "".to_string(),
         fields: vec![
-          Field {
+          VariableDefinition {
             name: "name".to_string(),
             field_type: "String".to_string(),
+            initializer: None,
           },
-          Field {
+          VariableDefinition {
             name: "price".to_string(),
             field_type: "Money".to_string(),
+            initializer: None,
           }],
         value_objects: vec![],
       }],
@@ -673,10 +678,10 @@ Component SalesComponent {
       inline_doc: "".to_string(),
       component_type: ComponentType::Application,
       attributes: vec![
-        Attribute {
+        AttributeDefinition {
           key: "name".to_string(),
           value: "Sample Phodal".to_string(),
-        }, Attribute {
+        }, AttributeDefinition {
           key: "type".to_string(),
           value: "Application".to_string(),
         },
@@ -733,23 +738,24 @@ Component SalesComponent {
     assert_eq!(decls[0], FklDeclaration::Entity(EntityDecl {
       is_aggregate_root: false,
       name: "Reservation".to_string(),
-      identify: Field {
+      identify: VariableDefinition {
         name: "".to_string(),
         field_type: "".to_string(),
+        initializer: None,
       },
       inline_doc: "".to_string(),
       fields: vec![
-        Field { name: "id".to_string(), field_type: "String".to_string() },
-        Field { name: "token".to_string(), field_type: "UUID".to_string() },
-        Field { name: "status".to_string(), field_type: "ReservationStatus".to_string() },
-        Field { name: "expiresAt".to_string(), field_type: "LocalDateTime".to_string() },
-        Field { name: "createdAt".to_string(), field_type: "LocalDateTime".to_string() },
-        Field { name: "screeningId".to_string(), field_type: "String".to_string() },
-        Field { name: "screeningStartTime".to_string(), field_type: "LocalDateTime".to_string() },
-        Field { name: "name".to_string(), field_type: "String".to_string() },
-        Field { name: "surname".to_string(), field_type: "String".to_string() },
-        Field { name: "tickets".to_string(), field_type: "Set<Ticket>".to_string() },
-        Field { name: "totalPrice".to_string(), field_type: "BigDecimal".to_string() }],
+        VariableDefinition { name: "id".to_string(), field_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "token".to_string(), field_type: "UUID".to_string(), initializer: None },
+        VariableDefinition { name: "status".to_string(), field_type: "ReservationStatus".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()) },
+        VariableDefinition { name: "expiresAt".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "createdAt".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "screeningId".to_string(), field_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "screeningStartTime".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "name".to_string(), field_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "surname".to_string(), field_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "tickets".to_string(), field_type: "Set<Ticket>".to_string(), initializer: None },
+        VariableDefinition { name: "totalPrice".to_string(), field_type: "BigDecimal".to_string(), initializer: None }],
       value_objects: vec![],
     }));
   }

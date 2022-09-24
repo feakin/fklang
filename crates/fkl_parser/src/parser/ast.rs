@@ -1,5 +1,25 @@
 use std::collections::HashMap;
 
+// Todo: add Loc support
+#[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Hash, Clone, Copy)]
+pub struct Loc(pub usize, pub usize, pub usize);
+
+impl Loc {
+  pub fn begin(&self) -> Self {
+    Loc(self.0, self.1, self.1)
+  }
+
+  pub fn end(&self) -> Self {
+    Loc(self.0, self.2, self.2)
+  }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct Identifier {
+  pub loc: Loc,
+  pub name: String,
+}
+
 // strategy DDD
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -115,20 +135,21 @@ pub struct DomainEvent {
 pub struct EntityDecl {
   pub is_aggregate_root: bool,
   pub name: String,
-  pub identify: Field,
+  pub identify: VariableDefinition,
   pub inline_doc: String,
-  pub fields: Vec<Field>,
+  pub fields: Vec<VariableDefinition>,
   pub value_objects: Vec<ValueObjectDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Field {
+pub struct VariableDefinition {
   pub name: String,
   pub field_type: String,
+  pub initializer: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Attribute {
+pub struct AttributeDefinition {
   pub key: String,
   pub value: String,
 }
@@ -145,7 +166,7 @@ pub struct Property {
 pub struct ValueObjectDecl {
   pub name: String,
   pub inline_doc: String,
-  pub fields: Vec<Field>,
+  pub fields: Vec<VariableDefinition>,
 }
 
 // Binding To Function
@@ -187,7 +208,7 @@ pub struct ComponentDecl {
   pub name: String,
   pub component_type: ComponentType,
   pub inline_doc: String,
-  pub attributes: Vec<Attribute>
+  pub attributes: Vec<AttributeDefinition>,
 }
 
 // binding
