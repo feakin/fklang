@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
@@ -9,6 +10,7 @@ use crate::parser::parse as ast_parse;
 pub struct MirTransform {
   pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
+  // pub contexts: HashMap<String, BoundedContext>,
   pub aggregates: IndexMap<String, Aggregate>,
   pub relations: Vec<mir::ContextRelation>,
 }
@@ -29,12 +31,32 @@ impl MirTransform {
       Err(e) => return Err(e),
     };
 
+    transform.build_context_map();
+
     Ok(ContextMap {
       name: transform.context_map_name,
       state: Default::default(),
       contexts: transform.contexts.values().map(|context| context.clone()).collect(),
       relations: transform.relations,
     })
+  }
+
+  fn build_context_map(&self) -> Vec<BoundedContext> {
+    let mut contexts = vec![];
+
+    self.contexts.values().for_each(|context| {
+      let mut context = BoundedContext::new(&context.name);
+
+      for aggregate in context.aggregates.clone() {
+        if let Some(agg) = self.aggregates.get(&aggregate.name) {
+          context.aggregates.push(agg.clone());
+        } else {
+          context.aggregates.push(aggregate.clone())
+        }
+      }
+    });
+
+    contexts
   }
 
   fn lower_decls(&mut self, decls: Vec<FklDeclaration>) {
