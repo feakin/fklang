@@ -1,0 +1,24 @@
+' http://domain-driven-design.org/zh/ddd-design-workshop-guide.html
+@startuml
+
+namespace user-context {
+   User <<Aggregate Root>>
+   VerifyCode <<Aggregate Root>>
+   Authorization <<Aggregate Root>>
+}
+
+namespace question-context {
+  Question <<Aggregate Root>>
+  Anwser <<Entity>>
+  Question "1" *-- "N" Anwser
+}
+
+namespace space-context {
+  Space <<Aggregate Root>>
+  SpaceMember <<Entity>>
+  Space "1" *-- "N" SpaceMember
+  SpaceApply <<Entity>>
+  Space "1" *-- "1" SpaceApply
+}
+
+@enduml

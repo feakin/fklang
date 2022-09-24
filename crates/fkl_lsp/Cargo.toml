@@ -1,0 +1,20 @@
+[package]
+name = "fkl-lsp"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lsp = { version = "0.93", package = "lsp-types" }
+lsp-text = { version = "0.9", features = ["tree-sitter"] }
+tree-sitter = { version = "0.9", package = "tree-sitter-facade" }
+
+chumsky = "0.8.0"
+env_logger = "0.9"
+ropey = "1.0"
+serde_json = "1.0"
+tokio = { version = "1.17.0", features = ["full"] }
+tower-lsp = { version = "0.17.0"}
+serde = { version = "1.0", features = ["derive"] }
+dashmap = "5.4"
+log = "0.4"
+im-rc = "15.0"

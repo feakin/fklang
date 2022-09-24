@@ -1,0 +1,11 @@
+[package]
+name = "fkl-dot"
+version = "0.1.0"
+edition = "2021"
+authors = ["Phodal Huang <h@phodal.com>"]
+description = ""
+repository = "https://github.com/feakin/feakin/"
+license = "MPL-2.0"
+
+[dependencies]
+#domain_derive = { path = "../domain_derive" }

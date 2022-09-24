@@ -1,0 +1,154 @@
+declarations = _{ SOI ~ declaration* ~ EOI }
+
+declaration = {
+  context_map_decl
+  | context_decl
+  | ext_module_decl
+  | aggregate_decl
+  | entity_decl
+  | component_decl
+}
+
+context_map_decl = {
+  "ContextMap" ~ identifier? ~ "{" ~ (context_node_decl | context_node_rel | inline_doc)* ~ "}"
+}
+
+context_decl = {
+  "Context" ~ identifier ~ "{" ~ (module_decl | aggregate_decl | inline_doc)* ~ "}"
+}
+
+context_node_decl = {
+  "context" ~ identifier
+}
+
+context_node_rel = {
+  left_id ~ left_rel_defs? ~ rel_symbol ~ ((right_id ~ right_rel_defs?) | (right_rel_defs? ~ right_id)) ~ ";"?
+}
+
+left_id = { identifier }
+right_id = { identifier }
+
+left_rel_defs = { rel_defs }
+right_rel_defs = { rel_defs }
+
+rel_defs = {
+  "[" ~ "rel" ~ "=" ~ identifier ~ "]"
+  | "[" ~ "rel" ~ "=" ~ "\"" ~ (identifier ~ ","?)* ~ "\"" ~ "]"
+  | "[" ~ identifier ~ "]"
+}
+
+rel_keyword = {
+  "rel" | "relation"
+}
+
+rel_symbol = {
+  rs_both | rs_left_to_right | rs_right_to_left
+}
+
+rs_left_to_right = { "->" }
+rs_right_to_left = { "<-" }
+rs_both = { "<->" }
+
+module_decl = {
+  "Module" ~ identifier ~ "{" ~ (aggregate_decl | inline_doc)* ~ "}"
+}
+
+ext_module_decl = {
+  module_decl
+}
+
+aggregate_decl = {
+  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc)* ~ "}"
+}
+
+inline_doc = {
+  "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""
+}
+
+// Entity should be like a concept
+entity_decl = {
+  ("Concept" | "Entity" ) ~ identifier ~ "{" ~ (constructor_decl | value_object_decl | inline_doc)* ~ "}"
+}
+
+constructor_decl = {
+  "constructor" ~ "(" ~ parameters_decl ~ ")"
+}
+
+value_object_decl = {
+  ("VO" | "ValueObject") ~ identifier ~ ("{" ~ param_type* ~ "}")?
+}
+
+parameters_decl = {
+  (parameter_decl ~ ","?)*
+}
+
+parameter_decl = {
+  identifier ~ ":" ~ param_type
+}
+
+param_type = {
+  list ~ "<" ~ identifier ~ ">"
+  | identifier
+}
+
+component_decl = {
+  "Component" ~ identifier ~ "{" ~ (attr_decl | inline_doc | use_aggregate )* ~ "}"
+}
+
+use_aggregate = {
+  "Aggregate" ~ identifier ~ ";"?
+}
+
+attr_decl = {
+  // component_type
+  identifier ~ (":" | "=") ~ attr_value ~ ";"?
+}
+
+attr_value = {
+  identifier | string
+}
+
+list = { ("List" | "Vec") }
+
+keywords = _{
+  // DDD Keywords
+  "ContextMap" | "Context"
+  //  Domain Analysis Keywords
+  | "SubDomain" | "GenericDomain" | "SupportingDomain" | "CoreDomain"
+  // Strategic
+  // TODO?
+  // Tactic Keywords
+  | "Aggregate" | "Entity" | "ValueObject" | "VO" | "Service" | "DomainEvent" | "CommandEvent"
+  // Implementation - Layered Keywords
+  | "Module" | "Repository" | "Service" | "Factory" | "ApplicationService" | "DomainService"
+  // Implementation - APIs
+  | "ApiEndpoints"
+  // TODO: DDD Relationship
+  | bounded_context_relation
+}
+
+// align to BoundedContextRelation
+bounded_context_relation = {
+  "SharedKernel" | "Partnership" | "CustomerSupplier" | "Conformist" | "AntiCorruptionLayer" | "OpenHostService" | "PublishedLanguage"
+}
+
+double_quoted_string  = @{ "\"" ~ (!("\"") ~ ANY)* ~ "\""}
+single_quoted_string  = @{ "\'" ~ (!("\'") ~ ANY)* ~ "\'"}
+
+identifier = @{
+ !keywords ~ (ASCII_ALPHA | ASCII_ALPHANUMERIC | "_") ~ (ASCII_ALPHANUMERIC | "_")*
+}
+
+// normal
+string = @{
+    double_quoted_string |
+    single_quoted_string
+}
+number = @{ '0'..'9'+ }
+int = @{ number | "-" ~ "0"* ~ '1'..'9' ~ number? }
+
+// comments
+newline    = _{ "\n" | "\r\n" }
+WHITESPACE = _{ " " | "\t" | newline }
+block_comment = _{ "/*" ~ (block_comment | !"*/" ~ ANY)* ~ "*/" }
+COMMENT    = _{ block_comment | ("//" ~ (!newline ~ ANY)*) }
