@@ -132,13 +132,13 @@ impl MirTransform {
   }
 
   fn transform_entity(&mut self, decl: &EntityDecl) -> mir::Entity {
-    let mut entity = mir::Entity::new(&decl.name);
-    entity.description = decl.inline_doc.clone();
-    entity.is_aggregate_root = decl.is_aggregate_root;
-
-    entity.fields = decl.fields.iter().map(|field| Self::transform_field(field)).collect();
-
-    entity
+    Entity {
+      name: decl.name.clone(),
+      is_aggregate_root: decl.is_aggregate_root,
+      description: decl.inline_doc.clone(),
+      fields: decl.fields.iter().map(|field| Self::transform_field(field)).collect(),
+      identify: Self::transform_field(&decl.identify),
+    }
   }
 
   fn transform_field(field: &VariableDefinition) -> Field {
