@@ -14,8 +14,10 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   for bc in &context_map.contexts {
     let name = &bc.name;
     let mut subgraph = Subgraph::new(&bc.name, &format!("{}(Context)", name));
+    subgraph.set_depth(1);
     for aggregate in &bc.aggregates {
       let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("{}(Aggregate)", aggregate.name));
+      aggregate_graph.set_depth(2);
 
       aggregate.entities.iter().for_each(|entity| {
         aggregate_graph.add_node(Node::label(&format!("entity_{}", entity.name), &entity.name));
@@ -117,11 +119,11 @@ Aggregate Reservation {
   subgraph cluster_reservation {
     label="Reservation(Context)";
 
-  subgraph cluster_aggregate_reservation {
-    label="Reservation(Aggregate)";
-    entity_Ticket [label="Ticket"];
-    entity_Reservation [label="Reservation"];
-  }
+    subgraph cluster_aggregate_reservation {
+      label="Reservation(Aggregate)";
+      entity_Ticket [label="Ticket"];
+      entity_Reservation [label="Reservation"];
+    }
   }
 
   subgraph cluster_user {
