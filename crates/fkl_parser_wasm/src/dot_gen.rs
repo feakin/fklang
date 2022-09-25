@@ -2,6 +2,7 @@ use fkl_dot::graph::Graph;
 use fkl_dot::node::Node;
 use fkl_dot::subgraph::Subgraph;
 use fkl_parser::mir::{ConnectionDirection, ContextMap, ContextRelation};
+
 use crate::bc_edge_style;
 use crate::bc_edge_style::BcEdgeStyle;
 
@@ -10,10 +11,9 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   graph.use_default_style();
 
   for bc in &context_map.contexts {
-    // add context.entities to subgraph
-    let mut subgraph = Subgraph::new(&bc.name, &bc.name);
+    let mut subgraph = Subgraph::new(&bc.name, &context_name(&bc.name));
     for aggregate in &bc.aggregates {
-      let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("Aggregate {}", aggregate.name));
+      let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("\"{}(Aggregate)\"", aggregate.name));
 
       aggregate.entities.iter().for_each(|entity| {
         aggregate_graph.add_node(Node::label(&format!("entity_{}", entity.name), &entity.name));
@@ -32,21 +32,28 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   format!("{}", graph)
 }
 
+fn context_name(name: &str) -> String {
+  format!("\"{}(Context)\"", name)
+}
+
 fn process_context_edge(graph: &mut Graph, relation: &ContextRelation) {
   let bc_edge_style = bc_edge_style::generate_edge_style(&relation.source_type, &relation.target_type);
   let style = create_graph_edge_style(bc_edge_style);
 
+  let source = &context_name(&relation.source);
+  let target = &context_name(&relation.target);
+
   match &relation.connection_type {
     ConnectionDirection::Undirected => {}
     ConnectionDirection::PositiveDirected => {
-      graph.add_edge_with_style(&relation.source, &relation.target, style);
+      graph.add_edge_with_style(source, target, style);
     }
     ConnectionDirection::NegativeDirected => {
-      graph.add_edge_with_style(&relation.target, &relation.source, style);
+      graph.add_edge_with_style(target, source, style);
     }
     ConnectionDirection::BiDirected => {
-      graph.add_edge_with_style(&relation.target, &relation.source, style);
-      graph.add_edge(&relation.source, &relation.target);
+      graph.add_edge_with_style(target, source, style);
+      graph.add_edge(source, target);
     }
   }
 }
@@ -71,6 +78,7 @@ fn create_graph_edge_style(bc_style: BcEdgeStyle) -> Vec<String> {
 #[cfg(test)]
 mod test {
   use fkl_parser::parse;
+
   use crate::dot_gen::to_dot;
 
   #[test]

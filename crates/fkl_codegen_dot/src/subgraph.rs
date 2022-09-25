@@ -46,7 +46,7 @@ impl fmt::Display for Subgraph {
 
     let space = indent(self.depth + 1);
 
-    out.write_str(&format!("{}label=\"{}\";\n", space, self.label))?;
+    out.write_str(&format!("{}label={};\n", space, self.label))?;
 
     for node in &self.nodes {
       out.write_str(&format!("{}{}\n", space, node))?
