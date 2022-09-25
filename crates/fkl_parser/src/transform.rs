@@ -2,10 +2,10 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelationType, Entity, Field, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, ValueObject};
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, RelationDirection, VariableDefinition};
-use crate::parser::parse as ast_parse;
+use crate::parser::{ast, parse as ast_parse};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -80,16 +80,7 @@ impl MirTransform {
             self.contexts.insert(bounded_context.name.clone(), bounded_context);
           });
 
-          context_map.relations.iter().for_each(|relation| {
-            let rel = mir::ContextRelation {
-              source: relation.source.clone(),
-              target: relation.target.clone(),
-              connection_type: transform_connection(&relation.direction),
-              source_type: ContextRelationType::list(&relation.source_types),
-              target_type: ContextRelationType::list(&relation.target_types),
-            };
-            self.relations.push(rel);
-          });
+          self.relations = context_map.relations.iter().map(|relation| Self::transform_relation(&relation)).collect();
         }
         FklDeclaration::BoundedContext(bc) => {
           let bounded_context = Self::transform_bounded_context(&bc);
@@ -110,6 +101,16 @@ impl MirTransform {
         FklDeclaration::Component(_) => {}
       }
     });
+  }
+
+  fn transform_relation(relation: &ast::ContextRelation) -> ContextRelation {
+    mir::ContextRelation {
+      source: relation.source.clone(),
+      target: relation.target.clone(),
+      connection_type: transform_connection(&relation.direction),
+      source_type: ContextRelationType::list(&relation.source_types),
+      target_type: ContextRelationType::list(&relation.target_types),
+    }
   }
 
   fn transform_bounded_context(context_decl: &&BoundedContextDecl) -> BoundedContext {
