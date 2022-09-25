@@ -82,20 +82,20 @@ impl MirTransform {
 
           self.relations = context_map.relations.iter().map(|relation| Self::transform_relation(&relation)).collect();
         }
-        FklDeclaration::BoundedContext(bc) => {
-          let bounded_context = Self::transform_bounded_context(&bc);
-          self.contexts.insert(bounded_context.name.clone(), bounded_context);
+        FklDeclaration::BoundedContext(decl) => {
+          let context = Self::transform_bounded_context(&decl);
+          self.contexts.insert(decl.name.clone(), context);
         }
         FklDeclaration::Domain(_) => {}
         FklDeclaration::Aggregate(decl) => {
           let aggregate = self.transform_aggregate(&decl);
-          self.aggregates.insert(aggregate.name.clone(), aggregate.clone());
+          self.aggregates.insert(decl.name.clone(), aggregate);
         }
         FklDeclaration::DomainService(_) => {}
         FklDeclaration::ApplicationService(_) => {}
-        FklDeclaration::Entity(entity_decl) => {
-          let entity = self.transform_entity(&entity_decl);
-          self.entities.insert(entity.name.clone(), entity.clone());
+        FklDeclaration::Entity(decl) => {
+          let entity = self.transform_entity(&decl);
+          self.entities.insert(decl.name.clone(), entity);
         }
         FklDeclaration::ValueObject(_) => {}
         FklDeclaration::Component(_) => {}
