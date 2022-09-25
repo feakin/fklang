@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
@@ -13,7 +14,7 @@ pub struct MirTransform {
   // pub contexts: HashMap<String, BoundedContext>,
   pub relations: Vec<mir::ContextRelation>,
 
-  pub aggregates: IndexMap<String, Aggregate>,
+  pub aggregates: HashMap<String, Aggregate>,
   pub entities: IndexMap<String, Entity>,
   pub value_objects: IndexMap<String, ValueObject>,
 }
@@ -97,11 +98,6 @@ impl MirTransform {
         FklDeclaration::Domain(_) => {}
         FklDeclaration::Aggregate(decl) => {
           let aggregate = self.transform_aggregate(&decl);
-          // decl.used_domain_objects.iter().for_each(|used_domain_object| {
-          //   let entity = mir::Entity::new(&used_domain_object.name);
-          //   aggregate.entities.push( entity);
-          // });
-
           self.aggregates.insert(aggregate.name.clone(), aggregate.clone());
         }
         FklDeclaration::DomainService(_) => {}
@@ -136,7 +132,18 @@ impl MirTransform {
   }
 
   fn transform_entity(&mut self, decl: &EntityDecl) -> mir::Entity {
-    let entity = mir::Entity::new(&decl.name);
+    let mut entity = mir::Entity::new(&decl.name);
+    entity.description = decl.inline_doc.clone();
+    entity.is_aggregate_root = decl.is_aggregate_root;
+
+    decl.fields.iter().for_each(|field| {
+      entity.fields.push(mir::Field {
+        initializer: field.initializer.clone(),
+        name: field.name.clone(),
+        type_type: field.type_type.clone(),
+      });
+    });
+
     entity
   }
 }
@@ -229,7 +236,9 @@ Aggregate ShoppingCart {
 }
 
 Entity Shopping {
-
+  Struct {
+    id: String;
+  }
 }
 "#;
     let context_map = MirTransform::mir(str).unwrap();
@@ -252,7 +261,7 @@ Entity Shopping {
                 is_aggregate_root: false,
                 identify: Field {
                   name: "".to_string(),
-                  value: "".to_string(),
+                  initializer: None,
                   type_type: "".to_string(),
                 },
                 fields: vec![],

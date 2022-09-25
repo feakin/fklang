@@ -5,3 +5,6 @@ pub mod value_object;
 pub mod service;
 
 pub mod block;
+
+pub use block::field::Field;
+pub use block::method::Method;

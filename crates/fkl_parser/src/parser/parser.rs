@@ -299,7 +299,7 @@ fn consume_parameter(pair: Pair<Rule>) -> VariableDefinition {
         field.name = p.as_str().to_string();
       }
       Rule::param_type => {
-        field.field_type = p.as_str().to_string();
+        field.type_type = p.as_str().to_string();
       }
       Rule::value => {
         field.initializer = Some(p.as_str().to_string());
@@ -478,12 +478,12 @@ Aggregate ShoppingCart {
         fields: vec![
           VariableDefinition {
             name: "name".to_string(),
-            field_type: "String".to_string(),
+            type_type: "String".to_string(),
             initializer: None,
           },
           VariableDefinition {
             name: "price".to_string(),
-            field_type: "Money".to_string(),
+            type_type: "Money".to_string(),
             initializer: None,
           }],
         value_objects: vec![],
@@ -782,22 +782,22 @@ Component SalesComponent {
       name: "Reservation".to_string(),
       identify: VariableDefinition {
         name: "".to_string(),
-        field_type: "".to_string(),
+        type_type: "".to_string(),
         initializer: None,
       },
       inline_doc: "".to_string(),
       fields: vec![
-        VariableDefinition { name: "id".to_string(), field_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "token".to_string(), field_type: "UUID".to_string(), initializer: None },
-        VariableDefinition { name: "status".to_string(), field_type: "ReservationStatus".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()) },
-        VariableDefinition { name: "expiresAt".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "createdAt".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "screeningId".to_string(), field_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "screeningStartTime".to_string(), field_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "name".to_string(), field_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "surname".to_string(), field_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "tickets".to_string(), field_type: "Set<Ticket>".to_string(), initializer: None },
-        VariableDefinition { name: "totalPrice".to_string(), field_type: "BigDecimal".to_string(), initializer: None }],
+        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "token".to_string(), type_type: "UUID".to_string(), initializer: None },
+        VariableDefinition { name: "status".to_string(), type_type: "ReservationStatus".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()) },
+        VariableDefinition { name: "expiresAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "createdAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "screeningId".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "screeningStartTime".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
+        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "surname".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "tickets".to_string(), type_type: "Set<Ticket>".to_string(), initializer: None },
+        VariableDefinition { name: "totalPrice".to_string(), type_type: "BigDecimal".to_string(), initializer: None }],
       value_objects: vec![],
     }));
   }

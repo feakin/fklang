@@ -114,14 +114,14 @@ ValueObject Notifications { }
                   name: "Cinema".to_string(),
                   description: "".to_string(),
                   is_aggregate_root: false,
-                  identify: Field { name: "".to_string(), value: "".to_string(), type_type: "".to_string() },
+                  identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
                   fields: vec![],
                 },
                 Entity {
                   name: "ScreeningRoom".to_string(),
                   description: "".to_string(),
                   is_aggregate_root: false,
-                  identify: Field { name: "".to_string(), value: "".to_string(), type_type: "".to_string() },
+                  identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
                   fields: vec![],
                 },
                 Entity {
@@ -130,7 +130,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],
@@ -152,7 +152,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],
@@ -163,7 +163,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],
@@ -174,7 +174,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],
@@ -196,7 +196,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![]
@@ -207,7 +207,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],
@@ -229,7 +229,7 @@ ValueObject Notifications { }
                   is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
-                    value: "".to_string(),
+                    initializer: None,
                     type_type: "".to_string(),
                   },
                   fields: vec![],

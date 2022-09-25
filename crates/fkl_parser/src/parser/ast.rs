@@ -146,7 +146,7 @@ pub struct EntityDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct VariableDefinition {
   pub name: String,
-  pub field_type: String,
+  pub type_type: String,
   pub initializer: Option<String>,
 }
 

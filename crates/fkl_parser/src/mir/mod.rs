@@ -9,3 +9,4 @@ pub use tactic::aggregate::*;
 pub use tactic::entity::*;
 pub use tactic::value_object::*;
 pub use tactic::domain_object::*;
+pub use tactic::block::*;
