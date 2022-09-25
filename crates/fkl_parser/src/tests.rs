@@ -199,7 +199,7 @@ ValueObject Notifications { }
                     initializer: None,
                     type_type: "".to_string(),
                   },
-                  fields: vec![]
+                  fields: vec![],
                 },
                 Entity {
                   name: "Reservation".to_string(),
@@ -210,7 +210,19 @@ ValueObject Notifications { }
                     initializer: None,
                     type_type: "".to_string(),
                   },
-                  fields: vec![],
+                  fields: vec![
+                    Field { name: "id".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "token".to_string(), initializer: None, type_type: "UUID".to_string() },
+                    Field { name: "status".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()), type_type: "ReservationStatus".to_string() },
+                    Field { name: "expiresAt".to_string(), initializer: None, type_type: "LocalDateTime".to_string() },
+                    Field { name: "createdAt".to_string(), initializer: None, type_type: "LocalDateTime".to_string() },
+                    Field { name: "screeningId".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "screeningStartTime".to_string(), initializer: None, type_type: "LocalDateTime".to_string() },
+                    Field { name: "name".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "surname".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "tickets".to_string(), initializer: None, type_type: "Set<Ticket>".to_string() },
+                    Field { name: "totalPrice".to_string(), initializer: None, type_type: "BigDecimal".to_string() },
+                  ],
                 },
               ],
             }
@@ -232,7 +244,14 @@ ValueObject Notifications { }
                     initializer: None,
                     type_type: "".to_string(),
                   },
-                  fields: vec![],
+                  fields: vec![
+                    Field { name: "id".to_string(), initializer: None, type_type: "UUID".to_string() },
+                    Field { name: "mobile".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "email".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "username".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "password".to_string(), initializer: None, type_type: "String".to_string() },
+                    Field { name: "address".to_string(), initializer: None, type_type: "String".to_string() },
+                  ],
                 }
               ],
             }

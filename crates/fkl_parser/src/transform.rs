@@ -47,8 +47,18 @@ impl MirTransform {
     })
   }
 
-  fn update_aggregates(&self) -> Vec<BoundedContext> {
+  fn update_aggregates(&mut self) -> Vec<BoundedContext> {
     let mut contexts = vec![];
+
+    self.aggregates.clone().iter().for_each(|(name, aggregate)| {
+      aggregate.entities.iter().for_each(|entity| {
+        if let Some(exist_entity) = self.entities.get(&entity.name) {
+          let aggregate = self.aggregates.get_mut(name).unwrap();
+          aggregate.entities.remove(aggregate.entities.iter().position(|e| e.name == entity.name).unwrap());
+          aggregate.entities.push(exist_entity.clone());
+        }
+      });
+    });
 
     self.contexts.values().for_each(|origin| {
       let mut context: BoundedContext = BoundedContext::new(&origin.name);
@@ -267,7 +277,9 @@ Entity Shopping {
                   initializer: None,
                   type_type: "".to_string(),
                 },
-                fields: vec![],
+                fields: vec![
+                  Field { name: "id".to_string(), initializer: None, type_type: "String".to_string() }
+                ],
               }
             ],
           }],
