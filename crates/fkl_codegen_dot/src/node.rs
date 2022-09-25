@@ -11,6 +11,10 @@ impl Node {
   pub fn new(name: &str) -> Self {
     Node { name: name.to_string(), label: name.to_string() }
   }
+
+  pub fn label(name: &str, label: &str) -> Self {
+    Node { name: name.to_string(), label: label.to_string() }
+  }
 }
 
 impl fmt::Display for Node {

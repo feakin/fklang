@@ -1,5 +1,6 @@
 use fkl_dot::graph::Graph;
 use fkl_dot::node::Node;
+use fkl_dot::subgraph::Subgraph;
 use fkl_parser::mir::{ConnectionDirection, ContextMap, ContextRelation};
 use crate::bc_edge_style;
 use crate::bc_edge_style::BcEdgeStyle;
@@ -9,7 +10,19 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   graph.use_default_style();
 
   for bc in &context_map.contexts {
-    graph.add_node(Node::new(&bc.name))
+    // add context.entities to subgraph
+    let mut subgraph = Subgraph::new(&bc.name, &bc.name);
+    for aggregate in &bc.aggregates {
+      let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("Aggregate {}", aggregate.name));
+
+      aggregate.entities.iter().for_each(|entity| {
+        aggregate_graph.add_node(Node::label(&format!("entity_{}", entity.name), &entity.name));
+      });
+
+      subgraph.add_subgraph(aggregate_graph);
+    }
+
+    graph.add_subgraph(subgraph);
   }
 
   for rel in &context_map.relations {
@@ -53,4 +66,33 @@ fn create_graph_edge_style(bc_style: BcEdgeStyle) -> Vec<String> {
   }
 
   style
+}
+
+#[cfg(test)]
+mod test {
+  use fkl_parser::parse;
+  use crate::dot_gen::to_dot;
+
+  #[test]
+  fn nested_entity() {
+    let input = r#"
+ContextMap TicketBooking {
+  Reservation -> Cinema;
+  Reservation -> Movie;
+  Reservation -> User;
+}
+
+Context Reservation {
+  Aggregate Reservation;
+}
+
+Aggregate Reservation {
+  Entity Ticket, Reservation;
+}
+"#;
+
+    let context_map = parse(input).unwrap();
+    let dot = to_dot(&context_map);
+    println!("{}", dot);
+  }
 }

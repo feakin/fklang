@@ -14,6 +14,7 @@ pub struct Graph {
   nodes: Vec<Node>,
   edges: Vec<Edge>,
   node_styles: Vec<String>,
+  graph_style: Vec<String>,
   subgraph: Vec<Subgraph>,
 }
 
@@ -24,6 +25,7 @@ impl Graph {
       nodes: Vec::new(),
       edges: Vec::new(),
       node_styles: vec![],
+      graph_style: vec![],
       subgraph: Vec::new(),
     }
   }
@@ -63,6 +65,8 @@ impl Graph {
   pub fn use_default_style(&mut self) {
     self.set_shape("box");
     self.set_style("filled");
+
+    self.graph_style.push("component=true".to_string());
   }
 }
 
@@ -70,6 +74,10 @@ impl Display for Graph {
   fn fmt(&self, out: &mut Formatter<'_>) -> fmt::Result {
     let space = indent(1);
     out.write_str(&format!("digraph {} {{\n", self.name))?;
+
+    if !self.graph_style.is_empty() {
+      out.write_str(&format!("{}{};\n", space, self.graph_style.join("")))?;
+    }
 
     if !self.node_styles.is_empty() {
       out.write_str(&format!("{}node [{}];\n", space, self.node_styles.join(" ")))?;

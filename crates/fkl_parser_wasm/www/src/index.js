@@ -93,3 +93,4 @@ let parser = new FklParser(template);
 console.log(parser.parse());
 console.log(parser.to_dot());
 
+document.writeln(parser.to_dot());
