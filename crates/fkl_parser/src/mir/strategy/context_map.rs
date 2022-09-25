@@ -18,6 +18,12 @@ pub struct ContextMap {
   pub state: ContextState,
   pub contexts: Vec<BoundedContext>,
   pub relations: Vec<ContextRelation>,
+
+  // todo: add rest in the future
+  // some entities no in map
+  // pub rest_entities: Vec<Entity>,
+  // some value objects no in map
+  // pub rest_value_objects: Vec<ValueObject>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

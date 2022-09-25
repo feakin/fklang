@@ -84,7 +84,7 @@ Entity User {
   }
 }
 
-ValueObject Payment {
+Entity Payment {
   Struct {
     id: UUID;
     amount: BigDecimal;
