@@ -26,7 +26,6 @@ fn process_context_edge(graph: &mut Graph, relation: &ContextRelation) {
   match &relation.connection_type {
     ConnectionDirection::Undirected => {}
     ConnectionDirection::PositiveDirected => {
-      // add_edge_labels(graph, &relation.source, &relation.target);
       graph.add_edge_with_style(&relation.source, &relation.target, style);
     }
     ConnectionDirection::NegativeDirected => {
@@ -52,5 +51,6 @@ fn create_graph_edge_style(bc_style: BcEdgeStyle) -> Vec<String> {
   if bc_style.taillabel.len() > 0 {
     style.push(format!("taillabel=\"{}\"", bc_style.taillabel));
   }
+
   style
 }
