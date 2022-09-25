@@ -2,9 +2,9 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelationType, Entity, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelationType, Entity, Field, ValueObject};
 use crate::mir::tactic::aggregate::Aggregate;
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, RelationDirection};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, RelationDirection, VariableDefinition};
 use crate::parser::parse as ast_parse;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -136,15 +136,17 @@ impl MirTransform {
     entity.description = decl.inline_doc.clone();
     entity.is_aggregate_root = decl.is_aggregate_root;
 
-    decl.fields.iter().for_each(|field| {
-      entity.fields.push(mir::Field {
-        initializer: field.initializer.clone(),
-        name: field.name.clone(),
-        type_type: field.type_type.clone(),
-      });
-    });
+    entity.fields = decl.fields.iter().map(|field| Self::transform_field(field)).collect();
 
     entity
+  }
+
+  fn transform_field(field: &VariableDefinition) -> Field {
+    Field {
+      initializer: field.initializer.clone(),
+      name: field.name.clone(),
+      type_type: field.type_type.clone(),
+    }
   }
 }
 
