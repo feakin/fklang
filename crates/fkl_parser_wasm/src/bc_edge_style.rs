@@ -99,12 +99,19 @@ ContextMap {
     let string = to_dot(&context_map);
 
     assert_eq!(string, r#"digraph  {
+  component=true;layout=fdp;
   node [shape=box style=filled];
-  MallContext [label="MallContext"];
-  ShoppingCartContext [label="ShoppingCartContext"];
-  ShoppingCartContext -> MallContext;
-  MallContext -> ShoppingCartContext;
-  ShoppingCartContext -> MallContext;
+  cluster_shoppingcartcontext -> cluster_mallcontext;
+  cluster_mallcontext -> cluster_shoppingcartcontext;
+  cluster_shoppingcartcontext -> cluster_mallcontext;
+
+  subgraph cluster_mallcontext {
+    label="MallContext(Context)";
+  }
+
+  subgraph cluster_shoppingcartcontext {
+    label="ShoppingCartContext(Context)";
+  }
 }"#);
   }
 
@@ -136,12 +143,19 @@ ContextMap {
 
     let string = to_dot(&context_map);
     assert_eq!(string, r#"digraph  {
+  component=true;layout=fdp;
   node [shape=box style=filled];
-  MallContext [label="MallContext"];
-  ShoppingCartContext [label="ShoppingCartContext"];
-  ShoppingCartContext -> MallContext [label="AntiCorruptionLayer",headlabel="D"];
-  MallContext -> ShoppingCartContext;
-  ShoppingCartContext -> MallContext;
+  cluster_shoppingcartcontext -> cluster_mallcontext [label="AntiCorruptionLayer",headlabel="D"];
+  cluster_mallcontext -> cluster_shoppingcartcontext;
+  cluster_shoppingcartcontext -> cluster_mallcontext;
+
+  subgraph cluster_mallcontext {
+    label="MallContext(Context)";
+  }
+
+  subgraph cluster_shoppingcartcontext {
+    label="ShoppingCartContext(Context)";
+  }
 }"#);
   }
 }

@@ -1,4 +1,4 @@
-all: setup build
+all: build
 
 setup:
 	curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh

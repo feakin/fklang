@@ -1,4 +1,4 @@
-pub fn naming(name: &str) -> String {
+pub fn cluster_name(name: &str) -> String {
   let mut new_name = name.to_string();
   if !name.starts_with("cluster_") {
     new_name = format!("cluster_{}", name);
@@ -38,7 +38,7 @@ mod test {
 
   #[test]
   fn return_origin_when_correct() {
-    assert_eq!(naming("cluster_hello_world"), "cluster_hello_world");
-    assert_eq!(naming("cluster_helloworld"), "cluster_helloworld");
+    assert_eq!(cluster_name("cluster_hello_world"), "cluster_hello_world");
+    assert_eq!(cluster_name("cluster_helloworld"), "cluster_helloworld");
   }
 }

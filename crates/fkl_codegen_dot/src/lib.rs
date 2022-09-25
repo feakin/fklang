@@ -106,7 +106,7 @@ mod tests {
     graph.add_node(Node::new("a"));
 
     assert_eq!(format!("{}", graph), r#"digraph graph_width_rect_shape_style {
-  component=true;
+  component=true;layout=fdp;
   node [shape=box style=filled];
   a [label="a"];
 }"#);

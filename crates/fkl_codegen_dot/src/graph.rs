@@ -67,6 +67,7 @@ impl Graph {
     self.set_style("filled");
 
     self.graph_style.push("component=true".to_string());
+    self.graph_style.push("layout=fdp".to_string());
   }
 }
 
@@ -76,7 +77,7 @@ impl Display for Graph {
     out.write_str(&format!("digraph {} {{\n", self.name))?;
 
     if !self.graph_style.is_empty() {
-      out.write_str(&format!("{}{};\n", space, self.graph_style.join("")))?;
+      out.write_str(&format!("{}{};\n", space, self.graph_style.join(";")))?;
     }
 
     if !self.node_styles.is_empty() {

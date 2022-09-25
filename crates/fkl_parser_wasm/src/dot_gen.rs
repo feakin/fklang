@@ -1,4 +1,5 @@
 use fkl_dot::graph::Graph;
+use fkl_dot::helper::naming::cluster_name;
 use fkl_dot::node::Node;
 use fkl_dot::subgraph::Subgraph;
 use fkl_parser::mir::{ConnectionDirection, ContextMap, ContextRelation};
@@ -11,9 +12,10 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   graph.use_default_style();
 
   for bc in &context_map.contexts {
-    let mut subgraph = Subgraph::new(&bc.name, &context_name(&bc.name));
+    let name = &bc.name;
+    let mut subgraph = Subgraph::new(&bc.name, &format!("{}(Context)", name));
     for aggregate in &bc.aggregates {
-      let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("\"{}(Aggregate)\"", aggregate.name));
+      let mut aggregate_graph = Subgraph::new(&format!("aggregate_{}", aggregate.name), &format!("{}(Aggregate)", aggregate.name));
 
       aggregate.entities.iter().for_each(|entity| {
         aggregate_graph.add_node(Node::label(&format!("entity_{}", entity.name), &entity.name));
@@ -32,16 +34,12 @@ pub(crate) fn to_dot(context_map: &ContextMap) -> String {
   format!("{}", graph)
 }
 
-fn context_name(name: &str) -> String {
-  format!("\"{}(Context)\"", name)
-}
-
 fn process_context_edge(graph: &mut Graph, relation: &ContextRelation) {
   let bc_edge_style = bc_edge_style::generate_edge_style(&relation.source_type, &relation.target_type);
   let style = create_graph_edge_style(bc_edge_style);
 
-  let source = &context_name(&relation.source);
-  let target = &context_name(&relation.target);
+  let source = &cluster_name(&relation.source);
+  let target = &cluster_name(&relation.target);
 
   match &relation.connection_type {
     ConnectionDirection::Undirected => {}
@@ -101,6 +99,34 @@ Aggregate Reservation {
 
     let context_map = parse(input).unwrap();
     let dot = to_dot(&context_map);
-    println!("{}", dot);
+    assert_eq!(dot, r#"digraph TicketBooking {
+  component=true;layout=fdp;
+  node [shape=box style=filled];
+  cluster_reservation -> cluster_cinema;
+  cluster_reservation -> cluster_movie;
+  cluster_reservation -> cluster_user;
+
+  subgraph cluster_cinema {
+    label="Cinema(Context)";
+  }
+
+  subgraph cluster_movie {
+    label="Movie(Context)";
+  }
+
+  subgraph cluster_reservation {
+    label="Reservation(Context)";
+
+  subgraph cluster_aggregate_reservation {
+    label="Reservation(Aggregate)";
+    entity_Ticket [label="Ticket"];
+    entity_Reservation [label="Reservation"];
+  }
+  }
+
+  subgraph cluster_user {
+    label="User(Context)";
+  }
+}"#);
   }
 }

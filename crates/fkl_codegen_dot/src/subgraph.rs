@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::edge::Edge;
 use crate::helper::config::indent;
-use crate::helper::naming::naming;
+use crate::helper::naming::cluster_name;
 use crate::node::Node;
 
 pub struct Subgraph {
@@ -18,7 +18,7 @@ pub struct Subgraph {
 impl Subgraph {
   pub fn new(name: &str, label: &str) -> Self {
     Subgraph {
-      name: naming(name),
+      name: cluster_name(name),
       label: label.to_string(),
       depth: 1,
       nodes: Vec::new(),
@@ -46,7 +46,7 @@ impl fmt::Display for Subgraph {
 
     let space = indent(self.depth + 1);
 
-    out.write_str(&format!("{}label={};\n", space, self.label))?;
+    out.write_str(&format!("{}label=\"{}\";\n", space, self.label))?;
 
     for node in &self.nodes {
       out.write_str(&format!("{}{}\n", space, node))?
