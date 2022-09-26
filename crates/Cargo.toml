@@ -8,3 +8,6 @@ members = [
   "server",
   "fkl_parser_wasm",
 ]
+
+[profile.release.package.fkl-wasm]
+opt-level = 2

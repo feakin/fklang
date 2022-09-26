@@ -14,6 +14,9 @@ use crate::utils::set_panic_hook;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+#[allow(dead_code)]
+type WasmResult<T = JsValue> = Result<T, serde_wasm_bindgen::Error>;
+
 #[wasm_bindgen]
 pub fn parse(str: String) -> String {
   set_panic_hook();

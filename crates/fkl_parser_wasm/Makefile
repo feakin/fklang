@@ -1,7 +1,10 @@
-all: build
+all: clean build publish
 
 setup:
 	curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+clean:
+	rm -rf pkg-*
 
 build: build-node build-web
 	rm pkg-*/package.json.old
@@ -9,12 +12,12 @@ build: build-node build-web
 PKG_NAME=@feakin\/fkl-wasm
 
 build-web:
-	wasm-pack build  --scope feakin --target=browser --out-name fkl-wasm-web --out-dir pkg-web
-	sed -i.old 's/"name": "${PKG_NAME}"/"name": "${PKG_NAME}-web"/' pkg-web/package.json
+	wasm-pack build --target web --out-dir pkg-web --out-name fkl .
+	sed -i.old 's/"name": "fkl-wasm"/"name": "${PKG_NAME}-web"/' pkg-web/package.json
 
 build-node:
-	wasm-pack build  --scope feakin --target=nodejs --out-name fkl-wasm-node --out-dir pkg-node
-	sed -i.old 's/"name": "${PKG_NAME}"/"name": "${PKG_NAME}-node"/' pkg-node/package.json
+	wasm-pack build --target nodejs --out-dir pkg-node --out-name fkl .
+	sed -i.old 's/"name": "fkl-wasm"/"name": "${PKG_NAME}-node"/' pkg-node/package.json
 
 publish: publish-web publish-node
 
