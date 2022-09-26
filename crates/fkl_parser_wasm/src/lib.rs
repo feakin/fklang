@@ -15,6 +15,12 @@ use crate::utils::set_panic_hook;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
+pub fn parse(str: String) -> String {
+  set_panic_hook();
+  FklParser::new(str).to_dot()
+}
+
+#[wasm_bindgen]
 pub struct FklParser {
   str: String,
 }
