@@ -19,7 +19,7 @@ context_decl = {
 }
 
 context_node_decl = {
-  ("Context" | "context") ~ identifier
+  ("Context" | "context") ~ identifier ~ ("," ~ identifier)*
 }
 
 context_node_rel = {
