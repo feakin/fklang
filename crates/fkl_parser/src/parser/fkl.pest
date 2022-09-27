@@ -15,7 +15,7 @@ context_map_decl = {
 }
 
 context_decl = {
-  "Context" ~ identifier ~ "{" ~ (module_decl | aggregate_decl | used_domain_objects_decl | inline_doc)* ~ "}"
+  "Context" ~ identifier ~ "{" ~ (aggregate_decl | used_domain_objects_decl | inline_doc)* ~ "}"
 }
 
 context_node_decl = {
