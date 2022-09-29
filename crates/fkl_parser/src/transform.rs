@@ -124,20 +124,19 @@ impl MirTransform {
   }
 
   fn transform_bounded_context(context_decl: &&BoundedContextDecl) -> BoundedContext {
-    let mut bounded_context = mir::BoundedContext::new(&context_decl.name);
-    context_decl.used_domain_objects.iter().for_each(|domain_object| {
-      bounded_context.aggregates.push(Aggregate::new(&domain_object.name.clone()));
-    });
+    let mut context = mir::BoundedContext::new(&context_decl.name);
+    context.aggregates = context_decl.used_domain_objects.iter().map(|domain_object| {
+      Aggregate::new(&domain_object.name.clone())
+    }).collect();
 
-    bounded_context
+    context
   }
 
   fn transform_aggregate(&mut self, decl: &AggregateDecl) -> mir::Aggregate {
     let mut aggregate = mir::Aggregate::new(&decl.name);
-    decl.used_domain_objects.iter().for_each(|domain_object| {
-      let entity = Entity::new(&domain_object.name);
-      aggregate.entities.push(entity);
-    });
+    aggregate.entities = decl.used_domain_objects.iter().map(|domain_object| {
+      Entity::new(&domain_object.name)
+    }).collect();
 
     aggregate
   }
