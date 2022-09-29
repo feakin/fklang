@@ -79,23 +79,27 @@ Context ShoppingCarContext  {
 }
 
 // render wtih UML styled?
-SubDomain Cart {
-  Aggregate Cart(display = "") {
-    type = aggregateRoot, display = "Cart";
-    something = "likethat";
+Aggregate Cart(display = "") {
+  type = aggregateRoot, display = "Cart";
+  something = "likethat";
+  DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
+  DomainEvent CartItemQuantityChanged {
+    type("DomainEvent")
+    name("CartItemQuantityChanged")
+    description("CartItemQuantityChanged")
+  }
 
-    // Concept or UML like ?
-    // can be inside or outside of the Aggregate
-    Entity Cart {
-      // it's to many, can change in different way.
-      ValueObject CartId
-      ValueObject CartStatus
-      ValueObject CartItem
-      ValueObject CartItemQuantity
-      ValueObject CartItemPrice
-      ValueObject CartItemTotal
-      ValueObject CartTotal 
-    }
+  // Concept or UML like ?
+  // can be inside or outside of the Aggregate
+  Entity Cart {
+    // it's to many, can change in different way.
+    ValueObject CartId
+    ValueObject CartStatus
+    ValueObject CartItem
+    ValueObject CartItemQuantity
+    ValueObject CartItemPrice
+    ValueObject CartItemTotal
+    ValueObject CartTotal 
   }
 }
 
@@ -161,7 +165,7 @@ Context Ticket {
     // equals
     moduleName: "domain"
     package: "se.citerus.dddsample.domain.model"
-  }
+  }  
 }
 ```
 
@@ -172,21 +176,31 @@ Context Ticket {
 Subscribe / Publish / Event / Flow
 
 ```kotlin
-DomainEvent createBook {
+api createBook {
   """bla bla"""
+
   // location with modules
   target: ${DomainObject}
   qualified: "${moduleName}:com.example.book"", 
   
-  notication ?
-  api ?
+  endpoint {
+    // message map
+    notication ?
+
+    // RPC API
+
+    // HTTP API ?
+    host: "http://localhost:8080"
+    url: "/api/v1/books"
+  }
   
   test {
      host: ""
      token: ""
   }
   
-  input {
+  entity: Book
+  input CreateBookRequest {
     struct {
       "title" : "string",
       "author" : "string",
@@ -203,7 +217,7 @@ DomainEvent createBook {
       range { min: 1, max: 100 }
     } 
   } 
-  output {
+  output CreateBookResponse {
      Struct {
         "id" : "number"
      }
