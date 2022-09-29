@@ -1,13 +1,16 @@
 [workspace]
 
 members = [
-  "fkl_codegen_dot",
-  "fkl_lsp",
-  "fkl_parser",
   "domain_derive",
   "server",
-  "fkl_parser_wasm",
+
   "fkl_cli",
+  "fkl_lsp",
+  "fkl_parser",
+  "fkl_parser_wasm",
+
+  "fkl_codegen_dot",
+  "fkl_codegen_java",
 ]
 
 [profile.release.package.fkl-wasm]
