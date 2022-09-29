@@ -28,9 +28,7 @@ pub enum FklDeclaration {
   Aggregate(AggregateDecl),
   Entity(EntityDecl),
   ValueObject(ValueObjectDecl),
-  Component(ComponentDecl),
-  DomainService(DomainServiceDecl),
-  ApplicationService(ApplicationServiceDecl),
+  Implementation(ImplementationDecl),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -80,12 +78,12 @@ pub struct BoundedContextDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct DomainEventDecl {
   pub name: String,
-  pub implementation: Option<Implementation>,
+  pub implementation: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Implementation {
-
+pub struct UsedImplementation {
+  pub name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -184,6 +182,32 @@ pub struct ValueObjectDecl {
 }
 
 // Binding To Function
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ImplementationDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub qualified_name: String,
+  // can be file path or url
+  pub endpoint: Vec<EndpointDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct SourceSetDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub file: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct EndpointDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub method: String,
+  pub path: String,
+  pub request: Option<RequestDecl>,
+  pub response: Option<ResponseDecl>,
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Trait {

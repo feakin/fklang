@@ -228,6 +228,16 @@ impl CinemaCreatedEvent {
 }
 ```
 
+
+## with OpenAPI
+
+```
+SourceSet  {
+  file: "openapi.yaml"
+  type: "openapi"
+}
+```
+
 Container API ?
 
 ## Layered
