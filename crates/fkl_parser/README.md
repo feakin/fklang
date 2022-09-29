@@ -139,6 +139,16 @@ ShoppingCarContext.API {
 
 ```
 
+## Typedef Container
+
+```groovy
+typepdf? container ContextMap {
+ 
+}
+```
+
+
+
 ## Context Binding
 
 binding source code to Context Map
@@ -148,6 +158,61 @@ ContextBinding {
   basePackage = se.citerus.dddsample.domain.model
 }
 ```
+
+## API Binding
+
+### DomainEvent
+
+Subscribe / Publish / Event / Flow
+
+```kotlin
+DomainEvent createBook {
+  """bla bla"""
+  // location with modules
+  qualified: "$module:com.example.book"", 
+  
+  notication ?
+  api ?
+  
+  test {
+     host: ""
+     token: ""
+  }
+  
+  input {
+    struct {
+      "title" : "string",
+      "author" : "string",
+      "price" : "number"
+    }
+    example {
+      "title" : "The Lord of the Rings",
+      "author" : "J.R.R. Tolkien",
+      "price" : 29.99
+    }
+    validate  { 
+      required { min: 3, max: 10 }
+      pattern { regex: "^[a-zA-Z0-9]+$" }
+      range { min: 1, max: 100 }
+    } 
+  } 
+  output {
+     Struct {
+        "id" : "number"
+     }
+     validate  { }
+  } 
+}
+```
+
+Container API ?
+
+## Layered
+
+```feakin
+
+```
+
 
 ## Styles
 
