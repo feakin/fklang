@@ -154,8 +154,14 @@ typepdf? container ContextMap {
 binding source code to Context Map
 
 ```
-ContextBinding {
-  basePackage = se.citerus.dddsample.domain.model
+Context Ticket {
+  binding {
+    language: "kotlin",
+    qualified: "${moduleName}:se.citerus.dddsample.domain.model",
+    // equals
+    moduleName: "domain"
+    package: "se.citerus.dddsample.domain.model"
+  }
 }
 ```
 
@@ -169,7 +175,8 @@ Subscribe / Publish / Event / Flow
 DomainEvent createBook {
   """bla bla"""
   // location with modules
-  qualified: "$module:com.example.book"", 
+  target: ${DomainObject}
+  qualified: "${moduleName}:com.example.book"", 
   
   notication ?
   api ?
