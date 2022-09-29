@@ -1,6 +1,6 @@
 pub mod tactic;
 pub mod strategy;
-pub mod binding;
+pub mod implementation;
 
 pub use strategy::context_map::*;
 pub use strategy::domain::*;

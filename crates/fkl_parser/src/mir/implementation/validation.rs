@@ -1,8 +1,9 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Validation {
+  None,
   Required(bool),
   Range(RangeValidation),
   Length(LengthValidation),
@@ -10,10 +11,16 @@ pub enum Validation {
   Compare(CompareValidation),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+impl Default for Validation {
+  fn default() -> Self {
+    Validation::None
+  }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct RangeValidation {
-  pub min: Option<f64>,
-  pub max: Option<f64>,
+  pub min: Option<usize>,
+  pub max: Option<usize>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]

@@ -227,7 +227,7 @@ pub struct ComponentDecl {
   pub attributes: Vec<AttributeDefinition>,
 }
 
-// binding
+// implementation
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ComponentType {
   Application,
