@@ -3,7 +3,7 @@ use genco::prelude::*;
 
 use fkl_parser::mir::Entity;
 
-fn gen_entity_struct(entity: Entity) -> anyhow::Result<()> {
+fn gen_entity_struct(_entity: Entity) -> anyhow::Result<()> {
   let car = &java::import("com.feakin", "Car");
   let list = &java::import("java.util", "List");
   let array_list = &java::import("java.util", "ArrayList");

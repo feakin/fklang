@@ -72,8 +72,20 @@ pub struct ContextMapDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BoundedContextDecl {
   pub name: String,
+  pub domain_events: Vec<DomainEventDecl>,
   pub aggregates: Vec<AggregateDecl>,
   pub used_domain_objects: Vec<UsedDomainObject>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct DomainEventDecl {
+  pub name: String,
+  pub implementation: Option<Implementation>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Implementation {
+
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

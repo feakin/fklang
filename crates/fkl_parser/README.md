@@ -176,7 +176,7 @@ Context Ticket {
 Subscribe / Publish / Event / Flow
 
 ```kotlin
-api createBook {
+impl CinemaCreatedEvent {
   """bla bla"""
 
   // location with modules
@@ -192,13 +192,15 @@ api createBook {
     // HTTP API ?
     host: "http://localhost:8080"
     url: "/api/v1/books"
+    
+    method: "POST"  
+      
+    test {
+       host: ""
+       token: ""
+    }
   }
-  
-  test {
-     host: ""
-     token: ""
-  }
-  
+
   entity: Book
   input CreateBookRequest {
     struct {

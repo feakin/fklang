@@ -84,6 +84,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
               names.push(context_name.clone());
               context_decl_map.insert(context_name.clone(), BoundedContextDecl {
                 name: context_name,
+                domain_events: vec![],
                 aggregates: vec![],
                 used_domain_objects: vec![],
               });
@@ -419,11 +420,13 @@ Context ShoppingCarContext {
       contexts: vec![
         BoundedContextDecl {
           name: "MallContext".to_string(),
+          domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
         },
         BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
+          domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
         },
@@ -646,6 +649,7 @@ Entity SalesPerson {
 
     assert_eq!(decls[0], FklDeclaration::BoundedContext(BoundedContextDecl {
       name: "Cart".to_string(),
+      domain_events: vec![],
       aggregates: vec![
         AggregateDecl {
           name: "Cart".to_string(),
@@ -740,8 +744,8 @@ Component SalesComponent {
         loc: Loc(11, 15),
       },
       contexts: vec![
-        BoundedContextDecl { name: "OrderContext".to_string(), aggregates: vec![], used_domain_objects: vec![] },
-        BoundedContextDecl { name: "SalesContext".to_string(), aggregates: vec![], used_domain_objects: vec![] },
+        BoundedContextDecl { name: "OrderContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![] },
+        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![] },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),
@@ -825,5 +829,18 @@ Aggregate Cinema {
         value_objects: vec![],
       })
     );
+  }
+
+  #[test]
+  fn aggregate_binding_syntax() {
+    let _decls = parse(r#"Context Cinema {
+  DomainEvent CinemaCreated(impl = CinemaCreatedEvent);
+}
+
+impl CinemaCreatedEvent {
+
+}
+"#).unwrap();
+
   }
 }

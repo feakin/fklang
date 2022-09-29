@@ -8,18 +8,31 @@ declaration = {
   | entity_decl
   | value_object_decl
   | component_decl
+  | impl_decl
 }
 
 context_map_decl = {
-  "ContextMap" ~ identifier? ~ "{" ~ (context_node_decl | context_node_rel | inline_doc)* ~ "}"
+  "ContextMap" ~ identifier? ~ "{" ~ (used_context_node | context_node_rel | inline_doc)* ~ "}"
 }
 
 context_decl = {
-  "Context" ~ identifier ~ "{" ~ (aggregate_decl | used_domain_objects_decl | inline_doc)* ~ "}"
+  "Context" ~ identifier ~ "{" ~ (aggregate_decl | used_domain_event_decl | used_domain_objects_decl | inline_doc)* ~ "}"
 }
 
-context_node_decl = {
+used_context_node = {
   ("Context" | "context") ~ identifier ~ ("," ~ identifier)*
+}
+
+used_domain_event_decl = {
+  "DomainEvent" ~ domain_event_binding ~ ("," ~ domain_event_binding)* ~ ";"?
+}
+
+domain_event_binding = {
+  identifier ~ "(" ~ "impl" ~ "=" ~ binding_id ~ ")"
+}
+
+binding_id = {
+  identifier *
 }
 
 context_node_rel = {
@@ -80,6 +93,10 @@ constructor_decl = {
 
 struct_decl = {
   ("struct" | "Struct") ~ "{" ~ fields_decl ~ "}"
+}
+
+impl_decl = {
+  "impl" ~ identifier ~ "{" ~ (inline_doc)? ~ "}"
 }
 
 parameters_decl = {
