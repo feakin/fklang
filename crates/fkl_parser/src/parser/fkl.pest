@@ -9,7 +9,7 @@ declaration = {
   | value_object_decl
   | struct_decl
   | component_decl
-  | impl_decl
+  | implementation_decl
 }
 
 context_map_decl = {
@@ -96,12 +96,12 @@ struct_decl = {
   ("struct" | "Struct") ~ identifier? ~ "{" ~ fields_decl ~ "}"
 }
 
-impl_decl = {
+implementation_decl = {
   "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl)? ~ "}"
 }
 
 endpoint_decl = {
-  "endpoint" ~ "{" ~ http_action ~ authorization_decl? ~ http_response_decl? ~ "}"
+  "endpoint" ~ "{" ~ http_request_decl ~ authorization_decl? ~ http_response_decl? ~ "}"
 }
 
 http_response_decl = {
@@ -109,7 +109,7 @@ http_response_decl = {
 }
 
 authorization_decl = {
-  "authorization" ~ ":" ~ authorization_type ~ special_string ~ special_string? ~ ";"?
+  "authorization" ~ ":" ~ authorization_type ~ username? ~ password? ~ ";"?
 }
 
 authorization_type = {
@@ -119,8 +119,12 @@ authorization_type = {
 username =  { special_string }
 password =  { special_string }
 
-http_action = {
-  ("GET" | "POST" | "PUT" | "DELETE" | "PATCH") ~ custom_param? ~ uri ~ http_body? ~ ";"?
+http_request_decl = {
+  http_method ~ custom_param? ~ uri ~ http_body? ~ ";"?
+}
+
+http_method = {
+  "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
 }
 
 custom_param = {
@@ -141,7 +145,7 @@ host = {
 }
 
 port = { number }
-path = { special_string }
+path = { uri_string }
 query = { "?" ~ special_string ~ ("&" ~ special_string)* }
 frag = { "#" ~ special_string }
 
@@ -228,6 +232,7 @@ string = @{
 number = @{ '0'..'9'+ }
 int = @{ number | "-" ~ "0"* ~ '1'..'9' ~ number? }
 special_string = @{ (ASCII_ALPHANUMERIC | "-" | "_" )* }
+uri_string = @{ (ASCII_ALPHANUMERIC | "-" | "_" | "{" | "}" )* }
 
 inline_doc = {
   "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""

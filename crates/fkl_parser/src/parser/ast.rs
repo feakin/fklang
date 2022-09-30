@@ -30,6 +30,7 @@ pub enum FklDeclaration {
   ValueObject(ValueObjectDecl),
   Implementation(ImplementationDecl),
   Component(ComponentDecl),
+  Struct(StructDecl),
   DomainService(DomainServiceDecl),
   ApplicationService(ApplicationServiceDecl),
 }
@@ -137,6 +138,13 @@ pub struct AggregateDecl {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct StructDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub fields: Vec<VariableDefinition>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct UsedDomainObject {
   pub name: String,
 }
@@ -192,7 +200,7 @@ pub struct ImplementationDecl {
   pub inline_doc: String,
   pub qualified_name: String,
   // can be file path or url
-  pub endpoint: Vec<EndpointDecl>,
+  pub endpoints: Vec<EndpointDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -205,21 +213,28 @@ pub struct SourceSetDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct EndpointDecl {
   pub name: String,
-  pub inline_doc: String,
   pub method: String,
-  pub path: String,
-  pub request: Option<RequestDecl>,
-  pub response: Option<ResponseDecl>,
+  pub uri: String,
+  pub authorization: Option<AuthorizationDecl>,
+  pub request: Option<HttpRequestDecl>,
+  pub response: Option<HttpResponseDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct RequestDecl {
+pub struct AuthorizationDecl {
+  pub authorization_type: String,
+  pub username: Option<String>,
+  pub password: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct HttpRequestDecl {
 
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct ResponseDecl {
-
+pub struct HttpResponseDecl {
+  pub(crate) name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -273,6 +288,7 @@ pub struct ComponentDecl {
   pub name: String,
   pub component_type: ComponentType,
   pub inline_doc: String,
+  pub used_domain_objects: Vec<UsedDomainObject>,
   pub attributes: Vec<AttributeDefinition>,
 }
 

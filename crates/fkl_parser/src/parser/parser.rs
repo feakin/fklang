@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EntityDecl, FklDeclaration, Identifier, Loc, RelationDirection, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, HttpResponseDecl, Identifier, ImplementationDecl, Loc, RelationDirection, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -52,6 +52,12 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         }
         Rule::value_object_decl => {
           decl = FklDeclaration::ValueObject(consume_value_object(p));
+        }
+        Rule::implementation_decl => {
+          decl = FklDeclaration::Implementation(consume_implementation(p));
+        }
+        Rule::struct_decl => {
+          decl = FklDeclaration::Struct(consume_struct(p));
         }
         _ => println!("unreachable content rule: {:?}", p.as_rule())
       };
@@ -277,16 +283,22 @@ fn consume_struct_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::fields_decl => {
-        for p in p.into_inner() {
-          match p.as_rule() {
-            Rule::name_type_def => {
-              fields.push(consume_parameter(p));
-            }
-            _ => println!("unreachable struct_decl rule: {:?}", p.as_rule())
-          }
-        }
+        fields = consume_fields_decl(p);
       }
       _ => println!("unreachable struct rule: {:?}", p.as_rule())
+    };
+  }
+  return fields;
+}
+
+fn consume_fields_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
+  let mut fields: Vec<VariableDefinition> = vec![];
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::name_type_def => {
+        fields.push(consume_parameter(p));
+      }
+      _ => println!("unreachable fields rule: {:?}", p.as_rule())
     };
   }
   return fields;
@@ -343,6 +355,9 @@ fn consume_component(pair: Pair<Rule>) -> ComponentDecl {
       Rule::attr_decl => {
         component.attributes.push(consume_attribute(p));
       }
+      Rule::used_domain_objects_decl => {
+        component.used_domain_objects = [component.used_domain_objects, consume_use_domain_object(p)].concat();
+      }
       _ => println!("unreachable component rule: {:?}", p.as_rule())
     };
   }
@@ -379,6 +394,108 @@ fn consume_attr_value(pair: Pair<Rule>) -> String {
     };
   }
   return value;
+}
+
+fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
+  let mut implementation = ImplementationDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        implementation.name = p.as_str().to_string();
+      }
+      Rule::inline_doc => {
+        implementation.inline_doc = parse_inline_doc(p);
+      }
+      Rule::endpoint_decl => {
+        implementation.endpoints.push(consume_endpoint(p));
+      }
+      _ => println!("unreachable implementation rule: {:?}", p.as_rule())
+    };
+  }
+  return implementation;
+}
+
+fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
+  let mut endpoint = EndpointDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        endpoint.name = p.as_str().to_string();
+      }
+      Rule::http_request_decl => {
+        for inner in p.into_inner() {
+          match inner.as_rule() {
+            Rule::http_method => {
+              endpoint.method = inner.as_str().to_string();
+            }
+            Rule::uri => {
+              endpoint.uri = inner.as_str().to_string();
+            }
+            _ => println!("unreachable http_request_decl rule: {:?}", inner.as_rule())
+          }
+        }
+      }
+      Rule::authorization_decl => {
+        endpoint.authorization = Some(consume_authorization(p));
+      }
+      Rule::http_response_decl => {
+        endpoint.response = Some(consume_http_response(p));
+      }
+      _ => println!("unreachable endpoint rule: {:?}", p.as_rule())
+    };
+  }
+  return endpoint;
+}
+
+fn consume_struct(pair: Pair<Rule>) -> StructDecl {
+  let mut struct_decl = StructDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        struct_decl.name = p.as_str().to_string();
+      }
+      Rule::inline_doc => {
+        struct_decl.inline_doc = parse_inline_doc(p);
+      }
+      Rule::fields_decl => {
+        struct_decl.fields = consume_fields_decl(p);
+      }
+      _ => println!("unreachable struct rule: {:?}", p.as_rule())
+    };
+  }
+  return struct_decl;
+}
+
+fn consume_authorization(pair: Pair<Rule>) -> AuthorizationDecl {
+  let mut authorization = AuthorizationDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::authorization_type => {
+        authorization.authorization_type = p.as_str().to_string();
+      }
+      Rule::username => {
+        authorization.username = Some(p.as_str().to_string());
+      }
+      Rule::password => {
+        authorization.password = Some(p.as_str().to_string());
+      }
+      _ => println!("unreachable authorization rule: {:?}", p.as_rule())
+    };
+  }
+  return authorization;
+}
+
+fn consume_http_response(pair: Pair<Rule>) -> HttpResponseDecl {
+  let mut response = HttpResponseDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        response.name = p.as_str().to_string();
+      }
+      _ => println!("unreachable http_response rule: {:?}", p.as_rule())
+    };
+  }
+  return response;
 }
 
 fn parse_string(str: &str) -> String {
@@ -729,6 +846,9 @@ Component SalesComponent {
           value: "Application".to_string(),
         },
       ],
+      used_domain_objects: vec![
+        UsedDomainObject { name: "SalesOrder".to_string() },
+      ],
     }));
   }
 
@@ -833,13 +953,10 @@ Aggregate Cinema {
 
   #[test]
   fn aggregate_binding_syntax() {
-    let result = parse(r#"Context Cinema {
-  DomainEvent CinemaCreated(impl = CinemaCreatedEvent);
-}
-
+    let result = parse(r#"
 impl CinemaCreatedEvent {
   endpoint {
-    GET ${uri}/post;
+    GET /book/{id};
     authorization: Basic admin admin;
     response: Cinema;
   }
@@ -853,5 +970,25 @@ struct Cinema {
 }
 "#).unwrap();
 
+    assert_eq!(result[0], FklDeclaration::Implementation(ImplementationDecl {
+      name: "CinemaCreatedEvent".to_string(),
+      inline_doc: "".to_string(),
+      qualified_name: "".to_string(),
+      endpoints: vec![
+        EndpointDecl {
+          name: "".to_string(),
+          method: "GET".to_string(),
+          uri: "/book/{id}".to_string(),
+          authorization: Some(AuthorizationDecl {
+            authorization_type: "Basic".to_string(),
+            username: Some("admin".to_string()),
+            password: Some("admin".to_string()),
+          }),
+          request: None,
+          response: Some(HttpResponseDecl {
+            name: "Cinema".to_string()
+          }),
+        }],
+    }));
   }
 }
