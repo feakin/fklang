@@ -1,55 +1,6 @@
 # Feakin Knowledge Language
 
-Feakin is enterprise architecture knowledge information
-
-- [ ] DDD Model
-- [ ] DSL Parser
-  - [ ] DSL Syntax
-  - [ ] Ast Model
-- [ ] Code Binding
-- [ ] Code Generator Model
-- [ ] Workflow DSL
-  - [ ] Event Storming
-    - [ ] Role
-    - [ ] Command
-    - [ ] Event
-
-基于微服务的 DDD
-
-核心域：Bounded Context, Unique Language,
-
-支持域：Domain Object
-
-通用域：Layered Architecture, Multiple Modules,
-
-# System Level
-
-# Org. Modeling
-
-- Application Level
-- Team Topology Model
-
-# Continuous feedback
-
-- C4
-
-# Domain DSL Language
-
-## DDD Building Blocks
-
-- ContextMap
-- Bounded Context
-  - Shared Kernel
-  - Anti-corruption Layer
-- SubDomain
-  - Core-domain
-  - Supporting-domain
-  - Generic-domain
-- Layered Architecture
-  - Domain
-  - Application
-  - Infrastructure
-  - Interface
+Fkl provide a two-way binding between design-implementation.
 
 Syntax:
 
@@ -90,35 +41,25 @@ Description Syntax:
 | if_expr     | :   | [ 'if' ] '(' [ expression ]  ')'     |
 | choose_expr | :   | [ 'choose' ] '(' [ expression ]  ')' |
 
-```
-
 ## Draft
 
-```kotlin
-ContextMap {
-  // with? type("Landscape")
-  ShoppingCarContext(acl = NormalACL) <-> MallContext(acl = NormalACL);
+```feakin
+ContextMap Ticket {
+
 }
 
 Context ShoppingCarContext  {
-  with? acl {
-    with type("Anti-corruption Layer")
-    with name("ShoppingCarACL")
-    with description("Anti-corruption Layer for ShoppingCar")
-  }
-  with display("Shopping Car")
+
 }
 
 // render wtih UML styled?
-Aggregate Cart(display = "") {
-  type = aggregateRoot, display = "Cart";
-  something = "likethat";
+Aggregate Cart {
+  """ inline doc sample
+just-demo for test
+"""
+  display = "Cart";
   DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
-  DomainEvent CartItemQuantityChanged {
-    type("DomainEvent")
-    name("CartItemQuantityChanged")
-    description("CartItemQuantityChanged")
-  }
+  DomainEvent CartItemQuantityChanged;
 
   // Concept or UML like ?
   // can be inside or outside of the Aggregate
@@ -134,14 +75,6 @@ Aggregate Cart(display = "") {
   }
 }
 
-// make owner ship?
-Aggregate (owner="") {
-  """ inline doc sample
-just for test
-"""
-
-}
-
 // global detail for Cart.
 Entity Cart {
 
@@ -152,28 +85,6 @@ DomainLanguage Shopping {
 }
 ```
 
-API Binding
-
-// [https://contextmapper.org/docs/mdsl/](https://contextmapper.org/docs/mdsl/)
-
-```kotlin
-ShoppingCarContext.API {
-  // align to constructure for copy;
-  model Address(id: Integeter);
-  model AddressId(id: String);
-
-  DomainEvent createAddress {
-    Description "Creates new address for customer"
-    PreValidate {
-      // validate the input
-    }
-    Payload Address
-    Response AddressId
-  }
-}
-
-```
-
 ## Typedef
 
 ### BuildIn Types
@@ -181,7 +92,7 @@ ShoppingCarContext.API {
 | Name        | Description                     |
 |-------------|---------------------------------|
 | identifier  | unique identifier               |
-| binary      | Any binaray data                |
+| binary      | Any binary data                 |
 | bits        | A set of bits or flags          |
 | boolean     | "true" or "false"               |
 | enumeration | Enumerated strings              |
@@ -197,11 +108,11 @@ typedef(container) ContextMap {
 }
 ```
 
-typedef_decl: typedef '(' metaType ')' ID '{' (decl_list) '}';
-
-decl_list: decl_item*
-
-decl_item: ID : DeclName
+| decl         |     | usage                                                 |
+|--------------|-----|-------------------------------------------------------|
+| typedef_decl | :   | [ 'typedef'] '(' metaType ')' ID '{' (decl_list) '}'; |
+| decl_list    | :   | decl_item*                                            |
+| decl_item    | :   | [ID] ':' decl_name                                    |
 
 ## Context Binding
 
@@ -209,29 +120,34 @@ binding source code to Context Map
 
 ```
 Context Ticket {
-  binding {
-    language: "kotlin",
-    qualified: "${moduleName}:se.citerus.dddsample.domain.model",
-    // equals
-    moduleName: "domain"
-    package: "se.citerus.dddsample.domain.model"
-  }  
+
+}
+
+binding Ticket {
+  language: "Kotlin",
+  layered: DDDLayered,
+  qualified: "${moduleName}:se.citerus.dddsample.domain.model",
+  // equals
+  moduleName: "domain"
+  package: "se.citerus.dddsample.domain.model"
 }
 ```
 
-## API Binding
-
-### DomainEvent
+## DomainEvent Implementation
 
 Subscribe / Publish / Event / Flow
 
 ```kotlin
 impl CinemaCreated {
   """bla bla"""
+  // or binding to ?
+  // binding: aggregate().
 
   // location with modules
-  target: ${DomainObject}
-  qualified: "${moduleName}:com.example.book"", 
+  // default to "root" or ":"
+  target: "${DomainObject}:com.example.book"
+  // ?
+  qualified: "${moduleName}:com.example.book", 
   
   endpoint {
     // message map
@@ -270,8 +186,15 @@ impl CinemaCreated {
       }
     } 
   } 
+  
+  middle {
+    via User get/update/delete/post userId 
+    via Kafka send "book.created"
+    // send "book.created" to Kafka
+  }
+
   output CreateBookResponse {
-     Struct {
+     struct {
         "id" : "number"
      }
      validate  { }
@@ -283,7 +206,7 @@ impl CinemaCreated {
 }
 ```
 
-## with OpenAPI
+## SourceSet with Eco
 
 plugins with extensions.
 
@@ -311,10 +234,10 @@ SourceSet PetSwagger {
 
 Container API ?
 
-## Layered
+## Layered Decl
 
 ```feakin
-Layered {
+layered {
   dependency {
     "domain" -> "application"
     "application" -> "infrastructure"
@@ -335,7 +258,7 @@ Layered {
 }
 ```
 
-## Description
+## Description Decl
 
 ```feakin
 description FakeCode {
@@ -351,9 +274,9 @@ description FakeCode {
 }
 ```
 
-## Styles
+## Style Decl
 
-Styles:
+[Todo] ?
 
 ```kotlin
 styles {
