@@ -109,6 +109,7 @@ impl MirTransform {
         }
         FklDeclaration::ValueObject(_) => {}
         FklDeclaration::Component(_) => {}
+        _ => {}
       }
     });
   }

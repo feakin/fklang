@@ -7,7 +7,7 @@ use crate::mir::implementation::http_impl::Endpoint;
 pub struct HttpApiBinding {
   pub name: String,
   pub defined: Option<HttpApiDefine>,
-  pub api_contract: Opiton<Endpoint>,
+  pub api_contract: Option<Endpoint>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]

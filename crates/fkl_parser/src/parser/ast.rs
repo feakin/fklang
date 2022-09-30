@@ -29,6 +29,9 @@ pub enum FklDeclaration {
   Entity(EntityDecl),
   ValueObject(ValueObjectDecl),
   Implementation(ImplementationDecl),
+  Component(ComponentDecl),
+  DomainService(DomainServiceDecl),
+  ApplicationService(ApplicationServiceDecl),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -207,6 +210,16 @@ pub struct EndpointDecl {
   pub path: String,
   pub request: Option<RequestDecl>,
   pub response: Option<ResponseDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct RequestDecl {
+
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ResponseDecl {
+
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
