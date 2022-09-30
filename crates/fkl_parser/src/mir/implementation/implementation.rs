@@ -1,20 +1,12 @@
-use serde::Deserialize;
-use serde::Serialize;
+use crate::mir::implementation::http_api_impl::HttpApiImpl;
 
-use crate::mir::implementation::api_contract::Endpoint;
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
-pub struct Implementation {
-  pub name: String,
-  pub description: String,
-  pub domain_bindings: Vec<DomainEventBinding>,
-}
+// Subscribe / Publish / Event / Flow
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
-pub struct DomainEventBinding {
-  pub name: String,
-  pub description: String,
-  pub domain_event: String,
-  // todo: thinking in a better way to do this
-  pub api_contract: Endpoint,
+pub enum Implementation {
+  PublishHttpApi(HttpApiImpl),
+  // todos: add those supports
+  PublishEvent,
+  // same to PublishEvent ?
+  PublishMessage,
 }

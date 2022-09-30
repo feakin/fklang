@@ -14,7 +14,6 @@ Feakin is enterprise architecture knowledge information
     - [ ] Command
     - [ ] Event
 
-
 基于微服务的 DDD
 
 核心域：Bounded Context, Unique Language,
@@ -85,7 +84,6 @@ Binding Syntax:
 | implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
 Description Syntax:
-
 
 | decl        |     | usage                                |
 |-------------|-----|--------------------------------------|
@@ -228,7 +226,7 @@ Context Ticket {
 Subscribe / Publish / Event / Flow
 
 ```kotlin
-impl CinemaCreatedEvent {
+impl CinemaCreated {
   """bla bla"""
 
   // location with modules
@@ -238,9 +236,7 @@ impl CinemaCreatedEvent {
   endpoint {
     // message map
     notication ?
-
     // RPC API
-
     // HTTP API ?
     host: "http://localhost:8080"
     url: "/api/v1/books"
@@ -265,10 +261,13 @@ impl CinemaCreatedEvent {
       "author" : "J.R.R. Tolkien",
       "price" : 29.99
     }
-    validate  { 
-      required { min: 3, max: 10 }
-      pattern { regex: "^[a-zA-Z0-9]+$" }
-      range { min: 1, max: 100 }
+    validate {
+      // title.length > 10 ? 
+      title  {
+        required { min: 3, max: 10 }
+        pattern { regex: "^[a-zA-Z0-9]+$" }
+        range { min: 1, max: 100 }
+      }
     } 
   } 
   output CreateBookResponse {
@@ -278,6 +277,7 @@ impl CinemaCreatedEvent {
      validate  { }
   } 
   
+  // contract-based development
   output CreateBookResponse(xpath="");
   input CreateBookResponse(sourceSet="PetSwagger" location="");
 }
@@ -337,7 +337,6 @@ Layered {
 
 ## Description
 
-
 ```feakin
 description FakeCode {
   if (and ?) then {} else { }
@@ -350,6 +349,7 @@ description FakeCode {
   // call
   via Entity send/receive Event;
 }
+```
 
 ## Styles
 
@@ -383,25 +383,5 @@ styles {
         opacity <integer: 0-100>
     }
 
-}
-```
-
-```groovy
-ContextMap {
-  context1 {
-    // AI Generator ?
-    boundedContext1 {
-      sharedKernel
-      antiCorruptionLayer
-      domain {
-        subDomain
-        coreDomain
-        genericDomain
-      }
-      infrastructure
-      application
-      presentation
-    }
-  }
 }
 ```
