@@ -234,7 +234,7 @@ pub struct HttpRequestDecl {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HttpResponseDecl {
-  pub(crate) name: String,
+  pub name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

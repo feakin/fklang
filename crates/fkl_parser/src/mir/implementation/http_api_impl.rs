@@ -1,7 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
-
-use crate::mir::implementation::http_impl::HttpApiBinding;
+use crate::mir::implementation::HttpEndpoint;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct HttpApiImpl {
@@ -11,6 +10,16 @@ pub struct HttpApiImpl {
   pub target_entity: String,
   // like "$moduleName:packageName
   pub qualified: String,
-  pub api_binding: Vec<HttpApiBinding>,
+  pub endpoints: Vec<HttpEndpoint>,
 }
+
+impl HttpApiImpl {
+  pub fn new(name: String) -> Self {
+    HttpApiImpl {
+      name,
+      ..Default::default()
+    }
+  }
+}
+
 

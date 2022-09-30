@@ -1,11 +1,14 @@
 use std::collections::HashMap;
+
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
 use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, ValueObject};
+use crate::mir::implementation::{HttpEndpoint, Implementation};
+use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, RelationDirection, VariableDefinition};
 use crate::parser::{ast, parse as ast_parse};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, ImplementationDecl, RelationDirection, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -13,10 +16,10 @@ pub struct MirTransform {
   pub contexts: IndexMap<String, BoundedContext>,
   // pub contexts: HashMap<String, BoundedContext>,
   pub relations: Vec<mir::ContextRelation>,
-
   pub aggregates: HashMap<String, Aggregate>,
   pub entities: IndexMap<String, Entity>,
   pub value_objects: IndexMap<String, ValueObject>,
+  pub implementations: Vec<HttpApiImpl>,
 }
 
 impl MirTransform {
@@ -28,6 +31,7 @@ impl MirTransform {
       relations: vec![],
       entities: Default::default(),
       value_objects: Default::default(),
+      implementations: vec![],
     };
 
     match ast_parse(str) {
@@ -44,6 +48,9 @@ impl MirTransform {
       state: Default::default(),
       contexts,
       relations: transform.relations,
+      implementations: transform.implementations.into_iter()
+        .map(|impl_| Implementation::PublishHttpApi(impl_))
+        .collect(),
     })
   }
 
@@ -109,7 +116,11 @@ impl MirTransform {
         }
         FklDeclaration::ValueObject(_) => {}
         FklDeclaration::Component(_) => {}
-        _ => {}
+        FklDeclaration::Implementation(implementation) => {
+          let api_impl = self.transform_implementation(implementation);
+          self.implementations.push(api_impl);
+        }
+        FklDeclaration::Struct(_) => {}
       }
     });
   }
@@ -159,6 +170,19 @@ impl MirTransform {
       type_type: field.type_type.clone(),
     }
   }
+
+  fn transform_implementation(&mut self, implementation: &ImplementationDecl) -> HttpApiImpl {
+    let mut http_api_impl = HttpApiImpl::new(implementation.name.clone());
+    http_api_impl.endpoints = implementation.endpoints.iter().map(|endpoint_decl| {
+      let mut endpoint = HttpEndpoint::new(endpoint_decl.name.clone());
+      endpoint.path = endpoint_decl.uri.clone();
+      endpoint.method = endpoint_decl.method.clone();
+
+      endpoint
+    }).collect();
+
+    http_api_impl
+  }
 }
 
 fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
@@ -174,6 +198,8 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 mod tests {
   use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity};
   use crate::mir::ConnectionDirection::PositiveDirected;
+  use crate::mir::implementation::{HttpEndpoint, Implementation};
+  use crate::mir::implementation::http_api_impl::HttpApiImpl;
   use crate::mir::tactic::block::Field;
   use crate::transform::MirTransform;
 
@@ -285,5 +311,37 @@ Entity Shopping {
           }],
       },
     ]);
+  }
+
+  #[test]
+  fn impl_support() {
+    let str = r#"
+impl CinemaCreatedEvent {
+  endpoint {
+    GET /book/{id};
+    authorization: Basic admin admin;
+    response: Cinema;
+  }
+}
+"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.implementations[0], Implementation::PublishHttpApi(HttpApiImpl {
+      name: "CinemaCreatedEvent".to_string(),
+      target_aggregate: "".to_string(),
+      target_entity: "".to_string(),
+      qualified: "".to_string(),
+      endpoints: vec![
+        HttpEndpoint {
+          name: "".to_string(),
+          description: "".to_string(),
+          path: "/book/{id}".to_string(),
+          method: "GET".to_string(),
+          request: None,
+          response: None,
+        }
+      ],
+    }
+    ));
   }
 }

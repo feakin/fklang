@@ -2,6 +2,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::mir::{BoundedContext, ContextRelation};
+use crate::mir::implementation::Implementation;
 
 //
 // Identify each model in play on the project and define its bounded context. This includes
@@ -19,6 +20,7 @@ pub struct ContextMap {
   pub contexts: Vec<BoundedContext>,
   pub relations: Vec<ContextRelation>,
 
+  pub implementations: Vec<Implementation>,
   // todo: add rest in the future
   // some entities no in map
   // pub rest_entities: Vec<Entity>,
