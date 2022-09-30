@@ -833,14 +833,14 @@ Aggregate Cinema {
 
   #[test]
   fn aggregate_binding_syntax() {
-    let _decls = parse(r#"Context Cinema {
+    let result = parse(r#"Context Cinema {
   DomainEvent CinemaCreated(impl = CinemaCreatedEvent);
 }
 
 impl CinemaCreatedEvent {
   endpoint {
     GET ${uri}/post;
-    authorization: Basic {{username}} {{password}};
+    authorization: Basic admin admin;
     response: Cinema;
   }
 }
