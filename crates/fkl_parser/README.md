@@ -2,13 +2,18 @@
 
 Fkl provide a two-way binding between design-implementation.
 
-- DDD Syntax
-- DomainEvent Implementation Syntax. generate implementation of DomainEvent.
-- Binding Syntax. mapping DSL to SourceCode
-- Layered Syntax. layered structured syntax.
-- Description Syntax. description design in fake code.
-- Typedef (TBD).
-- Style (TBD).
+Indesign: 
+
+- DDD syntax. DDD strategy and tactic description.
+- DomainEvent implementation syntax. for generate implementation of DomainEvent.
+- Binding syntax. mapping DSL to SourceCode
+- Layered syntax. layered structured syntax.
+- Description syntax. description design in fake code.
+
+TBD:
+
+- Typedef (TBD). for DDD syntax type bootstrapping.
+- Style (TBD). for design visualization UI.
 
 ## DDD
 
@@ -83,9 +88,7 @@ Entity Cart {
 
 }
 
-DomainLanguage Shopping {
-
-}
+DomainLanguage(sourceSet = TicketLang)
 ```
 
 ## DomainEvent Implementation
@@ -186,29 +189,47 @@ binding Ticket {
 
 plugins with extensions.
 
-UML for Struct
+### PlantUML for Structure 
+
+file_type: uml, puml
 
 ```
 Struct(sourceSet=DddUml, location="")
 
 SourceSet DddUml {
   type: "puml",
-  file: "ddd.puml"
+  file: PlantUml
 }
 
 // or
 SourceSet(type="puml", file="ddd.puml")
 ```
 
+### Swagger API
+
+file_type: Yaml, JSON 
+
+with: XPath
+
 ```
 SourceSet PetSwagger {
   file: "openapi.yaml",
-  type: "openapi",
+  type: OpenApi,
   prefix: "Pet"  // add prefix to items
 }
 ```
 
-Container API ?
+### UniqueLanguage model ?
+
+file_type: CSV, JSON, Markdown ?
+
+```
+SourceSet TicketLang {
+  file: "ticket.csv",
+  type: UniqueLanguage, // or also for UL
+  prefix: "Ticket"
+}
+```
 
 ## Layered
 
