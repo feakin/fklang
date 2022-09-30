@@ -7,6 +7,7 @@ declaration = {
   | aggregate_decl
   | entity_decl
   | value_object_decl
+  | struct_decl
   | component_decl
   | impl_decl
 }
@@ -92,11 +93,64 @@ constructor_decl = {
 }
 
 struct_decl = {
-  ("struct" | "Struct") ~ "{" ~ fields_decl ~ "}"
+  ("struct" | "Struct") ~ identifier? ~ "{" ~ fields_decl ~ "}"
 }
 
 impl_decl = {
-  "impl" ~ identifier ~ "{" ~ (inline_doc)? ~ "}"
+  "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl)? ~ "}"
+}
+
+endpoint_decl = {
+  "endpoint" ~ "{" ~ http_action ~ authorization_decl? ~ http_response_decl ~ "}"
+}
+
+http_response_decl = {
+  "response" ~ ":" ~ identifier
+}
+
+authorization_decl = {
+  "authorization" ~ ":" ~ authorization_type ~ special_string ~ special_string? ~ ";"?
+}
+
+authorization_type = {
+  "Basic" | "Bearer"
+}
+
+username =  { special_string }
+password =  { special_string }
+
+http_action = {
+  "GET" ~ custom_param? ~ uri ~ http_body? ~ ";"?
+  | "POST" ~ custom_param? ~ uri ~ http_body? ~ ";"?
+  | "PUT" ~ custom_param? ~ uri ~ http_body? ~ ";"?
+  | "DELETE" ~ custom_param? ~ uri ~ http_body? ~ ";"?
+  | "PATCH" ~ custom_param? ~ uri ~ http_body? ~ ";"?
+}
+
+custom_param = {
+  "$" ~ "{" ~ identifier ~ "}"
+}
+
+uri = {
+   url_origin? ~  ("/" ~ path?)* ~ query? ~ frag?
+}
+
+url_origin = {
+  scheme  ~ "://" ~ host ~ (":" ~ port)?
+}
+
+scheme = { special_string }
+host = {
+  special_string ~ ("." ~ special_string)*
+}
+
+port = { number }
+path = { special_string ~ ("/" ~ special_string)* }
+query = { "?" ~ special_string ~ ("&" ~ special_string)* }
+frag = { "#" ~ special_string }
+
+http_body = {
+  "response"  ~ ":" ~ struct_decl ~ ";"?
 }
 
 parameters_decl = {
@@ -177,7 +231,7 @@ string = @{
 }
 number = @{ '0'..'9'+ }
 int = @{ number | "-" ~ "0"* ~ '1'..'9' ~ number? }
-
+special_string = @{ (ASCII_ALPHANUMERIC | "$" | "{" | "}" | "-" | "-" )* }
 
 inline_doc = {
   "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""

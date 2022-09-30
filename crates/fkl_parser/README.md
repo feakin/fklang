@@ -108,14 +108,13 @@ impl CinemaCreated {
     POST ${uri}/post;
     contentType: application/json;
     authorization: Basic {{username}} {{password}};
-    // Authorization: Bearer {{auth_token}}
-    request?: {
+    request: {
       "id": {{$uuid}},
       "price": {{$randomInt}},
       "ts": {{$timestamp}},
       "value": "content"
     }
-    expect?: {
+    expect: {
       "status": 200
       "data": {
         "id": {{$uuid}},
@@ -128,7 +127,7 @@ impl CinemaCreated {
   
   
   // created in ApplicationService
-  middle {
+  tasks {
     via User get userId 
     via Kafka send "book.created"
     // send "book.created" to Kafka

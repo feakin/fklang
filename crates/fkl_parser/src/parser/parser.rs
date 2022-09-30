@@ -838,7 +838,18 @@ Aggregate Cinema {
 }
 
 impl CinemaCreatedEvent {
+  endpoint {
+    GET ${uri}/post;
+    authorization: Basic {{username}} {{password}};
+    response: Cinema;
+  }
+}
 
+struct Cinema {
+  id: String;
+  name: String;
+  address: String;
+  rooms: Set<ScreeningRoom>;
 }
 "#).unwrap();
 
