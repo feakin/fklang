@@ -16,7 +16,7 @@
 
 # Org. Modeling
 
-- Application Level 
+- Application Level
 - Team Topology Model
 
 # Continuous feedback
@@ -49,17 +49,29 @@ Syntax:
 |                    | &#124; | att_list                                                                     |
 | context_node_decl  | :      | ['context'] [ID]                                                             |
 | context_node_rel   | :      | [ ID ] rel_symbol [ ID ]                                                     |
-| rel_symbol         | :      | ('->' &#124; '<-' &#124; '<->')                                              |                      
+| rel_symbol         | :      | ('->' &#124; '<-' &#124; '<->')                                              |                     
 | context_decl       | :      | [ 'Context' ] [ ID ] '{' aggregate_list? '}'                                 |
 |                    | &#124; | att_list                                                                     |
 | att_list           | :      | attr_item+                                                                   |
-| attr_item          | :      | ID '=' ID [ (';' &#124; ',') ]                                               |
+| attr_item          | :      | ([ ID ] '=' [ value ] ','?)* ';'?                                            |
+|                    | &#124; | ([ ID ] ':' [ value ] ','?)* ';'?                                            |
+|                    | &#124; | [ ID ] ([ value, ',' ])*     ';'?                                            |
 | aggregate_decl     | :      | [ 'Aggregate' ]  [ ID ] '{' entity_list '}'                                  |
 |                    | &#124; | att_list                                                                     |
 | entity_decl        | :      | [ 'Entity' ] [ ID ] '{' value_object_list '}'                                |
 |                    | &#124; | att_list                                                                     |
 | value_object__decl | :      | [ 'ValueObject' ] [ ID ] '{' value_list '}'                                  |
 |                    | &#124; | att_list                                                                     |
+
+Binding Syntax:
+
+| decl                   |        | usage                                   |
+|------------------------|--------|-----------------------------------------|
+| source_set_decl        | :      | simple_source_set_decl                  |
+|                        | &#124; | space_source_set_decl                   |
+| space_source_set_decl  | :      | [ 'SourceSet' ] [ ID ] '{' att_list '}' |
+| simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
+| implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'   |
 
 ## Draft
 
@@ -151,8 +163,6 @@ typepdf? container ContextMap {
 }
 ```
 
-
-
 ## Context Binding
 
 binding source code to Context Map
@@ -231,7 +241,6 @@ impl CinemaCreatedEvent {
 }
 ```
 
-
 ## with OpenAPI
 
 plugins with extensions.
@@ -265,7 +274,6 @@ Container API ?
 ```feakin
 
 ```
-
 
 ## Styles
 
