@@ -2,7 +2,17 @@
 
 Fkl provide a two-way binding between design-implementation.
 
-Syntax:
+- DDD Syntax
+- DomainEvent Implementation Syntax. generate implementation of DomainEvent.
+- Binding Syntax. mapping DSL to SourceCode
+- Layered Syntax. layered structured syntax.
+- Description Syntax. description design in fake code.
+- Typedef (TBD).
+- Style (TBD).
+
+## DDD
+
+DDD Syntax:
 
 | decl               |        | usage                                                                        |
 |--------------------|--------|------------------------------------------------------------------------------|
@@ -34,14 +44,7 @@ Binding Syntax:
 | simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
 | implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
-Description Syntax:
-
-| decl        |     | usage                                |
-|-------------|-----|--------------------------------------|
-| if_expr     | :   | [ 'if' ] '(' [ expression ]  ')'     |
-| choose_expr | :   | [ 'choose' ] '(' [ expression ]  ')' |
-
-## Draft
+### Sample
 
 ```feakin
 ContextMap Ticket {
@@ -82,54 +85,6 @@ Entity Cart {
 
 DomainLanguage Shopping {
 
-}
-```
-
-## Typedef
-
-### BuildIn Types
-
-| Name        | Description                     |
-|-------------|---------------------------------|
-| identifier  | unique identifier               |
-| binary      | Any binary data                 |
-| bits        | A set of bits or flags          |
-| boolean     | "true" or "false"               |
-| enumeration | Enumerated strings              |
-| string      | string                          |
-| number      | Any number, can be float or int |
-| optional ?  | Optional type ?                 |
-
-### Container
-
-```groovy
-typedef(container) ContextMap {
- 
-}
-```
-
-| decl         |     | usage                                                 |
-|--------------|-----|-------------------------------------------------------|
-| typedef_decl | :   | [ 'typedef'] '(' metaType ')' ID '{' (decl_list) '}'; |
-| decl_list    | :   | decl_item*                                            |
-| decl_item    | :   | [ID] ':' decl_name                                    |
-
-## Context Binding
-
-binding source code to Context Map
-
-```
-Context Ticket {
-
-}
-
-binding Ticket {
-  language: "Kotlin",
-  layered: DDDLayered,
-  qualified: "${moduleName}:se.citerus.dddsample.domain.model",
-  // equals
-  moduleName: "domain"
-  package: "se.citerus.dddsample.domain.model"
 }
 ```
 
@@ -206,7 +161,28 @@ impl CinemaCreated {
 }
 ```
 
-## SourceSet with Eco
+## Binding
+
+binding source code to Context Map
+
+```
+Context Ticket {
+
+}
+
+binding Ticket {
+  language: "Kotlin",
+  layered: DDDLayered,
+  qualified: "${moduleName}:se.citerus.dddsample.domain.model",
+  // equals
+  moduleName: "domain"
+  package: "se.citerus.dddsample.domain.model"
+}
+```
+
+## SourceSet
+
+> SourceSet is design for support 3rd-party dsl, like PlantUML, Swagger.yaml
 
 plugins with extensions.
 
@@ -234,11 +210,15 @@ SourceSet PetSwagger {
 
 Container API ?
 
-## Layered Decl
+## Layered
+
+> Layered is design for decl
 
 ```feakin
-layered {
+layered default {
   dependency {
+    "interface" -> "application"
+    "interface" -> "domain"
     "domain" -> "application"
     "application" -> "infrastructure"
     "interface" -> "infrastructure"
@@ -258,7 +238,22 @@ layered {
 }
 ```
 
-## Description Decl
+## Description
+
+>  Description can provide design in fake code way.
+
+Description Syntax:
+
+| decl             |        | usage                                                                   |
+|------------------|--------|-------------------------------------------------------------------------|
+| description_decl | :      | [ ID ] '{' expr* '}'                                                    |
+| expr             | :      | if_expr                                                                 |
+|                  | &#124; | choose_expr                                                             | 
+|                  | &#124; | behavior_expr                                                           | 
+| if_expr          | :      | [ 'if' ] '(' [ expression ]  ')'                                        |
+| choose_expr      | :      | [ 'choose' ] '(' [ expression ]  ')'                                    |
+| behavior_expr    | :      | ['via'] [ ID ] action [ID]                                              |
+| action           | :      | [ 'get' &#124; 'update' &#124; 'delete' &#124; 'create' &#124;  'send'] |
 
 ```feakin
 description FakeCode {
@@ -274,9 +269,38 @@ description FakeCode {
 }
 ```
 
-## Style Decl
+## Typedef (TBD)
 
-[Todo] ?
+> Typedef provide custom syntax like container or others, can support for bootstrapping DDD syntax. 
+
+### BuildIn Types
+
+| Name        | Description                     |
+|-------------|---------------------------------|
+| identifier  | unique identifier               |
+| binary      | Any binary data                 |
+| bits        | A set of bits or flags          |
+| boolean     | "true" or "false"               |
+| enumeration | Enumerated strings              |
+| string      | string                          |
+| number      | Any number, can be float or int |
+| optional ?  | Optional type ?                 |
+
+### Container
+
+```groovy
+typedef(container) ContextMap {
+ 
+}
+```
+
+| decl         |     | usage                                                 |
+|--------------|-----|-------------------------------------------------------|
+| typedef_decl | :   | [ 'typedef'] '(' metaType ')' ID '{' (decl_list) '}'; |
+| decl_list    | :   | decl_item*                                            |
+| decl_item    | :   | [ID] ':' decl_name                                    |
+
+## Style Decl (TBD)
 
 ```kotlin
 styles {
