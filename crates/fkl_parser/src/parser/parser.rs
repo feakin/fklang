@@ -990,5 +990,16 @@ struct Cinema {
           }),
         }],
     }));
+    
+    assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
+      name: "Cinema".to_string(),
+      inline_doc: "".to_string(),
+      fields: vec![
+        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None },
+        VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None },
+      ],
+    }));
   }
 }
