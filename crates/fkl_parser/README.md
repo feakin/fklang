@@ -1,4 +1,4 @@
-# Feakin Knowledge Language
+# Feakin Knowledge Language Spec
 
 Fkl provide a two-way binding between design-implementation.
 
@@ -38,16 +38,6 @@ DDD Syntax:
 |                    | &#124; | att_list                                                                     |
 | value_object__decl | :      | [ 'ValueObject' ] [ ID ] '{' value_list '}'                                  |
 |                    | &#124; | att_list                                                                     |
-
-Binding Syntax:
-
-| decl                   |        | usage                                   |
-|------------------------|--------|-----------------------------------------|
-| source_set_decl        | :      | simple_source_set_decl                  |
-|                        | &#124; | space_source_set_decl                   |
-| space_source_set_decl  | :      | [ 'SourceSet' ] [ ID ] '{' att_list '}' |
-| simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
-| implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
 ### Sample
 
@@ -94,6 +84,69 @@ DomainLanguage(sourceSet = TicketLang)
 ## DomainEvent Implementation
 
 Subscribe / Publish / Event / Flow
+
+### Default impl config
+
+```kotlin
+default impl {
+  techstack {
+    language = "Kotlin"
+    framework = "Spring"
+    message = "Kafka" 
+    dao = "JPA"
+    cache = "Redis"
+    search = "ElasticSearch"
+  }
+}
+```
+
+### API
+
+```kotlin
+impl CinemaCreated {
+  endpoint {
+    POST ${uri}/post;
+    contentType: application/json;
+    authorization: Basic {{username}} {{password}};
+    // Authorization: Bearer {{auth_token}}
+    request?: {
+      "id": {{$uuid}},
+      "price": {{$randomInt}},
+      "ts": {{$timestamp}},
+      "value": "content"
+    }
+    expect?: {
+      "status": 200
+      "data": {
+        "id": {{$uuid}},
+        "price": {{$randomInt}},
+        "ts": {{$timestamp}},
+        "value": "content"
+      }
+    };
+  }
+  
+  
+  // created in ApplicationService
+  middle {
+    via User get userId 
+    via Kafka send "book.created"
+    // send "book.created" to Kafka
+  }
+}
+```
+
+```java
+// get_user_by_user_id from JPA
+public User getUserByUserId(String userId) {
+  return userRepository.findByUserId(userId);
+}
+
+// get_user_by_user_id from MyBatis
+public User getUserByUserId(String userId) {
+  return userMapper.getUserByUserId(userId);
+}
+```
 
 ```kotlin
 impl CinemaCreated {
@@ -187,7 +240,13 @@ binding Ticket {
 
 > SourceSet is design for support 3rd-party dsl, like PlantUML, Swagger.yaml
 
-plugins with extensions.
+| decl                   |        | usage                                   |
+|------------------------|--------|-----------------------------------------|
+| source_set_decl        | :      | simple_source_set_decl                  |
+|                        | &#124; | space_source_set_decl                   |
+| space_source_set_decl  | :      | [ 'SourceSet' ] [ ID ] '{' att_list '}' |
+| simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
+| implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
 ### PlantUML for Structure 
 
@@ -210,6 +269,9 @@ SourceSet(type="puml", file="ddd.puml")
 file_type: Yaml, JSON 
 
 with: XPath
+
+refs:
+- xpath syntax: [https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4](https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4)
 
 ```
 SourceSet PetSwagger {
@@ -234,6 +296,16 @@ SourceSet TicketLang {
 ## Layered
 
 > Layered is design for decl
+
+
+| decl             |        | usage                                                       |
+|------------------|--------|-------------------------------------------------------------|
+| layered_decl     | :      | 'layered' ([ ID ] &#124; 'default' )  '{' layered_body? '}' |
+| layered_body     | :      | layer_dependency                                            |
+|                  | &#124; | layer_item_decl                                             |
+| layer_item_decl  | :      | 'layer' [ ID ] '{' layer_item_entry* '}'                    |
+| layer_item_entry | :      | package_decl                                                |
+| package_decl     | :      | 'package' ':' [ string ]                                    | 
 
 ```feakin
 layered default {

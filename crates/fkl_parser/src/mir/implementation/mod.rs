@@ -2,6 +2,7 @@ pub mod validation;
 pub mod http_api_impl;
 pub mod http_impl;
 pub mod implementation;
+pub mod authorization;
 
 pub use validation::*;
 pub use http_impl::*;
