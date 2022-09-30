@@ -225,14 +225,34 @@ impl CinemaCreatedEvent {
      }
      validate  { }
   } 
+  
+  output CreateBookResponse(xpath="");
+  input CreateBookResponse(sourceSet="PetSwagger" location="");
 }
 ```
 
 
 ## with OpenAPI
 
+plugins with extensions.
+
+UML for Struct
+
 ```
-SourceSet  {
+Struct(sourceSet=DddUml, location="")
+
+SourceSet DddUml {
+  type: "puml",
+  file: "ddd.puml"
+}
+
+// or
+SourceSet(type="puml", file="ddd.puml")
+ 
+```
+
+```
+SourceSet PetSwagger {
   file: "openapi.yaml"
   type: "openapi"
 }
