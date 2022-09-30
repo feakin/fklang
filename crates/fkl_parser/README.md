@@ -82,27 +82,16 @@ Binding Syntax:
 |                        | &#124; | space_source_set_decl                   |
 | space_source_set_decl  | :      | [ 'SourceSet' ] [ ID ] '{' att_list '}' |
 | simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
-| implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'   |
+| implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
 Description Syntax:
 
 
-| decl                   |        | usage |
-|------------------------|--------|-----------------------------------------|
+| decl        |     | usage                                |
+|-------------|-----|--------------------------------------|
+| if_expr     | :   | [ 'if' ] '(' [ expression ]  ')'     |
+| choose_expr | :   | [ 'choose' ] '(' [ expression ]  ')' |
 
-
-```
-description FakeCode {
-  if (and ?) then {} else { }
-  choose() {
-    condition:
-    condition:
-  }
-  done
-  operator: <, >, >=, <=, ==, +, -, *, %, /, ? 
-  // call
-  via Entity send/receive Event;
-}
 ```
 
 ## Draft
@@ -191,16 +180,16 @@ ShoppingCarContext.API {
 
 ### BuildIn Types
 
-|  Name | Description  |
-|-------|------------------------|
-| identifier | unique identifier |
-| binary     | Any binaray data |
-| bits       | A set of bits or flags |
-| boolean    | "true" or "false" |
-| enumeration | Enumerated strings |
-| string      | string |
+| Name        | Description                     |
+|-------------|---------------------------------|
+| identifier  | unique identifier               |
+| binary      | Any binaray data                |
+| bits        | A set of bits or flags          |
+| boolean     | "true" or "false"               |
+| enumeration | Enumerated strings              |
+| string      | string                          |
 | number      | Any number, can be float or int |
-| optional ?   | Optional type ?   |
+| optional ?  | Optional type ?                 |
 
 ### Container
 
@@ -325,8 +314,42 @@ Container API ?
 ## Layered
 
 ```feakin
-
+Layered {
+  dependency {
+    "domain" -> "application"
+    "application" -> "infrastructure"
+    "interface" -> "infrastructure"
+  }
+  layer interface {
+    package: "com.example.book"
+  }
+  layer domain {
+    package: "com.example.domain"   
+  }
+  layer application {
+    package: "com.example.application"
+  }
+  layer infrastructure {
+    package: "com.example.infrastructure"
+  }
+}
 ```
+
+## Description
+
+
+```feakin
+description FakeCode {
+  if (and ?) then {} else { }
+  choose() {
+    condition:
+    condition:
+  }
+  done
+  operator: <, >, >=, <=, ==, +, -, *, %, /, ? 
+  // call
+  via Entity send/receive Event;
+}
 
 ## Styles
 
