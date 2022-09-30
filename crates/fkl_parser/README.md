@@ -1,5 +1,7 @@
 # Feakin Knowledge Language
 
+Feakin is enterprise architecture knowledge information
+
 - [ ] DDD Model
 - [ ] DSL Parser
   - [ ] DSL Syntax
@@ -11,6 +13,15 @@
     - [ ] Role
     - [ ] Command
     - [ ] Event
+
+
+基于微服务的 DDD
+
+核心域：Bounded Context, Unique Language,
+
+支持域：Domain Object
+
+通用域：Layered Architecture, Multiple Modules,
 
 # System Level
 
@@ -72,6 +83,25 @@ Binding Syntax:
 | space_source_set_decl  | :      | [ 'SourceSet' ] [ ID ] '{' att_list '}' |
 | simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
 | implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'   |
+
+Description Syntax:
+
+
+| decl                   |        | usage |
+|------------------------|--------|-----------------------------------------|
+
+
+```
+description FakeCode {
+  if { and? } else { }
+  choose() {
+    condition:
+    condition:
+  }
+  // call
+  via Entity send/receive Event;
+}
+```
 
 ## Draft
 
@@ -155,13 +185,34 @@ ShoppingCarContext.API {
 
 ```
 
-## Typedef Container
+## Typedef
+
+### BuildIn Types
+
+|  Name | Description  |
+|-------|------------------------|
+| identifier | unique identifier |
+| binary     | Any binaray data |
+| bits       | A set of bits or flags |
+| boolean    | "true" or "false" |
+| enumeration | Enumerated strings |
+| string      | string |
+| number      | Any number, can be float or int |
+| optional ?   | Optional type ?   |
+
+### Container
 
 ```groovy
-typepdf? container ContextMap {
+typedef(container) ContextMap {
  
 }
 ```
+
+typedef_decl: typedef '(' metaType ')' ID '{' (decl_list) '}';
+
+decl_list: decl_item*
+
+decl_item: ID : DeclName
 
 ## Context Binding
 
@@ -257,13 +308,13 @@ SourceSet DddUml {
 
 // or
 SourceSet(type="puml", file="ddd.puml")
- 
 ```
 
 ```
 SourceSet PetSwagger {
-  file: "openapi.yaml"
-  type: "openapi"
+  file: "openapi.yaml",
+  type: "openapi",
+  prefix: "Pet"  // add prefix to items
 }
 ```
 
@@ -329,13 +380,3 @@ ContextMap {
   }
 }
 ```
-
-基于微服务的 DDD
-
-核心域：Bounded Context, Unique Language,
-
-支持域：Domain Object
-
-通用域：Layered Architecture, Multiple Modules,
-
-
