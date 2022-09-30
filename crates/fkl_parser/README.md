@@ -93,11 +93,13 @@ Description Syntax:
 
 ```
 description FakeCode {
-  if { and? } else { }
+  if (and ?) then {} else { }
   choose() {
     condition:
     condition:
   }
+  done
+  operator: <, >, >=, <=, ==, +, -, *, %, /, ? 
   // call
   via Entity send/receive Event;
 }
