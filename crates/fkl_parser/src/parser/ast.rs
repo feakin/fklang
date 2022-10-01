@@ -229,7 +229,7 @@ pub struct AuthorizationDecl {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HttpRequestDecl {
-
+  pub name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

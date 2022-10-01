@@ -23,11 +23,12 @@ impl HttpEndpoint {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Request {
-  pre_validate: Option<Validation>,
+  pub name: String,
+  pub pre_validate: Option<Validation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Response {
   pub name: String,
-  post_validate: Option<Validation>,
+  pub post_validate: Option<Validation>,
 }

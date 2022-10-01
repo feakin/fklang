@@ -4,7 +4,7 @@ use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
 use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, ValueObject};
-use crate::mir::implementation::{HttpEndpoint, Implementation};
+use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
@@ -177,6 +177,20 @@ impl MirTransform {
       let mut endpoint = HttpEndpoint::new(endpoint_decl.name.clone());
       endpoint.path = endpoint_decl.uri.clone();
       endpoint.method = endpoint_decl.method.clone();
+      if let Some(decl) = &endpoint_decl.response {
+        endpoint.response = Some(Response {
+          name: decl.name.clone(),
+          post_validate: None,
+        });
+      }
+
+      if let Some(decl) = &endpoint_decl.request {
+        endpoint.request = Some(Request {
+          name: decl.name.clone(),
+          pre_validate: None,
+        });
+      }
+
 
       endpoint
     }).collect();
@@ -198,7 +212,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 mod tests {
   use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity};
   use crate::mir::ConnectionDirection::PositiveDirected;
-  use crate::mir::implementation::{HttpEndpoint, Implementation};
+  use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
   use crate::mir::tactic::block::Field;
   use crate::transform::MirTransform;
@@ -338,7 +352,10 @@ impl CinemaCreatedEvent {
           path: "/book/{id}".to_string(),
           method: "GET".to_string(),
           request: None,
-          response: None,
+          response: Some(Response {
+            name: "Cinema".to_string(),
+            post_validate: None,
+          }),
         }
       ],
     }
