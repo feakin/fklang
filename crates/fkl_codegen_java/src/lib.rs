@@ -1,25 +1,21 @@
 use genco::fmt;
 use genco::prelude::*;
 
-use fkl_parser::mir::Entity;
+pub mod java_gen;
 
-fn gen_entity_struct(_entity: Entity) -> anyhow::Result<()> {
-  let car = &java::import("com.feakin", "Car");
-  let list = &java::import("java.util", "List");
-  let array_list = &java::import("java.util", "ArrayList");
+use fkl_parser::mir::implementation::HttpApiImpl;
+
+fn gen_http_api(_api: HttpApiImpl) -> anyhow::Result<()> {
+  // let car = &java::import("com.feakin", "Car");
+  // let list = &java::import("java.util", "List");
+  // let array_list = &java::import("java.util", "ArrayList");
+
+  let comment = "// This is a comment";
 
   let tokens: java::Tokens = quote! {
-        public class HelloWorld {
-            public static void main(String[] args) {
-                $list<$car> cars = new $array_list<$car>();
+        $comment
+        public static void main(String[] args) {
 
-                cars.add(new $car("Volvo"));
-                cars.add(new $car("Audi"));
-
-                for ($car car : cars) {
-                    System.out.println(car);
-                }
-            }
         }
     };
 
@@ -35,11 +31,12 @@ fn gen_entity_struct(_entity: Entity) -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::Entity;
-  use crate::gen_entity_struct;
+  use fkl_parser::mir::implementation::HttpApiImpl;
+
+  use crate::gen_http_api;
 
   #[test]
   fn basic_mir() {
-    gen_entity_struct(Entity::default()).unwrap();
+    gen_http_api(HttpApiImpl::default()).unwrap();
   }
 }

@@ -8,3 +8,4 @@ pub use validation::*;
 pub use http_impl::*;
 pub use http_api_binding::*;
 pub use implementation::*;
+pub use http_api_impl::*;
