@@ -11,8 +11,7 @@ members = [
 
   "fkl_codegen_dot",
   "fkl_codegen_java",
-
-  "code_gen_plugins/feakin-aws-lambda",
+  "codegen_plugins/feakin-aws-lambda",
 ]
 
 [profile.release.package.fkl-wasm]
