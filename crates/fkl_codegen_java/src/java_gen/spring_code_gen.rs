@@ -1,4 +1,4 @@
-use fkl_parser::mir::implementation::HttpEndpoint;
+use fkl_parser::mir::implementation::{HttpEndpoint, Response};
 
 /// generate spring code for a single endpoint
 /// contains the following:
@@ -15,10 +15,11 @@ pub struct SpringCodeGen {
 impl SpringCodeGen {
   pub fn from(http: HttpEndpoint) -> Self {
     let method_annotation = Self::method_annotation(&http);
+    let method_header = Self::method_header(&http);
 
     SpringCodeGen {
       method_annotation,
-      method_header: "".to_string(),
+      method_header,
       ai_comment: "".to_string(),
     }
   }
@@ -41,6 +42,28 @@ impl SpringCodeGen {
 
     let method_annotation = annotation_key.to_owned() + &*annotation_value;
     method_annotation
+  }
+
+  fn method_header(http: &HttpEndpoint) -> String {
+    let method_name = if http.name == "" {
+      "main".to_string()
+    } else {
+      http.name.to_string()
+    };
+
+    let return_type = Self::response_to_return_type(&http.response);
+    format!("public {} {}()", return_type, method_name)
+  }
+
+  fn response_to_return_type(response: &Option<Response>) -> String {
+    match response {
+      Some(r) => r.name.to_owned(),
+      None => "void".to_owned(),
+    }
+  }
+
+  fn rename_domain_event_name(str: String) -> String {
+    return str;
   }
 }
 
@@ -86,7 +109,7 @@ import org.springframework.web.bind.annotation.RestController;
   #[test]
   fn method_head() {
     let annotation = SpringCodeGen::from(HttpEndpoint::default());
-    assert_eq!(annotation.method_header, "");
+    assert_eq!(annotation.method_header, "public void main()");
 
     let annotation = SpringCodeGen::from(HttpEndpoint {
       name: "all".to_string(),
