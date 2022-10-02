@@ -2,7 +2,7 @@ use genco::fmt;
 use genco::prelude::*;
 
 pub mod java_gen;
-pub mod stemmer;
+pub mod nlp;
 
 pub use java_gen::entity_gen::*;
 pub use java_gen::jpa_gen::*;

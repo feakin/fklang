@@ -1,4 +1,5 @@
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
+use crate::nlp::past_tense_to_normal;
 
 /// generate spring code for a single endpoint
 /// contains the following:
@@ -7,9 +8,10 @@ use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 ///   - method name
 ///   - method signature
 pub struct SpringCodeGen {
+  pub imports: Vec<String>,
   pub method_annotation: String,
   pub method_header: String,
-  pub ai_comment: String,
+  pub ai_comments: Vec<String>,
 }
 
 impl SpringCodeGen {
@@ -18,9 +20,11 @@ impl SpringCodeGen {
     let method_header = Self::method_header(&http);
 
     SpringCodeGen {
+      // todo: add support for imports
+      imports: vec![],
       method_annotation,
       method_header,
-      ai_comment: "".to_string(),
+      ai_comments: vec![],
     }
   }
 
@@ -80,16 +84,11 @@ impl SpringCodeGen {
   }
 
   fn rename_domain_event_name(str: &String) -> String {
-    // TODO: to ends with
-    if Self::start_uppercase(str) && Self::check_past_tense(str) {
+    if Self::start_uppercase(str) {
       Self::execute_rename(str)
     } else {
       str.to_owned()
     }
-  }
-
-  fn check_past_tense(str: &String) -> bool {
-    str.ends_with("ed")
   }
 
   fn start_uppercase(str: &String) -> bool {
@@ -100,7 +99,7 @@ impl SpringCodeGen {
     let words = Self::split_words_by_uppercase(str);
     let mut words = words;
     let last_word = words.pop().unwrap();
-    let string = Self::past_tense_to_present_tense(last_word.to_lowercase());
+    let string = past_tense_to_normal(&last_word.to_lowercase());
     words.insert(0, string);
     // join words
     words.join("")
@@ -119,30 +118,6 @@ impl SpringCodeGen {
     words.push(word);
 
     words
-  }
-
-  /// convert past tense to present tense
-  /// e.g. Created -> Create
-  /// e.p. Deleted -> Delete
-  /// todo: use https://github.com/CurrySoftware/rust-stemmers
-  fn past_tense_to_present_tense(str: String) -> String {
-    let mut chars = str.chars();
-    let mut new_str = "".to_string();
-    while let Some(c) = chars.next() {
-      if c == 'e' {
-        if let Some(next) = chars.next() {
-          if next == 'd' {
-            break;
-          } else {
-            new_str.push(c);
-            new_str.push(next);
-          }
-        }
-      } else {
-        new_str.push(c);
-      }
-    }
-    new_str
   }
 }
 
