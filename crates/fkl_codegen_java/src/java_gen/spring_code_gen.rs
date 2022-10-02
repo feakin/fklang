@@ -23,7 +23,7 @@ impl SpringCodeGen {
     }
   }
 
-  fn method_annotation(http: &HttpEndpoint) -> _ {
+  fn method_annotation(http: &HttpEndpoint) -> String {
     let annotation_key = match http.method.to_lowercase().as_str() {
       "get" => "@GetMapping",
       "post" => "@PostMapping",
