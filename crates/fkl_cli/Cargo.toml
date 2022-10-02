@@ -12,6 +12,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 
 fkl-parser = { path = "../fkl_parser" }
+fkl_codegen_java = { path = "../fkl_codegen_java" }
 
 [[bin]]
 name = "fkl"

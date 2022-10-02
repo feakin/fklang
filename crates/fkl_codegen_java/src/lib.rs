@@ -2,6 +2,11 @@ use genco::fmt;
 use genco::prelude::*;
 
 pub mod java_gen;
+pub mod stemmer;
+
+pub use java_gen::entity_gen::*;
+pub use java_gen::jpa_gen::*;
+pub use java_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 

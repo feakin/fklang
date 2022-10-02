@@ -22,7 +22,7 @@ fn main() {
     _ => unreachable!("clap should ensure we don't get here"),
   };
 
-  let manifest_path = matches.get_one::<std::path::PathBuf>("path");
+  let manifest_path = matches.get_one::<PathBuf>("path");
   match manifest_path {
     Some(path) => {
       gen_to_dot(path);

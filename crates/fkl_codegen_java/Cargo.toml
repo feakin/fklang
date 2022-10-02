@@ -9,4 +9,6 @@ edition = "2021"
 genco = "0.17.2"
 anyhow = "1.0.31"
 
+rust-stemmers = "1.2.0"
+
 fkl-parser = { path = "../fkl_parser" }
