@@ -1,4 +1,4 @@
-use fkl_parser::mir::implementation::{HttpEndpoint, Response};
+use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
 /// generate spring code for a single endpoint
 /// contains the following:
@@ -45,14 +45,31 @@ impl SpringCodeGen {
   }
 
   fn method_header(http: &HttpEndpoint) -> String {
+    let method_name = Self::method_name(http);
+    let request = Self::request_to_string(&http.request);
+    let return_type = Self::response_to_return_type(&http.response);
+    format!("public {} {}({})", return_type, method_name, request)
+  }
+
+  fn method_name(http: &HttpEndpoint) -> String {
     let method_name = if http.name == "" {
       "main".to_string()
     } else {
-      http.name.to_string()
+      Self::rename_domain_event_name(&http.name)
     };
+    method_name
+  }
 
-    let return_type = Self::response_to_return_type(&http.response);
-    format!("public {} {}()", return_type, method_name)
+  fn request_to_string(request: &Option<Request>) -> String {
+    match request {
+      None => {
+        "".to_string()
+      }
+      Some(req) => {
+        let request_name = req.name.to_string();
+        format!("@RequestBody {} {}", request_name, "request")
+      }
+    }
   }
 
   fn response_to_return_type(response: &Option<Response>) -> String {
@@ -62,14 +79,72 @@ impl SpringCodeGen {
     }
   }
 
-  fn rename_domain_event_name(str: String) -> String {
-    return str;
+  fn rename_domain_event_name(str: &String) -> String {
+    // TODO: to ends with
+    if Self::start_uppercase(str) && Self::check_past_tense(str) {
+      Self::execute_rename(str)
+    } else {
+      str.to_owned()
+    }
+  }
+
+  fn check_past_tense(str: &String) -> bool {
+    str.ends_with("ed")
+  }
+
+  fn start_uppercase(str: &String) -> bool {
+    str.chars().next().unwrap().is_uppercase()
+  }
+
+  fn execute_rename(str: &String) -> String {
+    let words = Self::split_words_by_uppercase(str);
+    let mut words = words;
+    let last_word = words.pop().unwrap();
+    let string = Self::remove_past_tense(last_word.to_lowercase());
+    words.insert(0, string);
+    // join words
+    words.join("")
+  }
+
+  fn split_words_by_uppercase(str: &String) -> Vec<String> {
+    let mut words: Vec<String> = vec![];
+    let mut word = "".to_string();
+    for c in str.chars() {
+      if c.is_uppercase() {
+        words.push(word);
+        word = "".to_string();
+      }
+      word.push(c);
+    };
+    words.push(word);
+
+    words
+  }
+
+  fn remove_past_tense(str: String) -> String {
+    let mut chars = str.chars();
+    let mut new_str = "".to_string();
+    while let Some(c) = chars.next() {
+      if c == 'e' {
+        if let Some(next) = chars.next() {
+          if next == 'd' {
+            break;
+          } else {
+            new_str.push(c);
+            new_str.push(next);
+          }
+        }
+      } else {
+        new_str.push(c);
+      }
+    }
+    new_str
   }
 }
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::implementation::{HttpEndpoint, Response};
+  use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
   use crate::java_gen::spring_code_gen::SpringCodeGen;
 
@@ -107,7 +182,7 @@ import org.springframework.web.bind.annotation.RestController;
   }
 
   #[test]
-  fn method_head() {
+  fn method_header_with_response() {
     let annotation = SpringCodeGen::from(HttpEndpoint::default());
     assert_eq!(annotation.method_header, "public void main()");
 
@@ -124,5 +199,22 @@ import org.springframework.web.bind.annotation.RestController;
     });
 
     assert_eq!(annotation.method_header, "public List<Employee> all()");
+  }
+
+  #[test]
+  fn method_header_with_request() {
+    let annotation = SpringCodeGen::from(HttpEndpoint {
+      name: "EmployeeCreated".to_string(),
+      description: "".to_string(),
+      path: "".to_string(),
+      method: "PUT".to_string(),
+      request: Some(Request {
+        name: "CreateEmployeeRequest".to_string(),
+        pre_validate: None,
+      }),
+      response: None,
+    });
+
+    assert_eq!(annotation.method_header, "public void creatEmployee(@RequestBody CreateEmployeeRequest request)");
   }
 }
