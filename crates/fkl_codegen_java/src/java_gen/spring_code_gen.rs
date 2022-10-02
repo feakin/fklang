@@ -100,7 +100,7 @@ impl SpringCodeGen {
     let words = Self::split_words_by_uppercase(str);
     let mut words = words;
     let last_word = words.pop().unwrap();
-    let string = Self::remove_past_tense(last_word.to_lowercase());
+    let string = Self::past_tense_to_present_tense(last_word.to_lowercase());
     words.insert(0, string);
     // join words
     words.join("")
@@ -121,7 +121,11 @@ impl SpringCodeGen {
     words
   }
 
-  fn remove_past_tense(str: String) -> String {
+  /// convert past tense to present tense
+  /// e.g. Created -> Create
+  /// e.p. Deleted -> Delete
+  /// todo: use https://github.com/CurrySoftware/rust-stemmers
+  fn past_tense_to_present_tense(str: String) -> String {
     let mut chars = str.chars();
     let mut new_str = "".to_string();
     while let Some(c) = chars.next() {
