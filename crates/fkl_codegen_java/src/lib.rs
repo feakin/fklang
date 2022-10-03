@@ -10,35 +10,49 @@ pub use spring_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 
-fn gen_http_api(_api: HttpApiImpl, framework: &str) -> anyhow::Result<()> {
+fn gen_http_api(api: HttpApiImpl, framework: &str) -> anyhow::Result<String> {
+  let mut w = fmt::FmtWriter::new(String::new());
 
-  let comment = "// This is a comment";
+  let fmt = fmt::Config::from_lang::<Java>().with_newline("\n");
+  // package from default impl
+  let config = java::Config::default().with_package(api.qualified);
 
-  let tokens: java::Tokens = quote! {
-        $comment
-        public static void main(String[] args) {
+  api.endpoints.iter().for_each(|endpoint| {
+    let spring_code_gen = SpringCodeGen::from(endpoint.clone());
+
+    let annotation = (spring_code_gen.method_annotation);
+    let newline = "\n";
+    let method_header = (spring_code_gen.method_header);
+
+    let tokens: java::Tokens = quote! {
+        $annotation$newline$method_header {
 
         }
     };
 
-  let stdout = std::io::stdout();
-  let mut w = fmt::IoWriter::new(stdout.lock());
+    tokens.format_file(&mut w.as_formatter(&fmt), &config).unwrap();
+  });
 
-  let fmt = fmt::Config::from_lang::<Java>().with_newline("\n");
-  let config = java::Config::default().with_package("com.feakin");
-
-  tokens.format_file(&mut w.as_formatter(&fmt), &config)?;
-  Ok(())
+  Ok(w.into_inner())
 }
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::implementation::HttpApiImpl;
+  use fkl_parser::mir::implementation::{HttpApiImpl, HttpEndpoint};
 
   use crate::gen_http_api;
 
   #[test]
-  fn basic_mir() {
-    gen_http_api(HttpApiImpl::default(), "spring").unwrap();
+  fn basic_convert() {
+    let mut api_impl = HttpApiImpl::default();
+    api_impl.qualified = "com.feakin.demo".to_string();
+    api_impl.endpoints.push(HttpEndpoint::default());
+
+    let output = gen_http_api(api_impl, "spring").unwrap();
+    assert_eq!(output, r#"package com.feakin.demo;
+
+@GetMapping
+public void main() { }
+"#)
   }
 }
