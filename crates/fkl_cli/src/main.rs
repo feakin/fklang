@@ -118,3 +118,35 @@ fn parse_to_ast(path: &PathBuf) {
   let mut file = std::fs::File::create("ast.json").expect("TODO: panic message");
   file.write_all(json.as_bytes()).expect("TODO: panic message");
 }
+
+#[cfg(test)]
+mod tests {
+  use fkl_codegen_java::gen_http_api;
+  use fkl_parser::mir::ContextMap;
+  use fkl_parser::mir::implementation::Implementation;
+  use fkl_parser::parse;
+
+  #[test]
+  fn it_works() {
+    let source = r#"impl CinemaCreated {
+  endpoint {
+    GET /book/{id};
+    authorization: Basic admin admin;
+    response: Cinema;
+  }
+}"#;
+
+    let context_map: ContextMap = parse(source).unwrap();
+    context_map.implementations.iter()
+      .for_each(|implementation| {
+        match implementation {
+          Implementation::PublishHttpApi(http) => {
+            let output = gen_http_api(http.clone(), "java").unwrap();
+            println!("{}", output);
+          }
+          Implementation::PublishEvent => {}
+          Implementation::PublishMessage => {}
+        }
+      })
+  }
+}

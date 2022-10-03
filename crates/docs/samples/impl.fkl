@@ -1,4 +1,4 @@
-impl CinemaCreatedEvent {
+impl CinemaCreated {
   endpoint {
     GET /book/{id};
     authorization: Basic admin admin;
