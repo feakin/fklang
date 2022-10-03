@@ -1,7 +1,9 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+use clap::ArgMatches;
 use fkl_codegen_java::gen_http_api;
+use fkl_parser::mir::ContextMap;
 use fkl_parser::mir::implementation::Implementation;
 
 use fkl_parser::parse;
@@ -16,9 +18,9 @@ fn main() {
         .arg(
           clap::arg!(--"path" <PATH>)
             .value_parser(clap::value_parser!(std::path::PathBuf)),
-        ).arg(
-        clap::arg!(--"lang" <String>),
-      ),
+        )
+        .arg(clap::arg!(--"lang" <String>))
+        .arg(clap::arg!(--"impl" <String>))
     )
     .subcommand(
       clap::command!("dot")
@@ -39,7 +41,7 @@ fn main() {
     ;
 
 
-  let matches = cmd.get_matches();
+  let matches: ArgMatches = cmd.get_matches();
   match matches.subcommand() {
     Some(("gen", matches)) => {
       let feakin_path = matches.get_one::<PathBuf>("path");
@@ -48,18 +50,27 @@ fn main() {
       if let Some(path) = feakin_path {
         if let Some(lang) = lang {
           let feakin = fs::read_to_string(path).unwrap();
-          let mir = parse(&feakin).unwrap();
+          let mir: ContextMap = parse(&feakin).unwrap();
+          let filter_impl = matches.get_one::<String>("impl");
 
-          mir.implementations.iter().for_each(|implementation| {
-            match implementation {
-              Implementation::PublishHttpApi(http) => {
-                let output = gen_http_api(http.clone(), &lang).unwrap();
-                println!("{}", output);
+          mir.implementations.iter()
+            .for_each(|implementation| {
+              match implementation {
+                Implementation::PublishHttpApi(http) => {
+                  if let Some(filter_impl) = filter_impl {
+                    if &http.name == filter_impl {
+                      let output = gen_http_api(http.clone(), &lang).unwrap();
+                      println!("{}", output);
+                    }
+                  } else {
+                    let output = gen_http_api(http.clone(), &lang).unwrap();
+                    println!("{}", output);
+                  }
+                }
+                Implementation::PublishEvent => {}
+                Implementation::PublishMessage => {}
               }
-              Implementation::PublishEvent => {}
-              Implementation::PublishMessage => {}
-            }
-          });
+            });
         }
       }
     }
