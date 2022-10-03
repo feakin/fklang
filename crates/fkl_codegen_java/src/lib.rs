@@ -1,19 +1,16 @@
 use genco::fmt;
 use genco::prelude::*;
 
-pub mod java_gen;
+pub mod spring_gen;
 pub mod nlp;
 
-pub use java_gen::entity_gen::*;
-pub use java_gen::jpa_gen::*;
-pub use java_gen::spring_code_gen::*;
+pub use spring_gen::entity_gen::*;
+pub use spring_gen::jpa_gen::*;
+pub use spring_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 
-fn gen_http_api(_api: HttpApiImpl) -> anyhow::Result<()> {
-  // let car = &java::import("com.feakin", "Car");
-  // let list = &java::import("java.util", "List");
-  // let array_list = &java::import("java.util", "ArrayList");
+fn gen_http_api(_api: HttpApiImpl, framework: &str) -> anyhow::Result<()> {
 
   let comment = "// This is a comment";
 
@@ -42,6 +39,6 @@ mod tests {
 
   #[test]
   fn basic_mir() {
-    gen_http_api(HttpApiImpl::default()).unwrap();
+    gen_http_api(HttpApiImpl::default(), "spring").unwrap();
   }
 }

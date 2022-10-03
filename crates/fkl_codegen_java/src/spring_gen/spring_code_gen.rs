@@ -125,7 +125,7 @@ impl SpringCodeGen {
 mod tests {
   use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
-  use crate::java_gen::spring_code_gen::SpringCodeGen;
+  use crate::spring_gen::spring_code_gen::SpringCodeGen;
 
   #[test]
   fn basic_mir() {
