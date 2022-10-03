@@ -1,0 +1,14 @@
+impl CinemaCreatedEvent {
+  endpoint {
+    GET /book/{id};
+    authorization: Basic admin admin;
+    response: Cinema;
+  }
+}
+
+struct Cinema {
+  id: String;
+  name: String;
+  address: String;
+  rooms: Set<ScreeningRoom>;
+}

@@ -10,7 +10,7 @@ pub use spring_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 
-fn gen_http_api(api: HttpApiImpl, framework: &str) -> anyhow::Result<String> {
+pub fn gen_http_api(api: HttpApiImpl, framework: &str) -> anyhow::Result<String> {
   let mut w = fmt::FmtWriter::new(String::new());
 
   let fmt = fmt::Config::from_lang::<Java>().with_newline("\n");
@@ -20,9 +20,9 @@ fn gen_http_api(api: HttpApiImpl, framework: &str) -> anyhow::Result<String> {
   api.endpoints.iter().for_each(|endpoint| {
     let spring_code_gen = SpringCodeGen::from(endpoint.clone());
 
-    let annotation = (spring_code_gen.method_annotation);
+    let annotation = spring_code_gen.method_annotation;
     let newline = "\n";
-    let method_header = (spring_code_gen.method_header);
+    let method_header = spring_code_gen.method_header;
 
     let tokens: java::Tokens = quote! {
         $annotation$newline$method_header {

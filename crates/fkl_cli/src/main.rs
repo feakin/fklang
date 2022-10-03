@@ -1,6 +1,8 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+use fkl_codegen_java::gen_http_api;
+use fkl_parser::mir::implementation::Implementation;
 
 use fkl_parser::parse;
 
@@ -9,28 +11,58 @@ fn main() {
     .bin_name("fkl")
     .subcommand_required(true)
     .subcommand(
-      clap::command!("gen").arg(
-        clap::arg!(--"path" <PATH>)
-          .value_parser(clap::value_parser!(std::path::PathBuf)),
+      clap::command!("gen")
+        .arg(
+          clap::arg!(--"path" <PATH>)
+            .value_parser(clap::value_parser!(std::path::PathBuf)),
+        ).arg(
+        clap::arg!(--"lang" <String>),
       ),
-    );
+    )
+    .subcommand(
+      clap::command!("parse")
+        .arg(
+          clap::arg!(--"path" <PATH>)
+            .value_parser(clap::value_parser!(std::path::PathBuf)),
+        ),
+    )
+    ;
 
 
   let matches = cmd.get_matches();
-  let matches = match matches.subcommand() {
-    Some(("gen", matches)) => matches,
+  match matches.subcommand() {
+    Some(("gen", matches)) => {
+      let feakin_path = matches.get_one::<PathBuf>("path");
+      let lang = matches.get_one::<String>("lang");
+      // debug
+      if let Some(path) = feakin_path {
+        if let Some(lang) = lang {
+          let feakin = fs::read_to_string(path).unwrap();
+          let mir = parse(&feakin).unwrap();
+
+          mir.implementations.iter().for_each(|implementation| {
+            match implementation {
+              Implementation::PublishHttpApi(http) => {
+                let output = gen_http_api(http.clone(), &lang).unwrap();
+                println!("{}", output);
+              }
+              Implementation::PublishEvent => {}
+              Implementation::PublishMessage => {}
+            }
+          });
+        }
+      }
+    }
+    Some(("dot", matches)) => {
+      let manifest_path = matches.get_one::<PathBuf>("path");
+      if let Some(path) = manifest_path {
+        gen_to_dot(path);
+      } else {
+        panic!("Please provide a path to a manifest file");
+      }
+    }
     _ => unreachable!("clap should ensure we don't get here"),
   };
-
-  let manifest_path = matches.get_one::<PathBuf>("path");
-  match manifest_path {
-    Some(path) => {
-      gen_to_dot(path);
-    }
-    None => {
-      println!("no path");
-    }
-  }
 }
 
 fn gen_to_dot(path: &PathBuf) {
@@ -44,3 +76,4 @@ fn gen_to_dot(path: &PathBuf) {
   let mut file = std::fs::File::create("test.json").expect("TODO: panic message");
   file.write_all(json.as_bytes()).expect("TODO: panic message");
 }
+
