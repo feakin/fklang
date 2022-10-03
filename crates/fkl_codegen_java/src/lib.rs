@@ -10,7 +10,7 @@ pub use spring_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 
-pub fn gen_http_api(api: HttpApiImpl, framework: &str) -> anyhow::Result<String> {
+pub fn gen_http_api(api: HttpApiImpl, _framework: &str) -> anyhow::Result<String> {
   let mut w = fmt::FmtWriter::new(String::new());
 
   let fmt = fmt::Config::from_lang::<Java>().with_newline("\n");
