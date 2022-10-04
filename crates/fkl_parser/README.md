@@ -102,6 +102,15 @@ default impl {
 
 ### API
 
+- input -> request
+  - pre-validate
+- output -> response
+  - post-validate
+- process -> flow
+  - tasking
+
+compare to `given-when-then`.
+
 ```kotlin
 impl CinemaCreated {
   endpoint {
@@ -126,16 +135,14 @@ impl CinemaCreated {
   }
   
   // created in ApplicationService
-  behaviour {
+  flow {
     via UserRepository::getUserById receive user: User
     // send "book.created" to Kafka
     via UserRepository::save with parameter() ??
     // or
     via UserRepository::save(user: User) receive user: User;
-    
     // message queue
-    via MessageQueue send ("CinemaCreated") to CinemaCreated
-    
+    via MessageQueue send "CinemaCreated" to CinemaCreated
     choose(isUserValid) {
       is true => {
         // do something
