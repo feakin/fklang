@@ -150,7 +150,7 @@ query = { "?" ~ special_string ~ ("&" ~ special_string)* }
 frag = { "#" ~ special_string }
 
 http_body = {
-  "response"  ~ ":" ~ struct_decl ~ ";"?
+  "request"  ~ ":" ~ struct_decl ~ ";"?
 }
 
 parameters_decl = {
