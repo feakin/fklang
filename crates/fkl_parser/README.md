@@ -117,13 +117,13 @@ impl CinemaCreated {
     POST "${uri}/post";
     contentType: application/json;
     authorization: Basic {{username}} {{password}};
-    request: {
+    request {
       "id": {{$uuid}},
       "price": {{$randomInt}},
       "ts": {{$timestamp}},
       "value": "content"
     }
-    expect: {
+    expect {
       "status": 200
       "data": {
         "id": {{$uuid}},
@@ -151,6 +151,15 @@ impl CinemaCreated {
         // do something
       }
     } 
+  }
+
+  validate {
+    pre {
+    
+    }
+    post {
+    
+    }
   }
 }
 ```
