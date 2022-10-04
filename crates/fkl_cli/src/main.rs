@@ -37,13 +37,15 @@ fn main() {
           clap::arg!(--"path" <PATH>)
             .value_parser(clap::value_parser!(std::path::PathBuf)),
         ),
-    )
-    ;
+    );
 
 
   let matches: ArgMatches = cmd.get_matches();
   match matches.subcommand() {
     Some(("gen", matches)) => {
+      println!("fkl gen --path <path> --lang <lang>");
+
+      let mut is_success = false;
       let feakin_path = matches.get_one::<PathBuf>("path");
       let lang = matches.get_one::<String>("lang");
       // debug
@@ -71,7 +73,13 @@ fn main() {
                 Implementation::PublishMessage => {}
               }
             });
+
+          is_success = true;
         }
+      }
+
+      if !is_success {
+        println!("run gen failure!")
       }
     }
     Some(("dot", matches)) => {
