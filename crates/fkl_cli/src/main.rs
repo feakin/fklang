@@ -131,22 +131,28 @@ mod tests {
     let source = r#"impl CinemaCreated {
   endpoint {
     GET /book/{id};
-    authorization: Basic admin admin;
     response: Cinema;
   }
 }"#;
 
+
+    let mut output = String::new();
     let context_map: ContextMap = parse(source).unwrap();
     context_map.implementations.iter()
       .for_each(|implementation| {
         match implementation {
           Implementation::PublishHttpApi(http) => {
-            let output = gen_http_api(http.clone(), "java").unwrap();
-            println!("{}", output);
+            output = gen_http_api(http.clone(), "java").unwrap();
           }
           Implementation::PublishEvent => {}
           Implementation::PublishMessage => {}
         }
-      })
+      });
+
+    assert_eq!(output, r#"package ;
+
+@GetMapping("/book/{id}")
+public Cinema creatCinema() { }
+"#)
   }
 }
