@@ -42,8 +42,6 @@ fn main() {
   let matches: ArgMatches = cmd.get_matches();
   match matches.subcommand() {
     Some(("gen", matches)) => {
-      println!("fkl gen --path <path> --lang <lang>");
-
       let mut is_success = false;
       let feakin_path = matches.get_one::<PathBuf>("path");
       let lang = matches.get_one::<String>("lang");
@@ -59,11 +57,11 @@ fn main() {
               Implementation::PublishHttpApi(http) => {
                 if let Some(filter_impl) = filter_impl {
                   if &http.name == filter_impl {
-                    let output = gen_http_api(http.clone(), &lang).unwrap();
+                    let output = gen_http_api(http.clone(), "java").unwrap();
                     println!("{}", output);
                   }
                 } else {
-                  let output = gen_http_api(http.clone(), &lang).unwrap();
+                  let output = gen_http_api(http.clone(), "java").unwrap();
                   println!("{}", output);
                 }
               }
