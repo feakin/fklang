@@ -2,7 +2,7 @@
 
 Fkl provide a two-way binding between design-implementation.
 
-Indesign: 
+Indesign:
 
 - DDD syntax. DDD strategy and tactic description.
 - DomainEvent implementation syntax. for generate implementation of DomainEvent.
@@ -125,12 +125,25 @@ impl CinemaCreated {
     };
   }
   
-  
   // created in ApplicationService
-  tasks {
-    via User get userId 
-    via Kafka send "book.created"
+  behaviour {
+    via UserRepository::getUserById receive user: User
     // send "book.created" to Kafka
+    via UserRepository::save with parameter() ??
+    // or
+    via UserRepository::save(user: User) receive user: User;
+    
+    // message queue
+    via MessageQueue send ("CinemaCreated") to CinemaCreated
+    
+    choose(isUserValid) {
+      is true => {
+        // do something
+      }
+      is false => {
+        // do something
+      }
+    } 
   }
 }
 ```
@@ -247,7 +260,7 @@ binding Ticket {
 | simple_source_set_decl | :      | [ 'SourceSet' ] [ ID ] '(' att_list ')' |
 | implementation_decl    | :      | [ 'impl' ] [ID] '{' (inline_doc) '}'    |
 
-### PlantUML for Structure 
+### PlantUML for Structure
 
 file_type: uml, puml
 
@@ -265,12 +278,14 @@ SourceSet(type="puml", file="ddd.puml")
 
 ### Swagger API
 
-file_type: Yaml, JSON 
+file_type: Yaml, JSON
 
 with: XPath
 
 refs:
-- xpath syntax: [https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4](https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4)
+
+- xpath
+  syntax: [https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4](https://github.com/antlr/grammars-v4/blob/master/xpath/xpath31/XPath31.g4)
 
 ```
 SourceSet PetSwagger {
@@ -295,7 +310,6 @@ SourceSet TicketLang {
 ## Layered
 
 > Layered is design for decl
-
 
 | decl             |        | usage                                                       |
 |------------------|--------|-------------------------------------------------------------|
@@ -332,7 +346,7 @@ layered default {
 
 ## Description
 
->  Description can provide design in fake code way.
+> Description can provide design in fake code way.
 
 Description Syntax:
 
@@ -363,7 +377,7 @@ description FakeCode {
 
 ## Typedef (TBD)
 
-> Typedef provide custom syntax like container or others, can support for bootstrapping DDD syntax. 
+> Typedef provide custom syntax like container or others, can support for bootstrapping DDD syntax.
 
 ### BuildIn Types
 
