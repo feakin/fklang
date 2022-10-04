@@ -19,7 +19,6 @@ fn main() {
           clap::arg!(--"path" <PATH>)
             .value_parser(clap::value_parser!(std::path::PathBuf)),
         )
-        .arg(clap::arg!(--"lang" <String>))
         .arg(clap::arg!(--"impl" <String>))
     )
     .subcommand(
@@ -50,32 +49,30 @@ fn main() {
       let lang = matches.get_one::<String>("lang");
       // debug
       if let Some(path) = feakin_path {
-        if let Some(lang) = lang {
-          let feakin = fs::read_to_string(path).unwrap();
-          let mir: ContextMap = parse(&feakin).unwrap();
-          let filter_impl = matches.get_one::<String>("impl");
+        let feakin = fs::read_to_string(path).unwrap();
+        let mir: ContextMap = parse(&feakin).unwrap();
+        let filter_impl = matches.get_one::<String>("impl");
 
-          mir.implementations.iter()
-            .for_each(|implementation| {
-              match implementation {
-                Implementation::PublishHttpApi(http) => {
-                  if let Some(filter_impl) = filter_impl {
-                    if &http.name == filter_impl {
-                      let output = gen_http_api(http.clone(), &lang).unwrap();
-                      println!("{}", output);
-                    }
-                  } else {
+        mir.implementations.iter()
+          .for_each(|implementation| {
+            match implementation {
+              Implementation::PublishHttpApi(http) => {
+                if let Some(filter_impl) = filter_impl {
+                  if &http.name == filter_impl {
                     let output = gen_http_api(http.clone(), &lang).unwrap();
                     println!("{}", output);
                   }
+                } else {
+                  let output = gen_http_api(http.clone(), &lang).unwrap();
+                  println!("{}", output);
                 }
-                Implementation::PublishEvent => {}
-                Implementation::PublishMessage => {}
               }
-            });
+              Implementation::PublishEvent => {}
+              Implementation::PublishMessage => {}
+            }
+          });
 
-          is_success = true;
-        }
+        is_success = true;
       }
 
       if !is_success {
