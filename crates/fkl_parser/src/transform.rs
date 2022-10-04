@@ -332,7 +332,7 @@ Entity Shopping {
     let str = r#"
 impl CinemaCreatedEvent {
   endpoint {
-    GET /book/{id};
+    GET "/book/{id}";
     authorization: Basic admin admin;
     response: Cinema;
   }

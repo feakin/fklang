@@ -120,20 +120,23 @@ username =  { special_string }
 password =  { special_string }
 
 http_request_decl = {
-  http_method ~ custom_param? ~ uri ~ http_body? ~ ";"?
+  http_method ~ uri ~ request_body? ~ ";"?
 }
 
 http_method = {
   "GET" | "POST" | "PUT" | "DELETE" | "PATCH"
 }
 
-custom_param = {
-  "$" ~ "{" ~ identifier ~ "}"
-}
+uri = { string }
 
-uri = {
-   url_origin? ~  ("/" ~ path)* ~ (query? ~ frag?)?
-}
+// todo: move to future
+// custom_param = {
+//   "$" ~ "{" ~ identifier ~ "}"
+// }
+//
+// uri = {
+//    url_origin? ~  ("/" ~ path)* ~ (query? ~ frag?)?
+// }
 
 url_origin = {
   scheme  ~ "://" ~ host ~ (":" ~ port)?
@@ -149,7 +152,7 @@ path = { uri_string }
 query = { "?" ~ special_string ~ ("&" ~ special_string)* }
 frag = { "#" ~ special_string }
 
-http_body = {
+request_body = {
   "request"  ~ ":" ~ (identifier | struct_decl) ~ ";"?
 }
 

@@ -429,7 +429,7 @@ fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
               endpoint.method = inner.as_str().to_string();
             }
             Rule::uri => {
-              endpoint.uri = inner.as_str().to_string();
+              endpoint.uri = parse_string(inner.as_str());
             }
             _ => println!("unreachable http_request_decl rule: {:?}", inner.as_rule())
           }
@@ -956,7 +956,7 @@ Aggregate Cinema {
     let result = parse(r#"
 impl CinemaCreatedEvent {
   endpoint {
-    GET /book/{id};
+    GET "/book/{id}";
     authorization: Basic admin admin;
     response: Cinema;
   }
@@ -990,7 +990,7 @@ struct Cinema {
           }),
         }],
     }));
-    
+
     assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
       name: "Cinema".to_string(),
       inline_doc: "".to_string(),

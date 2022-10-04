@@ -105,7 +105,7 @@ default impl {
 ```kotlin
 impl CinemaCreated {
   endpoint {
-    POST ${uri}/post;
+    POST "${uri}/post";
     contentType: application/json;
     authorization: Basic {{username}} {{password}};
     request: {

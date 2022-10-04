@@ -127,14 +127,13 @@ mod tests {
   use fkl_parser::parse;
 
   #[test]
-  fn it_works() {
+  fn convert_for_cli() {
     let source = r#"impl CinemaCreated {
   endpoint {
-    GET /book/{id};
+    GET "/book/{id}";
     response: Cinema;
   }
 }"#;
-
 
     let mut output = String::new();
     let context_map: ContextMap = parse(source).unwrap();
