@@ -149,9 +149,7 @@ mod tests {
         }
       });
 
-    assert_eq!(output, r#"package ;
-
-@GetMapping("/book/{id}")
+    assert_eq!(output, r#"@GetMapping("/book/{id}")
 public Cinema creatCinema() { }
 "#)
   }

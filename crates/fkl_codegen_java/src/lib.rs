@@ -15,7 +15,10 @@ pub fn gen_http_api(api: HttpApiImpl, _framework: &str) -> anyhow::Result<String
 
   let fmt = fmt::Config::from_lang::<Java>().with_newline("\n");
   // package from default impl
-  let config = java::Config::default().with_package(api.qualified);
+  let mut config: java::Config = java::Config::default();
+  if !api.qualified.is_empty() {
+    config = java::Config::default().with_package(api.qualified);
+  }
 
   api.endpoints.iter().for_each(|endpoint| {
     let mut endpoint = endpoint.clone();
