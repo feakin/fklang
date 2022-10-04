@@ -8,6 +8,7 @@ use fkl_parser::mir::implementation::Implementation;
 
 use fkl_parser::parse;
 
+// todo: add code highlight support
 fn main() {
   let cmd = clap::Command::new("fkl")
     .bin_name("fkl")
@@ -44,8 +45,6 @@ fn main() {
     Some(("gen", matches)) => {
       let mut is_success = false;
       let feakin_path = matches.get_one::<PathBuf>("path");
-      let lang = matches.get_one::<String>("lang");
-      // debug
       if let Some(path) = feakin_path {
         let feakin = fs::read_to_string(path).unwrap();
         let mir: ContextMap = parse(&feakin).unwrap();
