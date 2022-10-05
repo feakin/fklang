@@ -22,17 +22,14 @@ pub enum ErrorKind {
 
 #[derive(Debug)]
 pub struct ParseError {
-  /// Kind of error
   pub kind: ErrorKind,
   source: Option<Box<dyn StdError + Sync + Send>>,
 }
 
-
 impl fmt::Display for ParseError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     match &self.kind {
-      ErrorKind::Msg(ref message) => write!(f, "{:?}", message),
-      // ErrorKind::Json(ref e) => write!(f, "{}", e),
+      ErrorKind::Msg(ref message) => write!(f, "{}", message),
       ErrorKind::Io(ref io_error) => {
         write!(f, "Io error while writing rendered value to output: {:?}", io_error)
       }

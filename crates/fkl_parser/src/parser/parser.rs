@@ -1,3 +1,4 @@
+// use core::panicking::panic;
 use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
@@ -13,14 +14,7 @@ pub struct FklParser;
 pub fn parse(code: &str) -> ParseResult<Vec<FklDeclaration>> {
   match FklParser::parse(Rule::declarations, code) {
     Err(e) => {
-      let fancy_e = e.renamed_rules(|rule| {
-        match *rule {
-          _ => {
-            format!("{:?}", rule)
-          }
-        }
-      });
-      return Err(ParseError::msg(fancy_e));
+      return Err(ParseError::msg(e.to_string()));
     }
     Ok(pairs) => {
       Ok(consume_declarations(pairs))
@@ -1002,4 +996,47 @@ struct Cinema {
       ],
     }));
   }
+
+  #[test]
+  fn impl_flow() {
+    let result = parse(r#"
+imple CinemaCreatedEvent {
+
+}"#);
+    match result {
+      Err(e) => {
+        let string = format!("{}", e);
+        assert_eq!(string, r#" --> 2:1
+  |
+2 | imple CinemaCreatedEvent {
+  | ^---
+  |
+  = expected EOI or declaration"#);
+      },
+      _ => assert!(false),
+    };
+
+    // assert_eq!(result[0], FklDeclaration::Implementation(ImplementationDecl {
+    //   name: "CinemaCreatedEvent".to_string(),
+    //   inline_doc: "".to_string(),
+    //   qualified_name: "".to_string(),
+    //   endpoints: vec![
+    //     EndpointDecl {
+    //       name: "".to_string(),
+    //       method: "GET".to_string(),
+    //       uri: "/book/{id}".to_string(),
+    //       authorization: Some(AuthorizationDecl {
+    //         authorization_type: "Basic".to_string(),
+    //         username: Some("admin".to_string()),
+    //         password: Some("admin".to_string()),
+    //       }),
+    //       request: None,
+    //       response: Some(HttpResponseDecl {
+    //         name: "Cinema".to_string()
+    //       }),
+    //     }],
+    // }));
+
+  }
 }
+
