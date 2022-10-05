@@ -47,7 +47,7 @@ fn main() {
       let feakin_path = matches.get_one::<PathBuf>("path");
       if let Some(path) = feakin_path {
         let feakin = fs::read_to_string(path).unwrap();
-        let mir: ContextMap = parse(&feakin).unwrap();
+        let mir: ContextMap = parse(&feakin).or_else(|e| { println!("{}", e); Err(e) }).unwrap();
         let filter_impl = matches.get_one::<String>("impl");
 
         mir.implementations.iter()

@@ -983,6 +983,7 @@ struct Cinema {
             name: "Cinema".to_string()
           }),
         }],
+      flows: vec![]
     }));
 
     assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
@@ -998,7 +999,7 @@ struct Cinema {
   }
 
   #[test]
-  fn impl_flow() {
+  fn error_handling() {
     let result = parse(r#"
 imple CinemaCreatedEvent {
 
@@ -1015,28 +1016,47 @@ imple CinemaCreatedEvent {
       },
       _ => assert!(false),
     };
+  }
 
-    // assert_eq!(result[0], FklDeclaration::Implementation(ImplementationDecl {
-    //   name: "CinemaCreatedEvent".to_string(),
-    //   inline_doc: "".to_string(),
-    //   qualified_name: "".to_string(),
-    //   endpoints: vec![
-    //     EndpointDecl {
-    //       name: "".to_string(),
-    //       method: "GET".to_string(),
-    //       uri: "/book/{id}".to_string(),
-    //       authorization: Some(AuthorizationDecl {
-    //         authorization_type: "Basic".to_string(),
-    //         username: Some("admin".to_string()),
-    //         password: Some("admin".to_string()),
-    //       }),
-    //       request: None,
-    //       response: Some(HttpResponseDecl {
-    //         name: "Cinema".to_string()
-    //       }),
-    //     }],
-    // }));
+  #[test]
+  fn impl_with_flow() {
+    let decls = parse(r#"impl CinemaUpdated {
+    endpoint {
+        POST "/book/{id}";
+        request: CinemaUpdatedRequest;
+        authorization: Basic admin admin;
+        response: Cinema;
+    }
 
+    flow {
+        via UserRepository::getUserById receive user: User
+        via UserRepository::save(user: User) receive user: User;
+        via MessageQueue send CinemaCreated to "CinemaCreated"
+    }
+}
+"#).or_else(|e| { println!("{}", e); Err(e) }).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Implementation(ImplementationDecl {
+      name: "CinemaUpdated".to_string(),
+      inline_doc: "".to_string(),
+      qualified_name: "".to_string(),
+      endpoints: vec![
+        EndpointDecl {
+          name: "".to_string(),
+          method: "POST".to_string(),
+          uri: "/book/{id}".to_string(),
+          authorization: Some(AuthorizationDecl {
+            authorization_type: "Basic".to_string(),
+            username: Some("admin".to_string()),
+            password: Some("admin".to_string()),
+          }),
+          request: None,
+          response: Some(HttpResponseDecl {
+            name: "Cinema".to_string()
+          }),
+        }],
+      flows: vec![]
+    }));
   }
 }
 

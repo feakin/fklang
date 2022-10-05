@@ -97,30 +97,46 @@ struct_decl = {
 }
 
 implementation_decl = {
-  "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl)? ~ "}"
+  "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl | flow_decl)* ~ "}"
 }
 
 endpoint_decl = {
-  "endpoint" ~ "{" ~ http_request_decl ~ authorization_decl? ~ http_response_decl? ~ "}"
+  "endpoint" ~ "{" ~ http_request_decl ~ request_body? ~ authorization_decl? ~ http_response_decl? ~ "}"
 }
+
+flow_decl = {
+  "flow" ~ "{" ~ (via_method_decl | via_message_decl)* ~ "}"
+}
+
+via_method_decl = {
+  "via" ~ object_name ~ (("::" | ".") ~ method_name ~ ("(" ~ parameters_decl? ~ ")")?)? ~ "receive" ~ receive_object ~ ";"?
+}
+
+via_message_decl = {
+  "via" ~ object_name ~ "send" ~ pass_object ~ "to" ~ topic_name ~ ";"?
+}
+
+object_name = {  identifier }
+method_name = {  identifier }
+receive_object = {  name_type_def }
+pass_object = {  identifier }
+topic_name = {  string }
 
 http_response_decl = {
   "response" ~ ":" ~ identifier ~ ";"?
 }
 
 authorization_decl = {
-  "authorization" ~ ":" ~ authorization_type ~ username? ~ password? ~ ";"?
+  "authorization" ~ ":" ~ (string | authorization_type ~ username? ~ password? )~ ";"?
 }
 
-authorization_type = {
-  "Basic" | "Bearer"
-}
+authorization_type = { identifier }
 
 username =  { special_string }
 password =  { special_string }
 
 http_request_decl = {
-  http_method ~ uri ~ request_body? ~ ";"?
+  http_method ~ uri ~ ";"?
 }
 
 http_method = {

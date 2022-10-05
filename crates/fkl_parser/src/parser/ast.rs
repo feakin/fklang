@@ -201,6 +201,7 @@ pub struct ImplementationDecl {
   pub qualified_name: String,
   // can be file path or url
   pub endpoints: Vec<EndpointDecl>,
+  pub flows: Vec<FlowDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -236,6 +237,37 @@ pub struct HttpRequestDecl {
 pub struct HttpResponseDecl {
   pub name: String,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct FlowDecl {
+  pub inline_doc: String,
+  pub steps: Vec<StepDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StepDecl {
+  MethodCall(MethodCallDecl),
+  Message(MessageDecl),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct MethodCallDecl {
+  pub name: String,
+  pub object: String,
+  pub method: String,
+  pub arguments: Vec<Parameter>,
+  pub return_type: Option<Parameter>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct MessageDecl {
+  pub from: String,
+  pub to: String,
+  pub topic: String,
+  pub message: String,
+}
+
+// Binding To Data
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Trait {
