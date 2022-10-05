@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, HttpResponseDecl, Identifier, ImplementationDecl, Loc, RelationDirection, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, Loc, RelationDirection, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -424,6 +424,18 @@ fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
             }
             Rule::uri => {
               endpoint.uri = parse_string(inner.as_str());
+            }
+            _ => println!("unreachable http_request_decl rule: {:?}", inner.as_rule())
+          }
+        }
+      }
+      Rule::request_body => {
+        for inner in p.into_inner() {
+          match inner.as_rule() {
+            Rule::identifier => {
+              endpoint.request = Some(HttpRequestDecl {
+                name: inner.as_str().to_string(),
+              });
             }
             _ => println!("unreachable http_request_decl rule: {:?}", inner.as_rule())
           }
@@ -1050,7 +1062,9 @@ imple CinemaCreatedEvent {
             username: Some("admin".to_string()),
             password: Some("admin".to_string()),
           }),
-          request: None,
+          request: Some(HttpRequestDecl {
+            name: "CinemaUpdatedRequest".to_string()
+          }),
           response: Some(HttpResponseDecl {
             name: "Cinema".to_string()
           }),
