@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, Loc, RelationDirection, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -257,18 +257,25 @@ fn consume_constructor_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::parameters_decl => {
-        for p in p.into_inner() {
-          match p.as_rule() {
-            Rule::name_type_def => {
-              fields.push(consume_parameter(p));
-            }
-            _ => println!("unreachable parameter_decl rule: {:?}", p.as_rule())
-          }
-        }
+        fields = consume_parameters(p);
       }
       _ => println!("unreachable constructor rule: {:?}", p.as_rule())
     };
   }
+  return fields;
+}
+
+fn consume_parameters(p: Pair<Rule>) -> Vec<VariableDefinition> {
+  let mut fields: Vec<VariableDefinition> = vec![];
+  for p in p.into_inner() {
+    match p.as_rule() {
+      Rule::name_type_def => {
+        fields.push(consume_parameter(p));
+      }
+      _ => println!("unreachable parameter_decl rule: {:?}", p.as_rule())
+    }
+  }
+
   return fields;
 }
 
@@ -403,6 +410,9 @@ fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
       Rule::endpoint_decl => {
         implementation.endpoints.push(consume_endpoint(p));
       }
+      Rule::flow_decl => {
+        implementation.flows.push(consume_flow(p));
+      }
       _ => println!("unreachable implementation rule: {:?}", p.as_rule())
     };
   }
@@ -504,6 +514,69 @@ fn consume_http_response(pair: Pair<Rule>) -> HttpResponseDecl {
   return response;
 }
 
+fn consume_flow(pair: Pair<Rule>) -> FlowDecl {
+  let mut flow = FlowDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::inline_doc => {
+        flow.inline_doc = parse_inline_doc(p);
+      }
+      Rule::via_method_decl => {
+        flow.steps.push(StepDecl::MethodCall(consume_via_method_decl(p)));
+      }
+      Rule::via_message_decl => {
+        flow.steps.push(StepDecl::Message(consume_via_message_decl(p)));
+      }
+      _ => println!("unreachable flow rule: {:?}", p.as_rule())
+    };
+  }
+  return flow;
+}
+
+fn consume_via_method_decl(pair: Pair<Rule>) -> MethodCallDecl {
+  let mut method_call = MethodCallDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        method_call.name = p.as_str().to_string();
+      }
+      Rule::object_name => {
+        method_call.object = p.as_str().to_string();
+      }
+      Rule::method_name => {
+        method_call.method = p.as_str().to_string();
+      }
+      Rule::parameters_decl => {
+        method_call.arguments = consume_parameters(p);
+      }
+      Rule::receive_object => {
+        method_call.return_type = Some(consume_parameter(p.into_inner().next().unwrap()));
+      }
+      _ => println!("unreachable via_method_decl rule: {:?}", p.as_rule())
+    };
+  }
+  return method_call;
+}
+
+fn consume_via_message_decl(pair: Pair<Rule>) -> MessageDecl {
+  let mut message = MessageDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::object_name => {
+        message.from = p.as_str().to_string();
+      }
+      Rule::topic_name => {
+        message.topic = p.as_str().to_string();
+      }
+      Rule::pass_object => {
+        message.message = p.as_str().to_string();
+      }
+      _ => println!("unreachable via_message_decl rule: {:?}", p.as_rule())
+    };
+  }
+  return message;
+}
+
 fn parse_string(str: &str) -> String {
   let mut s = str.to_string();
   s.remove(0);
@@ -520,6 +593,7 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 mod tests {
   use crate::parser::ast::*;
   use crate::parser::ast::RelationDirection::{BiDirected, PositiveDirected};
+  use crate::parser::ast::StepDecl::{Message, MethodCall};
   use crate::parser::parser::parse;
 
   #[test]
@@ -995,7 +1069,7 @@ struct Cinema {
             name: "Cinema".to_string()
           }),
         }],
-      flows: vec![]
+      flows: vec![],
     }));
 
     assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
@@ -1025,7 +1099,7 @@ imple CinemaCreatedEvent {
   | ^---
   |
   = expected EOI or declaration"#);
-      },
+      }
       _ => assert!(false),
     };
   }
@@ -1046,7 +1120,10 @@ imple CinemaCreatedEvent {
         via MessageQueue send CinemaCreated to "CinemaCreated"
     }
 }
-"#).or_else(|e| { println!("{}", e); Err(e) }).unwrap();
+"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
 
     assert_eq!(decls[0], FklDeclaration::Implementation(ImplementationDecl {
       name: "CinemaUpdated".to_string(),
@@ -1069,7 +1146,42 @@ imple CinemaCreatedEvent {
             name: "Cinema".to_string()
           }),
         }],
-      flows: vec![]
+      flows: vec![FlowDecl {
+        inline_doc: "".to_string(),
+        steps: vec![
+          MethodCall(MethodCallDecl {
+            name: "".to_string(),
+            object: "UserRepository".to_string(),
+            method: "getUserById".to_string(),
+            arguments: vec![],
+            return_type: Some(VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }),
+          }),
+          MethodCall(MethodCallDecl {
+            name: "".to_string(),
+            object: "UserRepository".to_string(),
+            method: "save".to_string(),
+            arguments: vec![VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }],
+            return_type: Some(VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }),
+          }),
+          Message(MessageDecl {
+            from: "MessageQueue".to_string(),
+            topic: "\"CinemaCreated\"".to_string(),
+            message: "CinemaCreated".to_string(),
+          }),
+        ],
+      }],
     }));
   }
 }

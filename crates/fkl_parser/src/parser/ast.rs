@@ -255,14 +255,13 @@ pub struct MethodCallDecl {
   pub name: String,
   pub object: String,
   pub method: String,
-  pub arguments: Vec<Parameter>,
-  pub return_type: Option<Parameter>,
+  pub arguments: Vec<VariableDefinition>,
+  pub return_type: Option<VariableDefinition>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct MessageDecl {
   pub from: String,
-  pub to: String,
   pub topic: String,
   pub message: String,
 }
