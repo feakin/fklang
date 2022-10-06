@@ -145,15 +145,6 @@ http_method = {
 
 uri = { string }
 
-// todo: move to future
-// custom_param = {
-//   "$" ~ "{" ~ identifier ~ "}"
-// }
-//
-// uri = {
-//    url_origin? ~  ("/" ~ path)* ~ (query? ~ frag?)?
-// }
-
 url_origin = {
   scheme  ~ "://" ~ host ~ (":" ~ port)?
 }
