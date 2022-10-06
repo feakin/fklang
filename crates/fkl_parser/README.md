@@ -42,41 +42,35 @@ DDD Syntax:
 ### Sample
 
 ```feakin
-ContextMap Ticket {
+ContextMap Ticket {}
 
-}
-
-Context ShoppingCarContext  {
-
-}
+Context ShoppingCarContext {}
 
 // render wtih UML styled?
 Aggregate Cart {
-  """ inline doc sample
+""" inline doc sample
 just-demo for test
 """
-  display = "Cart";
-  DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
-  DomainEvent CartItemQuantityChanged;
+display = "Cart";
+DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
+DomainEvent CartItemQuantityChanged;
 
-  // Concept or UML like ?
-  // can be inside or outside of the Aggregate
-  Entity Cart {
-    // it's to many, can change in different way.
-    ValueObject CartId
-    ValueObject CartStatus
-    ValueObject CartItem
-    ValueObject CartItemQuantity
-    ValueObject CartItemPrice
-    ValueObject CartItemTotal
-    ValueObject CartTotal 
-  }
+// Concept or UML like ?
+// can be inside or outside of the Aggregate
+Entity Cart {
+// it's to many, can change in different way.
+ValueObject CartId
+ValueObject CartStatus
+ValueObject CartItem
+ValueObject CartItemQuantity
+ValueObject CartItemPrice
+ValueObject CartItemTotal
+ValueObject CartTotal
+}
 }
 
 // global detail for Cart.
-Entity Cart {
-
-}
+Entity Cart {}
 
 DomainLanguage(sourceSet = TicketLang)
 ```
@@ -142,7 +136,12 @@ impl CinemaCreated {
     // or
     via UserRepository::save(user: User) receive user: User;
     // message queue
-    via MessageQueue send "CinemaCreated" to CinemaCreated
+    via MessageQueue send CinemaCreated to "CinemaCreated"
+    // http request
+    via HTTP::post (with parameter())? to "${uri}/post"
+    // grpc Greeter
+    via GRPC::Greeter send CinemaCreated to "CinemaCreated"
+    // map filter
     choose(isUserValid) {
       is true => {
         // do something
@@ -338,25 +337,25 @@ SourceSet TicketLang {
 
 ```feakin
 layered default {
-  dependency {
-    "interface" -> "application"
-    "interface" -> "domain"
-    "domain" -> "application"
-    "application" -> "infrastructure"
-    "interface" -> "infrastructure"
-  }
-  layer interface {
-    package: "com.example.book"
-  }
-  layer domain {
-    package: "com.example.domain"   
-  }
-  layer application {
-    package: "com.example.application"
-  }
-  layer infrastructure {
-    package: "com.example.infrastructure"
-  }
+dependency {
+"interface" -> "application"
+"interface" -> "domain"
+"domain" -> "application"
+"application" -> "infrastructure"
+"interface" -> "infrastructure"
+}
+layer interface {
+package: "com.example.book"
+}
+layer domain {
+package: "com.example.domain"
+}
+layer application {
+package: "com.example.application"
+}
+layer infrastructure {
+package: "com.example.infrastructure"
+}
 }
 ```
 
@@ -379,15 +378,15 @@ Description Syntax:
 
 ```feakin
 description FakeCode {
-  if (and ?) then {} else { }
-  choose() {
-    condition:
-    condition:
-  }
-  done
-  operator: <, >, >=, <=, ==, +, -, *, %, /, ? 
-  // call
-  via Entity send/receive Event;
+if (and ?) then {} else {}
+choose() {
+condition:
+condition:
+}
+done
+operator: <, >, >=, <=, ==, +, -, *, %, /, ?
+// call
+via Entity send/ receive Event;
 }
 ```
 
