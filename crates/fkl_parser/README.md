@@ -41,32 +41,32 @@ DDD Syntax:
 
 ### Sample
 
-```feakin
+```kotlin
 ContextMap Ticket {}
 
 Context ShoppingCarContext {}
 
 // render wtih UML styled?
 Aggregate Cart {
-""" inline doc sample
-just-demo for test
-"""
-display = "Cart";
-DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
-DomainEvent CartItemQuantityChanged;
-
-// Concept or UML like ?
-// can be inside or outside of the Aggregate
-Entity Cart {
-// it's to many, can change in different way.
-ValueObject CartId
-ValueObject CartStatus
-ValueObject CartItem
-ValueObject CartItemQuantity
-ValueObject CartItemPrice
-ValueObject CartItemTotal
-ValueObject CartTotal
-}
+  """ inline doc sample
+  just-demo for test
+  """
+  display = "Cart";
+  DomainEvent CartCreated, CartItemAdded, CartItemRemoved, CartItemQuantityChanged, CartCheckedOut;
+  DomainEvent CartItemQuantityChanged;
+  
+  // Concept or UML like ?
+  // can be inside or outside of the Aggregate
+  Entity Cart {
+    // it's to many, can change in different way.
+    ValueObject CartId
+    ValueObject CartStatus
+    ValueObject CartItem
+    ValueObject CartItemQuantity
+    ValueObject CartItemPrice
+    ValueObject CartItemTotal
+    ValueObject CartTotal
+  }
 }
 
 // global detail for Cart.
@@ -335,27 +335,27 @@ SourceSet TicketLang {
 | layer_item_entry | :      | package_decl                                                |
 | package_decl     | :      | 'package' ':' [ string ]                                    | 
 
-```feakin
+```kotlin
 layered default {
-dependency {
-"interface" -> "application"
-"interface" -> "domain"
-"domain" -> "application"
-"application" -> "infrastructure"
-"interface" -> "infrastructure"
-}
-layer interface {
-package: "com.example.book"
-}
-layer domain {
-package: "com.example.domain"
-}
-layer application {
-package: "com.example.application"
-}
-layer infrastructure {
-package: "com.example.infrastructure"
-}
+  dependency {
+    "interface" -> "application"
+    "interface" -> "domain"
+    "domain" -> "application"
+    "application" -> "infrastructure"
+    "interface" -> "infrastructure"
+  }
+  layer interface {
+     package: "com.example.book"
+  }
+  layer domain {
+     package: "com.example.domain"
+  }
+  layer application {
+    package: "com.example.application"
+  }
+  layer infrastructure {
+     package: "com.example.infrastructure"
+  }
 }
 ```
 
@@ -376,17 +376,18 @@ Description Syntax:
 | behavior_expr    | :      | ['via'] [ ID ] action [ID]                                              |
 | action           | :      | [ 'get' &#124; 'update' &#124; 'delete' &#124; 'create' &#124;  'send'] |
 
-```feakin
+```kotlin
 description FakeCode {
-if (and ?) then {} else {}
-choose() {
-condition:
-condition:
-}
-done
-operator: <, >, >=, <=, ==, +, -, *, %, /, ?
-// call
-via Entity send/ receive Event;
+  if (and ?) then {} else {}
+  choose() {
+    condition:
+    condition:
+  }
+
+  done
+  operator: <, >, >=, <=, ==, +, -, *, %, /, ?
+  // call
+  via Entity send/ receive Event;
 }
 ```
 
