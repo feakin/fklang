@@ -1,9 +1,25 @@
 [package]
 name = "fkl_cli"
-version = "0.1.0"
+version = "0.2.0"
+authors = ["Phodal Huang <h@phodal.com>"]
+description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
+repository = "https://github.com/feakin/feakin/"
+categories = ["command-line-interface", "parsing"]
+keywords = [
+  "architecture",
+  "parser"
+]
+license = "MPL-2.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+include = [
+  "build.rs",
+  "src/**/*",
+  "Cargo.toml",
+  "LICENSE*",
+  "README.md",
+  "benches/**/*",
+  "examples/**/*"
+]
 
 [dependencies]
 clap = { version = "4.0.0-rc.3", features = ["derive", "cargo"] }
@@ -14,8 +30,8 @@ syntect = "5.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 
-fkl-parser = { path = "../fkl_parser" }
-fkl_codegen_java = { path = "../fkl_codegen_java" }
+fkl-parser = { path = "../fkl_parser", version = "0.2.0" }
+fkl_codegen_java = { path = "../fkl_codegen_java", version = "0.2.0" }
 
 [[bin]]
 name = "fkl"
