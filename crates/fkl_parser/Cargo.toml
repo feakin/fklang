@@ -1,9 +1,25 @@
 [package]
 name = "fkl-parser"
-version = "0.1.0"
+version = "0.2.0"
+authors = ["Phodal Huang <h@phodal.com>"]
+description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
+repository = "https://github.com/feakin/feakin/"
+categories = ["command-line-interface", "parsing"]
+keywords = [
+  "architecture",
+  "parser"
+]
+license = "MPL-2.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+include = [
+  "build.rs",
+  "src/**/*",
+  "Cargo.toml",
+  "LICENSE*",
+  "README.md",
+  "benches/**/*",
+  "examples/**/*"
+]
 
 [dependencies]
 pest = "2.3.1"
