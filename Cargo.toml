@@ -2,8 +2,7 @@
 
 members = [
   "domain_derive",
-
-  "fkl",
+  "fklang",
   "fkl_cli",
   "fkl_lsp",
   "fkl_parser",
