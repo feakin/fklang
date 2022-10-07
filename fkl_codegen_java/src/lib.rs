@@ -48,6 +48,7 @@ mod tests {
   use crate::gen_http_api;
 
   #[test]
+  #[ignore]
   fn basic_convert() {
     let mut api_impl = HttpApiImpl::default();
     api_impl.qualified = "com.feakin.demo".to_string();
