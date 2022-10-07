@@ -2,6 +2,7 @@
 
 [![Build](https://github.com/feakin/fklang/actions/workflows/build.yml/badge.svg)](https://github.com/feakin/fklang/actions/workflows/build.yml)
 ![Crates.io](https://img.shields.io/crates/v/fklang)
+[![codecov](https://codecov.io/gh/feakin/fklang/branch/master/graph/badge.svg?token=PCIL3T0NDR)](https://codecov.io/gh/feakin/fklang)
 
 > Fklang 是 Feakin 提供的一个架构设计的 DSL，用于描述软件系统的架构 —— 确保软件系统描述与实现的一致性。
 
