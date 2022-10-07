@@ -1,0 +1,42 @@
+name: Feakin DSL CLI CD
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    name: Publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: fkl
+            asset_name: fkl-linux
+          - os: windows-latest
+            artifact_name: fkl.exe
+            asset_name: fkl-windows.exe
+          - os: macos-latest
+            artifact_name: fkl
+            asset_name: fkl-macos
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build
+        run: cargo build --release --manifest-path=crates/fkl_cli/Cargo.toml
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          tag: ${{ github.ref }}

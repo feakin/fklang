@@ -2,7 +2,6 @@
 
 members = [
   "domain_derive",
-  "server",
 
   "fkl_cli",
   "fkl_lsp",
