@@ -31,7 +31,7 @@ jobs:
           toolchain: stable
 
       - name: Build
-        run: cargo build --release --manifest-path=crates/fkl_cli/Cargo.toml
+        run: cargo build --release --manifest-path=fkl_cli/Cargo.toml
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
