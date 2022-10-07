@@ -1,15 +1,8 @@
-# Fkl - Feakin Language
+# Fklang
 
-> Feakin is enterprise architecture knowledge information notation.
+>  Fklang 是 Feakin 提供的一个架构设计的 DSL，用于描述软件系统的架构 —— 确保软件系统描述与实现的一致性。
 
-Design Philosophy
-
-- Architecture Twin. two-way binding for architecture.
-- Lightweight Architecture Description.
-- Event-based code generation. eventful ??
-  - such as: `via xxEntity send xxMessage` 
-
-## Modules
+## Todos
 
 - domain_derive. a derive macro for domain types
 - Parser
@@ -27,44 +20,6 @@ Design Philosophy
     - [ ] plugin interface
     - [ ] plugin for AWS Lambda
 
-## DSL Design
+## License
 
-- [ ] DDD Model
-- [ ] DSL Parser
-  - [ ] DSL Syntax
-  - [ ] Ast Model
-- [ ] Code Binding
-- [ ] Code Generator Model
-- [ ] Workflow DSL
-  - [ ] Event Storming
-    - [ ] Role
-    - [ ] Command
-    - [ ] Event
-
-## EA
-
-enterprise architecture, technology architecture
-
-- Enterprise modeling
-  - System Level
-  - Application Level
-  - Org. Modeling
-    - Team Topology Model
-- DDD Building Blocks
-  - ContextMap
-  - Bounded Context
-    - Shared Kernel
-    - Anti-corruption Layer
-  - SubDomain
-    - Core-domain
-    - Supporting-domain
-    - Generic-domain
-- Software Implementation
-  - Layered Architecture
-    - Domain
-    - Application
-    - Infrastructure
-    - Interface
-  - Infrastructure
-    - Cloud
-    - On-premise
+@2022 This code is distributed under the MPL license. See `LICENSE` in this directory.
