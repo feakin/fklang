@@ -9,7 +9,7 @@ pub trait CodeIdent {
     model.set_end(node.end_position().row, node.end_position().column);
   }
 
-  fn create_function( capture: QueryCapture, text: &str) -> CodeFunction {
+  fn create_function(capture: QueryCapture, text: &str) -> CodeFunction {
     let mut function = CodeFunction::default();
     function.name = text.to_string();
 

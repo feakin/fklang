@@ -30,7 +30,7 @@ const JAVA_QUERY: &'static str = "
 
 pub struct JavaIdent {
   parser: Parser,
-  query: Query
+  query: Query,
 }
 
 impl JavaIdent {
@@ -44,7 +44,7 @@ impl JavaIdent {
 
     JavaIdent {
       parser,
-      query
+      query,
     }
   }
 }
@@ -123,6 +123,7 @@ impl JavaIdent {
 
 #[cfg(test)]
 mod tests {
+  use crate::class_info::{CodeClass, CodePoint};
   use crate::inserter::base_ident::CodeIdent;
   use crate::inserter::java_ident::JavaIdent;
 
@@ -197,4 +198,24 @@ class DateTimeImpl2 {
     assert_eq!(1, file.classes.len());
   }
 
+  #[test]
+  fn get_location_from_class() {
+    let source_code = "class DateTimeImpl {
+    public Date getDate() {
+        return new Date();
+    }
+}";
+
+    let file = JavaIdent::parse(source_code);
+    assert_eq!(file.classes[0], CodeClass {
+      name: "DateTimeImpl".to_string(),
+      path: "".to_string(),
+      module: "".to_string(),
+      package: "".to_string(),
+      implements: vec![],
+      functions: vec![],
+      start: CodePoint { row: 0, column: 0 },
+      end: CodePoint { row: 4, column: 1 },
+    });
+  }
 }

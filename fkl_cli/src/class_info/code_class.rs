@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use crate::class_info::{CodeFunction, CodePoint, Location};
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 pub struct CodeClass {
   pub name: String,
   pub path: String,

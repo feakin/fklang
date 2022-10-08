@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use crate::class_info::{CodePoint, Location};
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 pub struct CodeFunction {
   pub name: String,
   pub vars: Vec<String>,
