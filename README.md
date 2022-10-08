@@ -4,7 +4,7 @@
 ![Crates.io](https://img.shields.io/crates/v/fklang)
 [![codecov](https://codecov.io/gh/feakin/fklang/branch/master/graph/badge.svg?token=PCIL3T0NDR)](https://codecov.io/gh/feakin/fklang)
 
-> Fklang 是一个架构设计 DSL，以确保软件系统描述与实现的一致性。通过显式化的软件架构设计，用于支持 AI 代码生成系统的嵌入。
+> Fklang 是一个架构设计 DSL，通过显性化软件架构设计，以确保软件系统描述与实现的一致性。并在工作流中，内嵌对于 AI 代码生成软件的支持，以构筑完整的开发者体验。
 
 Try it: [Feakin Quick Start](https://book.feakin.com/quick-start.html)
 
