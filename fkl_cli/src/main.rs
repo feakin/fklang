@@ -56,11 +56,11 @@ fn main() {
               Implementation::PublishHttpApi(http) => {
                 if let Some(filter_impl) = filter_impl {
                   if &http.name == filter_impl {
-                    let output = gen_http_api(http.clone(), "java").unwrap();
+                    let output = gen_http_api(http.clone(), "java");
                     println!("{}", output);
                   }
                 } else {
-                  let output = gen_http_api(http.clone(), "java").unwrap();
+                  let output = gen_http_api(http.clone(), "java");
                   println!("{}", output);
                 }
               }
@@ -143,7 +143,7 @@ mod tests {
       .for_each(|implementation| {
         match implementation {
           Implementation::PublishHttpApi(http) => {
-            output = gen_http_api(http.clone(), "java").unwrap();
+            output = gen_http_api(http.clone(), "java");
           }
           Implementation::PublishEvent => {}
           Implementation::PublishMessage => {}
