@@ -1,5 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
+use crate::mir::Flow;
 use crate::mir::implementation::HttpEndpoint;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -11,6 +12,7 @@ pub struct HttpApiImpl {
   // like "$moduleName:packageName
   pub qualified: String,
   pub endpoints: Vec<HttpEndpoint>,
+  pub flows: Vec<Flow>,
 }
 
 impl HttpApiImpl {

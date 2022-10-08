@@ -1,12 +1,10 @@
-use crate::mir::binding::VariableDefinition;
+use serde::Deserialize;
+use serde::Serialize;
+
 use crate::mir::flow::step::Step;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Flow {
-    pub name: String,
-    pub inline_doc: String,
-    pub steps: Vec<Step>,
+  pub inline_doc: String,
+  pub steps: Vec<Step>,
 }
-
-
-

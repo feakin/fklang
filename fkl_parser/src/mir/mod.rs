@@ -14,5 +14,7 @@ pub use tactic::domain_object::*;
 pub use tactic::block::*;
 pub use implementation::*;
 
+pub use binding::*;
+
 pub use flow::flow::*;
 pub use flow::step::*;

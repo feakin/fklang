@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, Flow, MethodCall, Step, ValueObject};
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, ImplementationDecl, RelationDirection, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -195,7 +195,52 @@ impl MirTransform {
       endpoint
     }).collect();
 
+    http_api_impl.flows = implementation.flows.iter().map(|flow_decl| {
+      let mut flow = Flow::default();
+      flow.steps = flow_decl.steps.iter().map(|step_decl| {
+        match step_decl {
+          StepDecl::MethodCall(call) => {
+            let mut method_call = MethodCall::new(call.name.clone());
+            method_call.method = call.method.clone();
+            method_call.object = call.object.clone();
+            method_call.arguments = self.transform_variables(&call.arguments);
+            method_call.return_type = self.transform_return_type(&call);
+
+            Step::MethodCall(method_call)
+          }
+          StepDecl::Message(msg) => {
+            let mut message = mir::Message::default();
+            message.from = msg.from.clone();
+            message.topic = msg.topic.clone();
+            message.message = msg.message.clone();
+
+            Step::Message(message)
+          }
+        }
+      }).collect();
+
+      flow
+    }).collect();
+
     http_api_impl
+  }
+
+  fn transform_return_type(&mut self, call: &&MethodCallDecl) -> Option<mir::VariableDefinition> {
+    match &call.return_type {
+      None => None,
+      Some(var) => {
+        Some(self.transform_variables(&vec![var.clone()])[0].clone())
+      }
+    }
+  }
+  fn transform_variables(&self, vars: &Vec<ast::VariableDefinition>) -> Vec<mir::VariableDefinition> {
+    vars.iter().map(|var| {
+      mir::VariableDefinition {
+        name: var.name.clone(),
+        type_type: var.type_type.clone(),
+        initializer: var.initializer.clone(),
+      }
+    }).collect()
   }
 }
 
@@ -210,7 +255,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity, Flow, MethodCall, Step, VariableDefinition};
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -358,6 +403,76 @@ impl CinemaCreatedEvent {
           }),
         }
       ],
+      flows: vec![],
+    }
+    ));
+  }
+
+  #[test]
+  fn impl_support_flow() {
+    let str = r#"
+impl CinemaCreatedEvent {
+  endpoint {
+    GET "/book/{id}";
+    authorization: Basic admin admin;
+    response: Cinema;
+  }
+
+   flow {
+      via UserRepository::getUserById receive user: User
+      via UserRepository::save(user: User) receive user: User;
+   }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.implementations[0], Implementation::PublishHttpApi(HttpApiImpl {
+      name: "CinemaCreatedEvent".to_string(),
+      target_aggregate: "".to_string(),
+      target_entity: "".to_string(),
+      qualified: "".to_string(),
+      endpoints: vec![
+        HttpEndpoint {
+          name: "".to_string(),
+          description: "".to_string(),
+          path: "/book/{id}".to_string(),
+          method: "GET".to_string(),
+          request: None,
+          response: Some(Response {
+            name: "Cinema".to_string(),
+            post_validate: None,
+          }),
+        }
+      ],
+      flows: vec![Flow {
+        inline_doc: "".to_string(),
+        steps: vec![
+          Step::MethodCall(MethodCall {
+            name: "".to_string(),
+            object: "UserRepository".to_string(),
+            method: "getUserById".to_string(),
+            arguments: vec![],
+            return_type: Some(VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }),
+          }),
+          Step::MethodCall(MethodCall {
+            name: "".to_string(),
+            object: "UserRepository".to_string(),
+            method: "save".to_string(),
+            arguments: vec![VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }],
+            return_type: Some(VariableDefinition {
+              name: "user".to_string(),
+              type_type: "User".to_string(),
+              initializer: None,
+            }),
+          })],
+      }],
     }
     ));
   }
