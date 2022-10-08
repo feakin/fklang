@@ -119,6 +119,17 @@ impl SpringCodeGen {
 
     words
   }
+
+  fn ai_comments(http: &HttpEndpoint) -> Vec<String> {
+    let mut comments: Vec<String> = vec![];
+    if http.name != "" {
+      comments.push(http.name.to_owned());
+    }
+    if http.description != "" {
+      comments.push(http.description.to_owned());
+    }
+    comments
+  }
 }
 
 #[cfg(test)]

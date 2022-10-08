@@ -11,7 +11,7 @@ pub struct HttpApiImpl {
   pub target_entity: String,
   // like "$moduleName:packageName
   pub qualified: String,
-  pub endpoints: Vec<HttpEndpoint>,
+  pub endpoint: HttpEndpoint,
   pub flows: Vec<Flow>,
 }
 

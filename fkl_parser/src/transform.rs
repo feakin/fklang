@@ -8,7 +8,7 @@ use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EntityDecl, FklDeclaration, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -173,27 +173,7 @@ impl MirTransform {
 
   fn transform_implementation(&mut self, implementation: &ImplementationDecl) -> HttpApiImpl {
     let mut http_api_impl = HttpApiImpl::new(implementation.name.clone());
-    http_api_impl.endpoints = implementation.endpoints.iter().map(|endpoint_decl| {
-      let mut endpoint = HttpEndpoint::new(endpoint_decl.name.clone());
-      endpoint.path = endpoint_decl.uri.clone();
-      endpoint.method = endpoint_decl.method.clone();
-      if let Some(decl) = &endpoint_decl.response {
-        endpoint.response = Some(Response {
-          name: decl.name.clone(),
-          post_validate: None,
-        });
-      }
-
-      if let Some(decl) = &endpoint_decl.request {
-        endpoint.request = Some(Request {
-          name: decl.name.clone(),
-          pre_validate: None,
-        });
-      }
-
-
-      endpoint
-    }).collect();
+    http_api_impl.endpoint = Self::transform_endpoint(&implementation.endpoint);
 
     http_api_impl.flows = implementation.flows.iter().map(|flow_decl| {
       let mut flow = Flow::default();
@@ -223,6 +203,28 @@ impl MirTransform {
     }).collect();
 
     http_api_impl
+  }
+
+  fn transform_endpoint(endpoint_decl: &EndpointDecl) -> HttpEndpoint {
+    let mut endpoint = HttpEndpoint::new(endpoint_decl.name.clone());
+    endpoint.path = endpoint_decl.uri.clone();
+    endpoint.method = endpoint_decl.method.clone();
+    if let Some(decl) = &endpoint_decl.response {
+      endpoint.response = Some(Response {
+        name: decl.name.clone(),
+        post_validate: None,
+      });
+    }
+
+    if let Some(decl) = &endpoint_decl.request {
+      endpoint.request = Some(Request {
+        name: decl.name.clone(),
+        pre_validate: None,
+      });
+    }
+
+
+    endpoint
   }
 
   fn transform_return_type(&mut self, call: &&MethodCallDecl) -> Option<mir::VariableDefinition> {
@@ -390,19 +392,17 @@ impl CinemaCreatedEvent {
       target_aggregate: "".to_string(),
       target_entity: "".to_string(),
       qualified: "".to_string(),
-      endpoints: vec![
-        HttpEndpoint {
-          name: "".to_string(),
-          description: "".to_string(),
-          path: "/book/{id}".to_string(),
-          method: "GET".to_string(),
-          request: None,
-          response: Some(Response {
-            name: "Cinema".to_string(),
-            post_validate: None,
-          }),
-        }
-      ],
+      endpoint: HttpEndpoint {
+        name: "".to_string(),
+        description: "".to_string(),
+        path: "/book/{id}".to_string(),
+        method: "GET".to_string(),
+        request: None,
+        response: Some(Response {
+          name: "Cinema".to_string(),
+          post_validate: None,
+        }),
+      },
       flows: vec![],
     }
     ));
@@ -430,19 +430,17 @@ impl CinemaCreatedEvent {
       target_aggregate: "".to_string(),
       target_entity: "".to_string(),
       qualified: "".to_string(),
-      endpoints: vec![
-        HttpEndpoint {
-          name: "".to_string(),
-          description: "".to_string(),
-          path: "/book/{id}".to_string(),
-          method: "GET".to_string(),
-          request: None,
-          response: Some(Response {
-            name: "Cinema".to_string(),
-            post_validate: None,
-          }),
-        }
-      ],
+      endpoint: HttpEndpoint {
+        name: "".to_string(),
+        description: "".to_string(),
+        path: "/book/{id}".to_string(),
+        method: "GET".to_string(),
+        request: None,
+        response: Some(Response {
+          name: "Cinema".to_string(),
+          post_validate: None,
+        }),
+      },
       flows: vec![Flow {
         inline_doc: "".to_string(),
         steps: vec![

@@ -200,7 +200,7 @@ pub struct ImplementationDecl {
   pub inline_doc: String,
   pub qualified_name: String,
   // can be file path or url
-  pub endpoints: Vec<EndpointDecl>,
+  pub endpoint: EndpointDecl,
   pub flows: Vec<FlowDecl>,
 }
 

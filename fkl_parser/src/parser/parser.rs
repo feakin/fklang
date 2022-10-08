@@ -408,7 +408,7 @@ fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
         implementation.inline_doc = parse_inline_doc(p);
       }
       Rule::endpoint_decl => {
-        implementation.endpoints.push(consume_endpoint(p));
+        implementation.endpoint = consume_endpoint(p);
       }
       Rule::flow_decl => {
         implementation.flows.push(consume_flow(p));
@@ -1054,21 +1054,20 @@ struct Cinema {
       name: "CinemaCreatedEvent".to_string(),
       inline_doc: "".to_string(),
       qualified_name: "".to_string(),
-      endpoints: vec![
-        EndpointDecl {
-          name: "".to_string(),
-          method: "GET".to_string(),
-          uri: "/book/{id}".to_string(),
-          authorization: Some(AuthorizationDecl {
-            authorization_type: "Basic".to_string(),
-            username: Some("admin".to_string()),
-            password: Some("admin".to_string()),
-          }),
-          request: None,
-          response: Some(HttpResponseDecl {
-            name: "Cinema".to_string()
-          }),
-        }],
+      endpoint: EndpointDecl {
+        name: "".to_string(),
+        method: "GET".to_string(),
+        uri: "/book/{id}".to_string(),
+        authorization: Some(AuthorizationDecl {
+          authorization_type: "Basic".to_string(),
+          username: Some("admin".to_string()),
+          password: Some("admin".to_string()),
+        }),
+        request: None,
+        response: Some(HttpResponseDecl {
+          name: "Cinema".to_string()
+        }),
+      },
       flows: vec![],
     }));
 
@@ -1129,23 +1128,22 @@ imple CinemaCreatedEvent {
       name: "CinemaUpdated".to_string(),
       inline_doc: "".to_string(),
       qualified_name: "".to_string(),
-      endpoints: vec![
-        EndpointDecl {
-          name: "".to_string(),
-          method: "POST".to_string(),
-          uri: "/book/{id}".to_string(),
-          authorization: Some(AuthorizationDecl {
-            authorization_type: "Basic".to_string(),
-            username: Some("admin".to_string()),
-            password: Some("admin".to_string()),
-          }),
-          request: Some(HttpRequestDecl {
-            name: "CinemaUpdatedRequest".to_string()
-          }),
-          response: Some(HttpResponseDecl {
-            name: "Cinema".to_string()
-          }),
-        }],
+      endpoint: EndpointDecl {
+        name: "".to_string(),
+        method: "POST".to_string(),
+        uri: "/book/{id}".to_string(),
+        authorization: Some(AuthorizationDecl {
+          authorization_type: "Basic".to_string(),
+          username: Some("admin".to_string()),
+          password: Some("admin".to_string()),
+        }),
+        request: Some(HttpRequestDecl {
+          name: "CinemaUpdatedRequest".to_string()
+        }),
+        response: Some(HttpResponseDecl {
+          name: "Cinema".to_string()
+        }),
+      },
       flows: vec![FlowDecl {
         inline_doc: "".to_string(),
         steps: vec![
