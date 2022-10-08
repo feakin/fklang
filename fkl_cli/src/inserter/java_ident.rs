@@ -1,5 +1,6 @@
 use tree_sitter::{Node, Parser, Query, QueryCursor};
-use crate::class_info::{CodeClass, CodeFile};
+
+use crate::class_info::{CodeClass, CodeFile, CodeFunction};
 use crate::inserter::base_ident::CodeIdent;
 
 const JAVA_QUERY: &'static str = "
@@ -9,23 +10,26 @@ const JAVA_QUERY: &'static str = "
 (import_declaration
 	(scoped_identifier) @import-name)
 
-(method_declaration
-	(modifiers
-    	(annotation
-    		name: (identifier) @annotation.name
-            arguments: (annotation_argument_list)? @annotation.key_values
-    	)
-    )
-)
-
 (program
     (class_declaration
 	    name: (identifier) @class-name
         interfaces: (super_interfaces (interface_type_list (type_identifier)  @impl-name))?
+        body: (class_body (method_declaration
+            (modifiers
+                (annotation
+                  name: (identifier) @annotation.name
+                      arguments: (annotation_argument_list)? @annotation.key_values
+                )
+            )?
+            type: (type_identifier) @return-type
+            name: (identifier) @function-name
+            parameters: (formal_parameters (formal_parameter
+              type: (type_identifier) @param-type
+                name: (identifier) @param-name
+            ))?
+          ))?
     )
-)
-
-";
+)";
 
 
 pub struct JavaIdent {
@@ -64,8 +68,9 @@ impl JavaIdent {
     let captures = query_cursor.captures(&ident.query, tree.root_node(), text_callback);
 
     let mut code_file = CodeFile::default();
-    let mut class = CodeClass::default();
     let mut is_last_node = false;
+
+    let mut class = CodeClass::default();
 
     let capture_names = ident.query.capture_names();
 
@@ -99,15 +104,18 @@ impl JavaIdent {
         "impl-name" => {
           class.implements.push(text.to_string());
         }
+        "function-name" => {
+          class.functions.push(JavaIdent::insert_function(capture, text));
+        }
         "parameter" => {}
         &_ => {
-          println!(
-            "    pattern: {}, capture: {}, row: {}, text: {:?}",
-            mat.pattern_index,
-            capture_name,
-            capture.node.start_position().row,
-            capture.node.utf8_text((&code).as_ref()).unwrap_or("")
-          );
+          // println!(
+          //   "    pattern: {}, capture: {}, row: {}, text: {:?}",
+          //   mat.pattern_index,
+          //   capture_name,
+          //   capture.node.start_position().row,
+          //   capture.node.utf8_text((&code).as_ref()).unwrap_or("")
+          // );
         }
       }
     }
@@ -123,7 +131,7 @@ impl JavaIdent {
 
 #[cfg(test)]
 mod tests {
-  use crate::class_info::{CodeClass, CodePoint};
+  use crate::class_info::{CodeClass, CodeFunction, CodePoint};
   use crate::inserter::base_ident::CodeIdent;
   use crate::inserter::java_ident::JavaIdent;
 
@@ -213,7 +221,13 @@ class DateTimeImpl2 {
       module: "".to_string(),
       package: "".to_string(),
       implements: vec![],
-      functions: vec![],
+      functions: vec![CodeFunction {
+        name: "getDate".to_string(),
+        return_type: "".to_string(),
+        variable: vec![],
+        start: CodePoint { row: 1, column: 4 },
+        end: CodePoint { row: 3, column: 5 },
+      }],
       start: CodePoint { row: 0, column: 0 },
       end: CodePoint { row: 4, column: 1 },
     });

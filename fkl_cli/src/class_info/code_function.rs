@@ -4,7 +4,10 @@ use crate::class_info::{CodePoint, Location};
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 pub struct CodeFunction {
   pub name: String,
-  pub vars: Vec<String>,
+  // todo: add support
+  pub return_type: String,
+  // todo: add support
+  pub variable: Vec<String>,
   pub start: CodePoint,
   pub end: CodePoint,
 }
