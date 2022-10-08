@@ -8,7 +8,7 @@ use fkl_parser::mir::implementation::Implementation;
 
 use fkl_parser::parse;
 
-pub mod inserter;
+pub mod ident;
 pub mod class_info;
 
 // todo: add code highlight support
