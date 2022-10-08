@@ -13,5 +13,5 @@ members = [
   "codegen_plugins/feakin-aws-lambda",
 ]
 
-[profile.release.package.fkl-wasm]
+[profile.release.package.fkl-parser-wasm]
 opt-level = 2

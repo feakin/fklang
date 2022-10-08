@@ -14,14 +14,18 @@ pub fn gen_http_api(api: HttpApiImpl, _framework: &str) -> String {
   let spring_code_gen = SpringCodeGen::from(&endpoint, &api.flow);
   let annotation = spring_code_gen.method_annotation;
   let method_header = spring_code_gen.method_header;
-  let flows = spring_code_gen.ai_comments.join("\n");
+  let ai_comments = spring_code_gen.ai_comments
+    .iter()
+    .map(|comment| format!("        {}", comment))
+    .collect::<Vec<String>>()
+    .join("\n");
 
   format!(r#"
     {}
     {} {{
-      {}
+{}
     }}
-"#, annotation, method_header, flows)
+"#, annotation, method_header, ai_comments)
 }
 
 #[cfg(test)]
@@ -37,6 +41,6 @@ mod tests {
     api_impl.endpoint = HttpEndpoint::default();
 
     let output = gen_http_api(api_impl, "spring");
-    assert_eq!(output, "\n    @GetMapping\n    public void main() {\n      \n    }\n")
+    assert_eq!(output, "\n    @GetMapping\n    public void main() {\n\n    }\n")
   }
 }
