@@ -18,3 +18,4 @@ web/public/js/libs/d3.js
 coco_plugins
 temp
 .DS_Store
+lcov.info

@@ -12,7 +12,7 @@ pub struct HttpApiImpl {
   // like "$moduleName:packageName
   pub qualified: String,
   pub endpoint: HttpEndpoint,
-  pub flows: Vec<Flow>,
+  pub flow: Option<Flow>,
 }
 
 impl HttpApiImpl {

@@ -201,7 +201,7 @@ pub struct ImplementationDecl {
   pub qualified_name: String,
   // can be file path or url
   pub endpoint: EndpointDecl,
-  pub flows: Vec<FlowDecl>,
+  pub flow: Option<FlowDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

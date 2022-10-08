@@ -411,7 +411,7 @@ fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
         implementation.endpoint = consume_endpoint(p);
       }
       Rule::flow_decl => {
-        implementation.flows.push(consume_flow(p));
+        implementation.flow = consume_flow(p);
       }
       _ => println!("unreachable implementation rule: {:?}", p.as_rule())
     };
@@ -514,7 +514,7 @@ fn consume_http_response(pair: Pair<Rule>) -> HttpResponseDecl {
   return response;
 }
 
-fn consume_flow(pair: Pair<Rule>) -> FlowDecl {
+fn consume_flow(pair: Pair<Rule>) -> Option<FlowDecl> {
   let mut flow = FlowDecl::default();
   for p in pair.into_inner() {
     match p.as_rule() {
@@ -530,7 +530,11 @@ fn consume_flow(pair: Pair<Rule>) -> FlowDecl {
       _ => println!("unreachable flow rule: {:?}", p.as_rule())
     };
   }
-  return flow;
+  if flow.steps.len() == 0 {
+    return None
+  }
+
+  return Some(flow);
 }
 
 fn consume_via_method_decl(pair: Pair<Rule>) -> MethodCallDecl {
@@ -1068,7 +1072,7 @@ struct Cinema {
           name: "Cinema".to_string()
         }),
       },
-      flows: vec![],
+      flow: None,
     }));
 
     assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
@@ -1144,7 +1148,7 @@ imple CinemaCreatedEvent {
           name: "Cinema".to_string()
         }),
       },
-      flows: vec![FlowDecl {
+      flow: Some(FlowDecl {
         inline_doc: "".to_string(),
         steps: vec![
           MethodCall(MethodCallDecl {
@@ -1179,7 +1183,7 @@ imple CinemaCreatedEvent {
             message: "CinemaCreated".to_string(),
           }),
         ],
-      }],
+      }),
     }));
   }
 }

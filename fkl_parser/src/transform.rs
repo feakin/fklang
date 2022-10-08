@@ -8,7 +8,7 @@ use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -175,34 +175,40 @@ impl MirTransform {
     let mut http_api_impl = HttpApiImpl::new(implementation.name.clone());
     http_api_impl.endpoint = Self::transform_endpoint(&implementation.endpoint);
 
-    http_api_impl.flows = implementation.flows.iter().map(|flow_decl| {
-      let mut flow = Flow::default();
-      flow.steps = flow_decl.steps.iter().map(|step_decl| {
-        match step_decl {
-          StepDecl::MethodCall(call) => {
-            let mut method_call = MethodCall::new(call.name.clone());
-            method_call.method = call.method.clone();
-            method_call.object = call.object.clone();
-            method_call.arguments = self.transform_variables(&call.arguments);
-            method_call.return_type = self.transform_return_type(&call);
-
-            Step::MethodCall(method_call)
-          }
-          StepDecl::Message(msg) => {
-            let mut message = mir::Message::default();
-            message.from = msg.from.clone();
-            message.topic = msg.topic.clone();
-            message.message = msg.message.clone();
-
-            Step::Message(message)
-          }
-        }
-      }).collect();
-
-      flow
-    }).collect();
+    http_api_impl.flow = if let Some(flow) = &implementation.flow {
+      Some(self.transform_flow(&flow))
+    } else {
+      None
+    };
 
     http_api_impl
+  }
+
+  fn transform_flow(&mut self, flow_decl: &FlowDecl) -> Flow {
+    let mut flow = Flow::default();
+    flow.steps = flow_decl.steps.iter().map(|step_decl| {
+      match step_decl {
+        StepDecl::MethodCall(call) => {
+          let mut method_call = MethodCall::new(call.name.clone());
+          method_call.method = call.method.clone();
+          method_call.object = call.object.clone();
+          method_call.parameters = self.transform_variables(&call.arguments);
+          method_call.return_type = self.transform_return_type(&call);
+
+          Step::MethodCall(method_call)
+        }
+        StepDecl::Message(msg) => {
+          let mut message = mir::Message::default();
+          message.from = msg.from.clone();
+          message.topic = msg.topic.clone();
+          message.message = msg.message.clone();
+
+          Step::Message(message)
+        }
+      }
+    }).collect();
+
+    flow
   }
 
   fn transform_endpoint(endpoint_decl: &EndpointDecl) -> HttpEndpoint {
@@ -403,7 +409,7 @@ impl CinemaCreatedEvent {
           post_validate: None,
         }),
       },
-      flows: vec![],
+      flow: None,
     }
     ));
   }
@@ -441,14 +447,14 @@ impl CinemaCreatedEvent {
           post_validate: None,
         }),
       },
-      flows: vec![Flow {
+      flow: Some(Flow {
         inline_doc: "".to_string(),
         steps: vec![
           Step::MethodCall(MethodCall {
             name: "".to_string(),
             object: "UserRepository".to_string(),
             method: "getUserById".to_string(),
-            arguments: vec![],
+            parameters: vec![],
             return_type: Some(VariableDefinition {
               name: "user".to_string(),
               type_type: "User".to_string(),
@@ -459,7 +465,7 @@ impl CinemaCreatedEvent {
             name: "".to_string(),
             object: "UserRepository".to_string(),
             method: "save".to_string(),
-            arguments: vec![VariableDefinition {
+            parameters: vec![VariableDefinition {
               name: "user".to_string(),
               type_type: "User".to_string(),
               initializer: None,
@@ -470,7 +476,7 @@ impl CinemaCreatedEvent {
               initializer: None,
             }),
           })],
-      }],
+      }),
     }
     ));
   }

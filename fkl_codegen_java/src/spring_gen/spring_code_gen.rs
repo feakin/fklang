@@ -1,3 +1,4 @@
+use fkl_parser::mir::{Flow, Step};
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 use crate::nlp::past_tense_to_normal;
 
@@ -15,16 +16,21 @@ pub struct SpringCodeGen {
 }
 
 impl SpringCodeGen {
-  pub fn from(http: HttpEndpoint) -> Self {
+  pub fn from(http: &HttpEndpoint, flow: &Option<Flow>) -> Self {
     let method_annotation = Self::method_annotation(&http);
     let method_header = Self::method_header(&http);
+    let ai_comments = if let Some(flow) = flow {
+      Self::ai_comments(&flow.steps)
+    } else {
+      vec![]
+    };
 
     SpringCodeGen {
       // todo: add support for imports
       imports: vec![],
       method_annotation,
       method_header,
-      ai_comments: vec![],
+      ai_comments,
     }
   }
 
@@ -120,21 +126,27 @@ impl SpringCodeGen {
     words
   }
 
-  fn ai_comments(http: &HttpEndpoint) -> Vec<String> {
-    let mut comments: Vec<String> = vec![];
-    if http.name != "" {
-      comments.push(http.name.to_owned());
-    }
-    if http.description != "" {
-      comments.push(http.description.to_owned());
-    }
-    comments
+  fn ai_comments(steps: &Vec<Step>) -> Vec<String> {
+    steps.iter().enumerate().map(|(index, step)| {
+      match step {
+        Step::MethodCall(call) => {
+          format!("// {}. {}", index + 1, call)
+        }
+        Step::Message(msg) => {
+          format!("// {}. {}", index + 1, msg)
+        }
+        Step::RpcCall(_) => {
+          "".to_string()
+        }
+      }
+    }).collect()
   }
 }
 
 #[cfg(test)]
 mod tests {
   use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
+  use fkl_parser::mir::{Message, MethodCall, Step, VariableDefinition};
 
   use crate::spring_gen::spring_code_gen::SpringCodeGen;
 
@@ -153,30 +165,32 @@ import org.springframework.web.bind.annotation.RestController;
 
   #[test]
   fn annotation() {
-    let annotation = SpringCodeGen::from(HttpEndpoint::default());
+    let annotation = SpringCodeGen::from(&HttpEndpoint::default(), &None);
     assert_eq!(annotation.method_annotation, "@GetMapping");
 
-    let annotation = SpringCodeGen::from(HttpEndpoint {
+    let annotation = SpringCodeGen::from(&HttpEndpoint {
       method: "POST".to_string(),
       ..Default::default()
-    });
+    }, &None,
+    );
     assert_eq!(annotation.method_annotation, "@PostMapping");
 
-    let annotation = SpringCodeGen::from(HttpEndpoint {
+    let annotation = SpringCodeGen::from(&HttpEndpoint {
       method: "PUT".to_string(),
       path: "/employees".to_string(),
       ..Default::default()
-    });
+    }, &None,
+    );
 
     assert_eq!(annotation.method_annotation, "@PutMapping(\"/employees\")");
   }
 
   #[test]
   fn method_header_with_response() {
-    let annotation = SpringCodeGen::from(HttpEndpoint::default());
+    let annotation = SpringCodeGen::from(&HttpEndpoint::default(), &None);
     assert_eq!(annotation.method_header, "public void main()");
 
-    let annotation = SpringCodeGen::from(HttpEndpoint {
+    let annotation = SpringCodeGen::from(&HttpEndpoint {
       name: "all".to_string(),
       description: "".to_string(),
       path: "".to_string(),
@@ -186,14 +200,15 @@ import org.springframework.web.bind.annotation.RestController;
         name: "List<Employee>".to_string(),
         post_validate: None,
       }),
-    });
+    }, &None,
+    );
 
     assert_eq!(annotation.method_header, "public List<Employee> all()");
   }
 
   #[test]
   fn method_header_with_request() {
-    let annotation = SpringCodeGen::from(HttpEndpoint {
+    let annotation = SpringCodeGen::from(&HttpEndpoint {
       name: "EmployeeCreated".to_string(),
       description: "".to_string(),
       path: "".to_string(),
@@ -203,8 +218,34 @@ import org.springframework.web.bind.annotation.RestController;
         pre_validate: None,
       }),
       response: None,
-    });
+    }, &None,
+    );
 
     assert_eq!(annotation.method_header, "public void creatEmployee(@RequestBody CreateEmployeeRequest request)");
+  }
+
+  #[test]
+  fn format_ai_comments() {
+    let comments = SpringCodeGen::ai_comments(&vec![
+      Step::MethodCall(MethodCall {
+        name: "all".to_string(),
+        object: "UserRepository".to_string(),
+        method: "save".to_string(),
+        parameters: vec![VariableDefinition {
+          name: "user".to_string(),
+          type_type: "User".to_string(),
+          initializer: None,
+        }],
+        return_type: None,
+      }),
+      Step::Message(Message {
+        from: "Content".to_string(),
+        to: "".to_string(),
+        topic: "sample:blabla".to_string(),
+        message: "hello".to_string(),
+      }),
+    ]);
+
+    assert_eq!(comments.join(" "), "// 1. call UserRepository.save with (user:User) // 2. send hello from Content to sample:blabla");
   }
 }

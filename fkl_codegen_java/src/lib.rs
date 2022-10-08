@@ -20,9 +20,7 @@ pub fn gen_http_api(api: HttpApiImpl, _framework: &str) -> anyhow::Result<String
     config = java::Config::default().with_package(api.qualified);
   }
 
-  let mut endpoint = api.endpoint.clone();
-  endpoint.name = api.name.clone();
-  let spring_code_gen = SpringCodeGen::from(endpoint);
+  let spring_code_gen = SpringCodeGen::from(&api.endpoint, &api.flow);
 
   let annotation = spring_code_gen.method_annotation;
   let newline = "\n";
