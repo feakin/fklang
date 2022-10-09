@@ -10,6 +10,7 @@ use fkl_parser::parse;
 
 pub mod ident;
 pub mod class_info;
+pub mod inserter;
 
 // todo: add code highlight support
 fn main() {
