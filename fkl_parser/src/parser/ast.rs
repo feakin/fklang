@@ -35,11 +35,11 @@ pub enum FklDeclaration {
   ApplicationService(ApplicationServiceDecl),
 }
 
+// todo: add Loc support
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UbiquitousLanguage {
   pub name: String,
   pub description: String,
-  // use hashmap to make sure it's unique
   pub words: HashMap<String, UniqueWord>,
 }
 
@@ -192,7 +192,7 @@ pub struct ValueObjectDecl {
   pub fields: Vec<VariableDefinition>,
 }
 
-// Binding To Function
+// Implementation Block
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ImplementationDecl {
@@ -266,7 +266,42 @@ pub struct MessageDecl {
   pub message: String,
 }
 
-// Binding To Data
+// Binding block
+
+/// [`SourceSet`] is a code block is a block of code that can be executed.
+/// It can be a function, a method, a class, a trait, a module, a file, a package, a library, a program, etc.
+/// - [`source_type`]: the type of the source code, e.g. feakin, java, puml/uml, swagger, etc.
+/// - [`src_dir`]: the directory of the source code
+/// - [`filter`]: the filter of the source code
+///
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct SourceSet {
+  pub name: String,
+  /// default to be Feakin?
+  pub source_type: String,
+  pub src_dirs: Vec<String>,
+  pub filter: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct Binding {
+  pub events: Vec<String>,
+  pub source_set: Option<SourceSet>,
+  pub extra_config: Option<BindingExtraConfig>
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct BindingExtraConfig {
+  pub language: String,
+  /// sometimes, people dont' like to use root dir in the source code, like `project/build.gradle`
+  /// or `project/src/main/java`. And not build.gradle in the root of project.
+  pub directory: Option<String>,
+  /// in modular DDD, we need to know which module is the domain module.
+  pub module: Option<String>,
+  pub package: String,
+}
+
+// Architecture Binding Block
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Trait {
@@ -297,7 +332,6 @@ pub struct ComponentDecl {
   pub attributes: Vec<AttributeDefinition>,
 }
 
-// implementation
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ComponentType {
   Application,
