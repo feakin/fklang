@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::{BoundedContext, ContextRelation};
+use crate::mir::{BoundedContext, ContextRelation, LayeredArchitecture};
 use crate::mir::implementation::Implementation;
 
 //
@@ -26,6 +26,7 @@ pub struct ContextMap {
   // pub rest_entities: Vec<Entity>,
   // some value objects no in map
   // pub rest_value_objects: Vec<ValueObject>,
+  pub layered: Option<LayeredArchitecture>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

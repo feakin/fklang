@@ -280,6 +280,7 @@ ValueObject Notifications { }
           target_type: vec![],
         }],
       implementations: vec![],
+      layered: None
     });
   }
 }

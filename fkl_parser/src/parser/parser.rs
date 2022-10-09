@@ -1370,4 +1370,3 @@ imple CinemaCreatedEvent {
     }));
   }
 }
-

@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Entity, Field, Flow, MethodCall, Step, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Dependency, Entity, Field, Flow, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, LayeredDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -20,6 +20,7 @@ pub struct MirTransform {
   pub entities: IndexMap<String, Entity>,
   pub value_objects: IndexMap<String, ValueObject>,
   pub implementations: Vec<HttpApiImpl>,
+  pub layered: Option<LayeredArchitecture>,
 }
 
 impl MirTransform {
@@ -32,6 +33,7 @@ impl MirTransform {
       entities: Default::default(),
       value_objects: Default::default(),
       implementations: vec![],
+      layered: Default::default(),
     };
 
     match ast_parse(str) {
@@ -51,6 +53,7 @@ impl MirTransform {
       implementations: transform.implementations.into_iter()
         .map(|impl_| Implementation::PublishHttpApi(impl_))
         .collect(),
+      layered: transform.layered,
     })
   }
 
@@ -119,7 +122,9 @@ impl MirTransform {
         }
         FklDeclaration::Struct(_) => {}
         FklDeclaration::Binding(_) => {}
-        FklDeclaration::Layered(_) => {}
+        FklDeclaration::Layered(decl) => {
+          self.layered = Some(self.transform_layered(&decl));
+        }
       }
     });
   }
@@ -240,6 +245,7 @@ impl MirTransform {
       }
     }
   }
+
   fn transform_variables(&self, vars: &Vec<ast::VariableDefinition>) -> Vec<mir::VariableDefinition> {
     vars.iter().map(|var| {
       mir::VariableDefinition {
@@ -248,6 +254,28 @@ impl MirTransform {
         initializer: var.initializer.clone(),
       }
     }).collect()
+  }
+
+  fn transform_layered(&self, decl: &LayeredDecl) -> LayeredArchitecture {
+    let mut layered = LayeredArchitecture::default();
+
+    layered.name = decl.name.clone();
+    layered.dependencies = decl.dependencies.iter().map(|rule| {
+      let mut dependency_rule = Dependency::default();
+      dependency_rule.source = rule.source.clone();
+      dependency_rule.target = rule.target.clone();
+
+      dependency_rule
+    }).collect();
+
+    layered.layers = decl.layers.iter().map(|layer| {
+      Layer {
+        name: layer.name.clone(),
+        package: layer.package.clone(),
+      }
+    }).collect();
+
+    layered
   }
 }
 
@@ -262,7 +290,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity, Flow, MethodCall, Step, VariableDefinition};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, Layer, LayeredArchitecture, MethodCall, Step, VariableDefinition};
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -478,5 +506,76 @@ impl CinemaCreatedEvent {
       }),
     }
     ));
+  }
+
+  #[test]
+  fn lower_layered() {
+    let str = r#"layered DDD {
+  dependency {
+    "interface" -> "application"
+    "interface" -> "domain"
+    "domain" -> "application"
+    "application" -> "infrastructure"
+    "interface" -> "infrastructure"
+  }
+  layer interface {
+     package: "com.example.book";
+  }
+  layer domain {
+     package: "com.example.domain";
+  }
+  layer application {
+    package: "com.example.application";
+  }
+  layer infrastructure {
+    package: "com.example.infrastructure";
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.layered, Some(LayeredArchitecture {
+      name: "DDD".to_string(),
+      layers: vec![
+        Layer {
+          name: "interface".to_string(),
+          package: "com.example.book".to_string(),
+        },
+        Layer {
+          name: "domain".to_string(),
+          package: "com.example.domain".to_string(),
+        },
+        Layer {
+          name: "application".to_string(),
+          package: "com.example.application".to_string(),
+        },
+        Layer {
+          name: "infrastructure".to_string(),
+          package: "com.example.infrastructure".to_string(),
+        },
+      ],
+      dependencies: vec![
+        Dependency {
+          source: "interface".to_string(),
+          target: "application".to_string(),
+        },
+        Dependency {
+          source: "interface".to_string(),
+          target: "domain".to_string(),
+        },
+        Dependency {
+          source: "domain".to_string(),
+          target: "application".to_string(),
+        },
+        Dependency {
+          source: "application".to_string(),
+          target: "infrastructure".to_string(),
+        },
+        Dependency {
+          source: "interface".to_string(),
+          target: "infrastructure".to_string(),
+        },
+      ],
+      description: "".to_string()
+    }));
   }
 }
