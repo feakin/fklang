@@ -30,11 +30,13 @@ pub mod tests {
   use crate::testing::do_parse_test;
 
   #[test]
+  #[cfg(not(target_os = "windows"))]
   fn parse_test() {
     assert!(do_parse_test("impl"));
   }
 
   #[test]
+  #[cfg(not(target_os = "windows"))]
   fn layered_test() {
     assert!(do_parse_test("layered"));
   }
