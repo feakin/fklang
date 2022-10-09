@@ -30,7 +30,8 @@ pub enum FklDeclaration {
   Implementation(ImplementationDecl),
   Struct(StructDecl),
   // Domain(DomainDecl),
-  Component(ComponentDecl),
+  Binding(BindingDecl),
+  Component(ComponentDecl)
 }
 
 // todo: add Loc support
@@ -80,7 +81,6 @@ pub struct BoundedContextDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct DomainEventDecl {
   pub name: String,
-  pub implementation: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -133,6 +133,7 @@ pub struct AggregateDecl {
   pub used_domain_objects: Vec<UsedDomainObject>,
   pub entities: Vec<EntityDecl>,
   pub value_objects: Vec<ValueObjectDecl>,
+  pub domain_events: Vec<DomainEventDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -282,7 +283,9 @@ pub struct SourceSet {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Binding {
+pub struct BindingDecl {
+  pub name: String,
+  pub domain_object_type: String,
   pub events: Vec<String>,
   pub source_set: Option<SourceSet>,
   pub extra_config: Option<BindingExtraConfig>
@@ -290,13 +293,14 @@ pub struct Binding {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct BindingExtraConfig {
-  pub language: String,
+  pub base_url: Option<String>,
+  pub language: Option<String>,
   /// sometimes, people dont' like to use root dir in the source code, like `project/build.gradle`
   /// or `project/src/main/java`. And not build.gradle in the root of project.
   pub directory: Option<String>,
   /// in modular DDD, we need to know which module is the domain module.
   pub module: Option<String>,
-  pub package: String,
+  pub package: Option<String>,
 }
 
 // Architecture Binding Block

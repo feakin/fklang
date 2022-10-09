@@ -657,6 +657,7 @@ just for test
       used_domain_objects: vec![],
       entities: vec![],
       value_objects: vec![],
+      domain_events: vec![]
     }));
   }
 
@@ -693,6 +694,7 @@ Aggregate ShoppingCart {
         value_objects: vec![],
       }],
       value_objects: vec![],
+      domain_events: vec![]
     }))
   }
 
@@ -901,6 +903,7 @@ Entity SalesPerson {
             ],
           }],
           value_objects: vec![],
+          domain_events: vec![]
         }
       ],
       used_domain_objects: vec![],
@@ -1031,6 +1034,7 @@ Aggregate Cinema {
           UsedDomainObject { name: "Seat".to_string() }],
         entities: vec![],
         value_objects: vec![],
+        domain_events: vec![]
       })
     );
   }

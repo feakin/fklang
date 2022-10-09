@@ -118,6 +118,7 @@ impl MirTransform {
           self.implementations.push(api_impl);
         }
         FklDeclaration::Struct(_) => {}
+        FklDeclaration::Binding(_) => {}
       }
     });
   }
