@@ -20,13 +20,7 @@ pub struct ContextMap {
   pub state: ContextState,
   pub contexts: Vec<BoundedContext>,
   pub relations: Vec<ContextRelation>,
-
   pub implementations: Vec<Implementation>,
-  // todo: add rest in the future
-  // some entities no in map
-  // pub rest_entities: Vec<Entity>,
-  // some value objects no in map
-  // pub rest_value_objects: Vec<ValueObject>,
   pub layered: Option<LayeredArchitecture>,
 }
 
@@ -105,11 +99,10 @@ impl Display for ContextMap {
     self.layered.as_ref().map(|layered| {
       writeln!(f, "  LayeredArchitecture({})", layered.name).unwrap();
       for layer in &layered.layers {
-        writeln!(f, "    Layer {} ({})", layer.name, layer.package).unwrap();
+        writeln!(f, "    Layer {} (\"{}\")", layer.name, layer.package).unwrap();
       }
     });
 
-    writeln!(f, "")?;
     Ok(())
   }
 }
@@ -149,7 +142,6 @@ mod tests {
   BoundedContext(TicketContext)
     Aggregate(TicketAggregate)
       Entity(TicketEntity)
-
 "#);
   }
 }

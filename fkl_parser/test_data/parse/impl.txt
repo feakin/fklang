@@ -1,109 +1,13 @@
-ContextMap {
-    name: "TicketBooking",
-    state: ToBe,
-    contexts: [
-        BoundedContext {
-            name: "Reservation",
-            aggregates: [],
-        },
-        BoundedContext {
-            name: "TicketContext",
-            aggregates: [
-                Aggregate {
-                    name: "Ticket",
-                    description: "",
-                    entities: [],
-                },
-                Aggregate {
-                    name: "Reservation",
-                    description: "",
-                    entities: [],
-                },
-            ],
-        },
-    ],
-    relations: [
-        ContextRelation {
-            source: "Reservation",
-            target: "TicketContext",
-            connection_type: BiDirected,
-            source_type: [],
-            target_type: [],
-        },
-    ],
-    implementations: [
-        PublishHttpApi(
-            HttpApiImpl {
-                name: "UserCreated",
-                target_aggregate: "",
-                target_entity: "",
-                qualified: "",
-                endpoint: HttpEndpoint {
-                    name: "",
-                    description: "",
-                    path: "/user/{id}",
-                    method: "POST",
-                    request: None,
-                    response: Some(
-                        Response {
-                            name: "User",
-                            post_validate: None,
-                        },
-                    ),
-                },
-                flow: Some(
-                    Flow {
-                        inline_doc: "",
-                        steps: [
-                            MethodCall(
-                                MethodCall {
-                                    name: "",
-                                    object: "UserRepository",
-                                    method: "getUserById",
-                                    parameters: [],
-                                    return_type: Some(
-                                        VariableDefinition {
-                                            name: "user",
-                                            type_type: "User",
-                                            initializer: None,
-                                        },
-                                    ),
-                                },
-                            ),
-                            MethodCall(
-                                MethodCall {
-                                    name: "",
-                                    object: "UserRepository",
-                                    method: "save",
-                                    parameters: [
-                                        VariableDefinition {
-                                            name: "user",
-                                            type_type: "User",
-                                            initializer: None,
-                                        },
-                                    ],
-                                    return_type: Some(
-                                        VariableDefinition {
-                                            name: "user",
-                                            type_type: "User",
-                                            initializer: None,
-                                        },
-                                    ),
-                                },
-                            ),
-                            Message(
-                                Message {
-                                    from: "Kafak",
-                                    to: "",
-                                    topic: "\"user.create\"",
-                                    message: "User",
-                                },
-                            ),
-                        ],
-                    },
-                ),
-            },
-        ),
-    ],
-    layered: None,
-}
+ContextMap(TicketBooking)
+  Relation(Reservation <-> TicketContext) 
+  BoundedContext(Reservation)
+  BoundedContext(TicketContext)
+    Aggregate(Ticket)
+    Aggregate(Reservation)
+    PublishHttpApi(UserCreated)
+      POST Path(/user/{id})
+      Response: User
+      Flow
+        MethodCall()
+        MethodCall()
+        Message(Kafka)

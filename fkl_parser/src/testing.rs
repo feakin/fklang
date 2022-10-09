@@ -14,7 +14,7 @@ pub fn do_parse_test(test_name: &str) -> bool {
 
   let input = fs::read_to_string(input_path).unwrap();
   let result = parse(&input).unwrap();
-  let result = format!("{:#?}", result);
+  let result = format!("{}", result);
 
   if !output_path.exists() {
     fs::write(&output_path, result).unwrap();

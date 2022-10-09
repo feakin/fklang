@@ -23,6 +23,6 @@ impl UserCreated {
   flow {
     via UserRepository::getUserById receive user: User
     via UserRepository::save(user: User) receive user: User;
-    via Kafak send User to "user.create";
+    via Kafka send User to "user.create";
   }
 }
