@@ -119,6 +119,7 @@ impl MirTransform {
         }
         FklDeclaration::Struct(_) => {}
         FklDeclaration::Binding(_) => {}
+        FklDeclaration::Layered(_) => {}
       }
     });
   }

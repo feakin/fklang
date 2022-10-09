@@ -8,8 +8,10 @@ declaration = {
   | entity_decl
   | value_object_decl
   | struct_decl
+  // ddd
   | component_decl
   | implementation_decl
+  | layered_decl
 }
 
 context_map_decl = {
@@ -115,6 +117,25 @@ via_method_decl = {
 via_message_decl = {
   "via" ~ object_name ~ "send" ~ pass_object ~ "to" ~ topic_name ~ ";"?
 }
+
+layered_decl = {
+  "layered" ~ identifier ~ "{" ~ (inline_doc | dependency | layer_decl)* ~ "}"
+}
+
+layer_decl = {
+  "layer" ~ identifier ~ "{" ~ (inline_doc | (package_def)*)? ~ "}"
+}
+
+package_def = {
+  "package" ~ ":" ~ string ~ ";"?
+}
+
+dependency = {
+  "dependency" ~ "{" ~ (source ~ rs_left_to_right  ~ target)* ~ "}"
+}
+
+source = { identifier | string }
+target = { identifier | string }
 
 object_name = {  identifier }
 method_name = {  identifier }

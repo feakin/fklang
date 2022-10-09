@@ -1190,5 +1190,82 @@ imple CinemaCreatedEvent {
       }),
     }));
   }
+
+  #[test]
+  fn layered_architecture() {
+    let decls = parse(r#"layered DDD {
+  dependency {
+    "interface" -> "application"
+    "interface" -> "domain"
+    "domain" -> "application"
+    "application" -> "infrastructure"
+    "interface" -> "infrastructure"
+  }
+  layer interface {
+     package: "com.example.book"
+  }
+  layer domain {
+     package: "com.example.domain"
+  }
+  layer application {
+    package: "com.example.application"
+  }
+  layer infrastructure {
+    package: "com.example.infrastructure"
+  }
+}"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+
+    // assert_eq!(decls[0], FklDeclaration::Layered(LayeredDecl {
+    //   name: "DDD".to_string(),
+    //   inline_doc: "".to_string(),
+    //   dependencies: vec![
+    //     LayerRelation {
+    //       from: "interface".to_string(),
+    //       to: "application".to_string(),
+    //     },
+    //     LayerRelation {
+    //       from: "interface".to_string(),
+    //       to: "domain".to_string(),
+    //     },
+    //     LayerRelation {
+    //       from: "domain".to_string(),
+    //       to: "application".to_string(),
+    //     },
+    //     LayerRelation {
+    //       from: "application".to_string(),
+    //       to: "infrastructure".to_string(),
+    //     },
+    //     LayerRelation {
+    //       from: "interface".to_string(),
+    //       to: "infrastructure".to_string(),
+    //     },
+    //   ],
+    //   layers: vec![
+    //     LayerDecl {
+    //       name: "interface".to_string(),
+    //       inline_doc: "".to_string(),
+    //       package: "com.example.book".to_string(),
+    //     },
+    //     LayerDecl {
+    //       name: "domain".to_string(),
+    //       inline_doc: "".to_string(),
+    //       package: "com.example.domain".to_string(),
+    //     },
+    //     LayerDecl {
+    //       name: "application".to_string(),
+    //       inline_doc: "".to_string(),
+    //       package: "com.example.application".to_string(),
+    //     },
+    //     LayerDecl {
+    //       name: "infrastructure".to_string(),
+    //       inline_doc: "".to_string(),
+    //       package: "com.example.infrastructure".to_string(),
+    //     },
+    //   ],
+    // }));
+  }
 }
 

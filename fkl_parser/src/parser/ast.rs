@@ -31,7 +31,8 @@ pub enum FklDeclaration {
   Struct(StructDecl),
   // Domain(DomainDecl),
   Binding(BindingDecl),
-  Component(ComponentDecl)
+  Component(ComponentDecl),
+  Layered(LayeredDecl),
 }
 
 // todo: add Loc support
@@ -301,6 +302,29 @@ pub struct BindingExtraConfig {
   /// in modular DDD, we need to know which module is the domain module.
   pub module: Option<String>,
   pub package: Option<String>,
+}
+
+// Layered Block
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct LayeredDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub dependencies: Vec<LayerRelation>,
+  pub layers: Vec<LayerDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct LayerRelation {
+  pub from: String,
+  pub to: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct LayerDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub package: String,
 }
 
 // Architecture Binding Block
