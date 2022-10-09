@@ -2,7 +2,7 @@ use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::{BoundedContext, ContextRelation, LayeredArchitecture};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, Step};
 use crate::mir::implementation::Implementation;
 
 //
@@ -45,15 +45,69 @@ impl Default for ContextState {
 impl Display for ContextMap {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     writeln!(f, "ContextMap({})", self.name)?;
+    for relation in &self.relations {
+      let rel = match relation.connection_type {
+        ConnectionDirection::Undirected => "-",
+        ConnectionDirection::PositiveDirected => "->",
+        ConnectionDirection::NegativeDirected => "<-",
+        ConnectionDirection::BiDirected => "<->",
+      };
+      writeln!(f, "  Relation({} {} {}) ", relation.source, rel, relation.target)?;
+    }
+
     for context in &self.contexts {
       writeln!(f, "  BoundedContext({})", context.name)?;
       for aggregate in &context.aggregates {
         writeln!(f, "    Aggregate({})", aggregate.name)?;
         for entity in &aggregate.entities {
           writeln!(f, "      Entity({})", entity.name)?;
+          entity.fields.iter().for_each(|field| {
+            writeln!(f, "        Field({})", field.name).unwrap();
+          });
         }
       }
     }
+
+    for imp in &self.implementations {
+      match imp {
+        Implementation::PublishHttpApi(api) => {
+          writeln!(f, "    PublishHttpApi({})", api.name)?;
+          writeln!(f, "      {} Path({})", api.endpoint.method, api.endpoint.path)?;
+
+          if let Some(request) = &api.endpoint.request {
+            writeln!(f, "      Request: {}", request.name)?;
+          }
+
+          if let Some(response) = &api.endpoint.response {
+            writeln!(f, "      Response: {}", response.name)?;
+          }
+
+          api.flow.iter().for_each(|flow| {
+            writeln!(f, "      Flow").unwrap();
+            flow.steps.iter().for_each(|step| {
+              match step {
+                Step::MethodCall(call) => {
+                  writeln!(f, "        MethodCall({})", call.name).unwrap();
+                }
+                Step::Message(msg) => {
+                  writeln!(f, "        Message({})", msg.from).unwrap();
+                }
+                Step::RpcCall(_) => {}
+              }
+            });
+          });
+        }
+        Implementation::PublishEvent => {}
+        Implementation::PublishMessage => {}
+      }
+    }
+
+    self.layered.as_ref().map(|layered| {
+      writeln!(f, "  LayeredArchitecture({})", layered.name).unwrap();
+      for layer in &layered.layers {
+        writeln!(f, "    Layer {} ({})", layer.name, layer.package).unwrap();
+      }
+    });
 
     writeln!(f, "")?;
     Ok(())
@@ -81,14 +135,14 @@ mod tests {
               description: "".to_string(),
               is_aggregate_root: false,
               identify: Default::default(),
-              fields: vec![]
-            }]
+              fields: vec![],
+            }],
           }
-        ]
+        ],
       }],
       relations: vec![],
       implementations: vec![],
-      layered: None
+      layered: None,
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)

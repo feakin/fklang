@@ -1,0 +1,53 @@
+ContextMap {
+    name: "",
+    state: ToBe,
+    contexts: [],
+    relations: [],
+    implementations: [],
+    layered: Some(
+        LayeredArchitecture {
+            name: "DDD",
+            description: "",
+            dependencies: [
+                Dependency {
+                    source: "interface",
+                    target: "application",
+                },
+                Dependency {
+                    source: "interface",
+                    target: "domain",
+                },
+                Dependency {
+                    source: "domain",
+                    target: "application",
+                },
+                Dependency {
+                    source: "application",
+                    target: "infrastructure",
+                },
+                Dependency {
+                    source: "interface",
+                    target: "infrastructure",
+                },
+            ],
+            layers: [
+                Layer {
+                    name: "interface",
+                    package: "com.example.book",
+                },
+                Layer {
+                    name: "domain",
+                    package: "com.example.domain",
+                },
+                Layer {
+                    name: "application",
+                    package: "com.example.application",
+                },
+                Layer {
+                    name: "infrastructure",
+                    package: "com.example.infrastructure",
+                },
+            ],
+        },
+    ),
+}

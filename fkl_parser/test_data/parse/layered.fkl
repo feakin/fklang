@@ -1,0 +1,21 @@
+layered DDD {
+  dependency {
+    "interface" -> "application"
+    "interface" -> "domain"
+    "domain" -> "application"
+    "application" -> "infrastructure"
+    "interface" -> "infrastructure"
+  }
+  layer interface {
+     package: "com.example.book";
+  }
+  layer domain {
+     package: "com.example.domain";
+  }
+  layer application {
+    package: "com.example.application";
+  }
+  layer infrastructure {
+    package: "com.example.infrastructure";
+  }
+}

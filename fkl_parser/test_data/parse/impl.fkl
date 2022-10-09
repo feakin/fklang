@@ -1,0 +1,28 @@
+ContextMap TicketBooking {
+  Reservation <-> TicketContext;
+}
+
+Context TicketContext {
+  Aggregate Ticket, Reservation;
+}
+
+Entity Ticket {
+  Struct {
+    seat: String;
+  }
+}
+
+// binding;
+impl UserCreated {
+  endpoint {
+    POST "/user/{id}";
+    authorization: Basic admin admin;
+    response: User;
+  }
+
+  flow {
+    via UserRepository::getUserById receive user: User
+    via UserRepository::save(user: User) receive user: User;
+    via Kafak send User to "user.create";
+  }
+}
