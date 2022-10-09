@@ -282,32 +282,6 @@ pub struct Function {
   pub return_type: Vec<Parameter>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct RestApi {
-  pub name: String,
-  pub method: HttpMethod,
-  pub path: String,
-  pub parameters: Vec<Parameter>,
-  pub return_type: Vec<Parameter>,
-}
-
-#[allow(dead_code)]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum HttpMethod {
-  Get,
-  Post,
-  Put,
-  Delete,
-  Patch,
-  Custom(String)
-}
-
-impl Default for HttpMethod {
-  fn default() -> Self {
-    HttpMethod::Get
-  }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Parameter {
   pub name: String,
