@@ -103,13 +103,10 @@ impl MirTransform {
           let context = Self::transform_bounded_context(&decl);
           self.contexts.insert(decl.name.clone(), context);
         }
-        FklDeclaration::Domain(_) => {}
         FklDeclaration::Aggregate(decl) => {
           let aggregate = self.transform_aggregate(&decl);
           self.aggregates.insert(decl.name.clone(), aggregate);
         }
-        FklDeclaration::DomainService(_) => {}
-        FklDeclaration::ApplicationService(_) => {}
         FklDeclaration::Entity(decl) => {
           let entity = self.transform_entity(&decl);
           self.entities.insert(decl.name.clone(), entity);

@@ -15,6 +15,7 @@ pub struct SpringCodeGen {
   pub ai_comments: Vec<String>,
 }
 
+// todo: add api for generate service
 impl SpringCodeGen {
   pub fn from(http: &HttpEndpoint, flow: &Option<Flow>) -> Self {
     let method_annotation = Self::method_annotation(&http);

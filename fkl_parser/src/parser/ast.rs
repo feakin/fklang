@@ -24,15 +24,13 @@ pub enum FklDeclaration {
   None,
   ContextMap(ContextMapDecl),
   BoundedContext(BoundedContextDecl),
-  Domain(DomainDecl),
   Aggregate(AggregateDecl),
   Entity(EntityDecl),
   ValueObject(ValueObjectDecl),
   Implementation(ImplementationDecl),
-  Component(ComponentDecl),
   Struct(StructDecl),
-  DomainService(DomainServiceDecl),
-  ApplicationService(ApplicationServiceDecl),
+  // Domain(DomainDecl),
+  Component(ComponentDecl),
 }
 
 // todo: add Loc support
@@ -50,19 +48,19 @@ pub struct UniqueWord {
   pub context_name: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DomainDecl {
-  pub name: String,
-  pub description: String,
-  pub sub_domains: Vec<SubDomain>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SubDomain {
-  pub name: String,
-  pub subdomain_type: String,
-  pub entities: Vec<BoundedContextDecl>,
-}
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub struct DomainDecl {
+//   pub name: String,
+//   pub description: String,
+//   pub sub_domains: Vec<SubDomain>,
+// }
+//
+// #[derive(Debug, Clone, PartialEq, Eq)]
+// pub struct SubDomain {
+//   pub name: String,
+//   pub subdomain_type: String,
+//   pub entities: Vec<BoundedContextDecl>,
+// }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ContextMapDecl {
