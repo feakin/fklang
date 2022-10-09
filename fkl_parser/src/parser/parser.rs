@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -52,6 +52,9 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         }
         Rule::struct_decl => {
           decl = FklDeclaration::Struct(consume_struct(p));
+        }
+        Rule::layered_decl => {
+          decl = FklDeclaration::Layered(consume_layered(p));
         }
         _ => println!("unreachable content rule: {:?}", p.as_rule())
       };
@@ -531,7 +534,7 @@ fn consume_flow(pair: Pair<Rule>) -> Option<FlowDecl> {
     };
   }
   if flow.steps.len() == 0 {
-    return None
+    return None;
   }
 
   return Some(flow);
@@ -579,6 +582,105 @@ fn consume_via_message_decl(pair: Pair<Rule>) -> MessageDecl {
     };
   }
   return message;
+}
+
+fn consume_layered(pair: Pair<Rule>) -> LayeredDecl {
+  let mut layered = LayeredDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        layered.name = p.as_str().to_string();
+      }
+      Rule::inline_doc => {
+        layered.inline_doc = parse_inline_doc(p);
+      }
+      Rule::dependency_decl => {
+        layered.dependencies = consume_dependency_decl(p);
+      }
+      Rule::layer_decl => {
+        layered.layers.push(consume_layer_decl(p));
+      }
+      _ => println!("unreachable layered rule: {:?}", p.as_rule())
+    };
+  }
+
+  return layered;
+}
+
+fn consume_layer_decl(pair: Pair<Rule>) -> LayerDecl {
+  let mut layer = LayerDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        layer.name = p.as_str().to_string();
+      }
+      Rule::inline_doc => {
+        layer.inline_doc = parse_inline_doc(p);
+      }
+      Rule::package_def => {
+        for p in p.into_inner() {
+          match p.as_rule() {
+            Rule::package => {
+              layer.package = parse_string(p.as_str());
+            }
+            _ => println!("unreachable package_def rule: {:?}", p.as_rule())
+          };
+        }
+      }
+      _ => println!("unreachable layer rule: {:?}", p.as_rule())
+    };
+  }
+
+  return layer;
+}
+
+fn consume_dependency_decl(pair: Pair<Rule>) -> Vec<LayerRelationDecl> {
+  let mut relations: Vec<LayerRelationDecl> = vec![];
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::dependency_entry => {
+        relations.push(consume_dependency_entry(p));
+      }
+
+      _ => println!("unreachable dependency rule: {:?}", p.as_rule())
+    };
+  }
+  return relations;
+}
+
+fn consume_dependency_entry(pair: Pair<Rule>) -> LayerRelationDecl {
+  let mut relation = LayerRelationDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::source => {
+        relation.source = parse_ident_or_string(p);
+      }
+      Rule::target => {
+        relation.target = parse_ident_or_string(p);
+      }
+      Rule::rs_left_to_right => {}
+      _ => println!("unreachable dependency entry: {:?}", p.as_rule())
+    };
+  }
+
+  return relation;
+}
+
+fn parse_ident_or_string(pair: Pair<Rule>) -> String {
+  let mut ident = String::new();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        ident = p.as_str().to_string();
+      }
+      Rule::string => {
+        ident = parse_string(p.as_str());
+      }
+      _ => println!("unreachable ident_or_string rule: {:?}", p.as_rule())
+    };
+  }
+
+  return ident;
 }
 
 fn parse_string(str: &str) -> String {
@@ -657,7 +759,7 @@ just for test
       used_domain_objects: vec![],
       entities: vec![],
       value_objects: vec![],
-      domain_events: vec![]
+      domain_events: vec![],
     }));
   }
 
@@ -694,7 +796,7 @@ Aggregate ShoppingCart {
         value_objects: vec![],
       }],
       value_objects: vec![],
-      domain_events: vec![]
+      domain_events: vec![],
     }))
   }
 
@@ -903,7 +1005,7 @@ Entity SalesPerson {
             ],
           }],
           value_objects: vec![],
-          domain_events: vec![]
+          domain_events: vec![],
         }
       ],
       used_domain_objects: vec![],
@@ -1034,7 +1136,7 @@ Aggregate Cinema {
           UsedDomainObject { name: "Seat".to_string() }],
         entities: vec![],
         value_objects: vec![],
-        domain_events: vec![]
+        domain_events: vec![],
       })
     );
   }
@@ -1202,70 +1304,70 @@ imple CinemaCreatedEvent {
     "interface" -> "infrastructure"
   }
   layer interface {
-     package: "com.example.book"
+     package: "com.example.book";
   }
   layer domain {
-     package: "com.example.domain"
+     package: "com.example.domain";
   }
   layer application {
-    package: "com.example.application"
+    package: "com.example.application";
   }
   layer infrastructure {
-    package: "com.example.infrastructure"
+    package: "com.example.infrastructure";
   }
 }"#).or_else(|e| {
       println!("{}", e);
       Err(e)
     }).unwrap();
 
-    // assert_eq!(decls[0], FklDeclaration::Layered(LayeredDecl {
-    //   name: "DDD".to_string(),
-    //   inline_doc: "".to_string(),
-    //   dependencies: vec![
-    //     LayerRelation {
-    //       from: "interface".to_string(),
-    //       to: "application".to_string(),
-    //     },
-    //     LayerRelation {
-    //       from: "interface".to_string(),
-    //       to: "domain".to_string(),
-    //     },
-    //     LayerRelation {
-    //       from: "domain".to_string(),
-    //       to: "application".to_string(),
-    //     },
-    //     LayerRelation {
-    //       from: "application".to_string(),
-    //       to: "infrastructure".to_string(),
-    //     },
-    //     LayerRelation {
-    //       from: "interface".to_string(),
-    //       to: "infrastructure".to_string(),
-    //     },
-    //   ],
-    //   layers: vec![
-    //     LayerDecl {
-    //       name: "interface".to_string(),
-    //       inline_doc: "".to_string(),
-    //       package: "com.example.book".to_string(),
-    //     },
-    //     LayerDecl {
-    //       name: "domain".to_string(),
-    //       inline_doc: "".to_string(),
-    //       package: "com.example.domain".to_string(),
-    //     },
-    //     LayerDecl {
-    //       name: "application".to_string(),
-    //       inline_doc: "".to_string(),
-    //       package: "com.example.application".to_string(),
-    //     },
-    //     LayerDecl {
-    //       name: "infrastructure".to_string(),
-    //       inline_doc: "".to_string(),
-    //       package: "com.example.infrastructure".to_string(),
-    //     },
-    //   ],
-    // }));
+    assert_eq!(decls[0], FklDeclaration::Layered(LayeredDecl {
+      name: "DDD".to_string(),
+      inline_doc: "".to_string(),
+      dependencies: vec![
+        LayerRelationDecl {
+          source: "interface".to_string(),
+          target: "application".to_string(),
+        },
+        LayerRelationDecl {
+          source: "interface".to_string(),
+          target: "domain".to_string(),
+        },
+        LayerRelationDecl {
+          source: "domain".to_string(),
+          target: "application".to_string(),
+        },
+        LayerRelationDecl {
+          source: "application".to_string(),
+          target: "infrastructure".to_string(),
+        },
+        LayerRelationDecl {
+          source: "interface".to_string(),
+          target: "infrastructure".to_string(),
+        },
+      ],
+      layers: vec![
+        LayerDecl {
+          name: "interface".to_string(),
+          inline_doc: "".to_string(),
+          package: "com.example.book".to_string(),
+        },
+        LayerDecl {
+          name: "domain".to_string(),
+          inline_doc: "".to_string(),
+          package: "com.example.domain".to_string(),
+        },
+        LayerDecl {
+          name: "application".to_string(),
+          inline_doc: "".to_string(),
+          package: "com.example.application".to_string(),
+        },
+        LayerDecl {
+          name: "infrastructure".to_string(),
+          inline_doc: "".to_string(),
+          package: "com.example.infrastructure".to_string(),
+        },
+      ],
+    }));
   }
 }
 

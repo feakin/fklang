@@ -310,14 +310,14 @@ pub struct BindingExtraConfig {
 pub struct LayeredDecl {
   pub name: String,
   pub inline_doc: String,
-  pub dependencies: Vec<LayerRelation>,
+  pub dependencies: Vec<LayerRelationDecl>,
   pub layers: Vec<LayerDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct LayerRelation {
-  pub from: String,
-  pub to: String,
+pub struct LayerRelationDecl {
+  pub source: String,
+  pub target: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

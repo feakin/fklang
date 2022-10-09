@@ -119,7 +119,7 @@ via_message_decl = {
 }
 
 layered_decl = {
-  "layered" ~ identifier ~ "{" ~ (inline_doc | dependency | layer_decl)* ~ "}"
+  "layered" ~ identifier ~ "{" ~ (inline_doc | dependency_decl | layer_decl)* ~ "}"
 }
 
 layer_decl = {
@@ -127,15 +127,20 @@ layer_decl = {
 }
 
 package_def = {
-  "package" ~ ":" ~ string ~ ";"?
+  "package" ~ ":" ~ package ~ ";"?
 }
 
-dependency = {
-  "dependency" ~ "{" ~ (source ~ rs_left_to_right  ~ target)* ~ "}"
+dependency_decl = {
+  "dependency" ~ "{" ~ dependency_entry* ~ "}"
+}
+
+dependency_entry = {
+  source ~ rs_left_to_right  ~ target
 }
 
 source = { identifier | string }
 target = { identifier | string }
+package = { string }
 
 object_name = {  identifier }
 method_name = {  identifier }
