@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -38,5 +39,63 @@ pub enum ContextState {
 impl Default for ContextState {
   fn default() -> Self {
     ContextState::ToBe
+  }
+}
+
+impl Display for ContextMap {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    writeln!(f, "ContextMap({})", self.name)?;
+    for context in &self.contexts {
+      writeln!(f, "  BoundedContext({})", context.name)?;
+      for aggregate in &context.aggregates {
+        writeln!(f, "    Aggregate({})", aggregate.name)?;
+        for entity in &aggregate.entities {
+          writeln!(f, "      Entity({})", entity.name)?;
+        }
+      }
+    }
+
+    writeln!(f, "")?;
+    Ok(())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use crate::ContextMap;
+  use crate::mir::{Aggregate, BoundedContext, Entity};
+
+  #[test]
+  fn display_context_map() {
+    let context_map = ContextMap {
+      name: "Ticket".to_string(),
+      state: Default::default(),
+      contexts: vec![BoundedContext {
+        name: "TicketContext".to_string(),
+        aggregates: vec![
+          Aggregate {
+            name: "TicketAggregate".to_string(),
+            description: "".to_string(),
+            entities: vec![Entity {
+              name: "TicketEntity".to_string(),
+              description: "".to_string(),
+              is_aggregate_root: false,
+              identify: Default::default(),
+              fields: vec![]
+            }]
+          }
+        ]
+      }],
+      relations: vec![],
+      implementations: vec![],
+      layered: None
+    };
+    let output = format!("{}", context_map);
+    assert_eq!(output, r#"ContextMap(Ticket)
+  BoundedContext(TicketContext)
+    Aggregate(TicketAggregate)
+      Entity(TicketEntity)
+
+"#);
   }
 }
