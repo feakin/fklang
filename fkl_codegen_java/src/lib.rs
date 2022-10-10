@@ -7,7 +7,7 @@ pub use spring_gen::spring_code_gen::*;
 
 use fkl_parser::mir::implementation::HttpApiImpl;
 
-pub fn gen_http_api(api: HttpApiImpl, _framework: &str) -> String {
+pub fn gen_http_api(api: &HttpApiImpl, _framework: &str) -> String {
   let mut endpoint = api.endpoint.clone();
   endpoint.name = api.name.clone();
 
@@ -40,7 +40,7 @@ mod tests {
     api_impl.qualified = "com.feakin.demo".to_string();
     api_impl.endpoint = HttpEndpoint::default();
 
-    let output = gen_http_api(api_impl, "spring");
+    let output = gen_http_api(&api_impl, "spring");
     assert_eq!(output, "\n    @GetMapping\n    public void main() {\n\n    }\n")
   }
 }

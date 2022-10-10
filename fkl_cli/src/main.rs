@@ -123,7 +123,7 @@ mod tests {
       .for_each(|implementation| {
         match implementation {
           Implementation::PublishHttpApi(http) => {
-            output = gen_http_api(http.clone(), "java");
+            output = gen_http_api(&http, "java");
           }
           Implementation::PublishEvent => {}
           Implementation::PublishMessage => {}

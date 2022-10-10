@@ -22,6 +22,18 @@ impl HttpApiImpl {
       ..Default::default()
     }
   }
+
+  pub fn target(&self) -> String {
+    if !self.target_aggregate.is_empty() {
+      return self.target_aggregate.clone();
+    }
+
+    if !self.target_entity.is_empty() {
+      return self.target_entity.clone();
+    }
+
+    return "".to_string();
+  }
 }
 
 

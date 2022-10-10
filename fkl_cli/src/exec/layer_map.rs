@@ -90,7 +90,7 @@ mod tests {
       ]
     });
 
-    assert_eq!(layer_map.interface_path(), "src/main/java/com/feakin/fklang/")
+    assert_eq!(layer_map.interface_path(), "src/main/java/com/feakin/fklang")
   }
 }
 

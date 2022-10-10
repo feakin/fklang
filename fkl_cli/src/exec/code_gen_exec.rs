@@ -11,6 +11,7 @@ use crate::exec::layer_map::LayerMap;
 
 pub struct CodeBlock {
   pub target_layer: DddLayer,
+  pub class_name: String,
   pub code: String,
 }
 
@@ -52,16 +53,18 @@ fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBloc
         Implementation::PublishHttpApi(http) => {
           if let Some(filter_impl) = filter_impl {
             if &http.name == filter_impl {
-              let output = gen_http_api(http.clone(), "java");
+              let output = gen_http_api(http, "java");
               codes.push(CodeBlock {
                 target_layer: DddLayer::Interface,
+                class_name: "".to_string(),
                 code: output,
               });
             }
           } else {
-            let output = gen_http_api(http.clone(), "java");
+            let output = gen_http_api(http, "java");
             codes.push(CodeBlock {
               target_layer: DddLayer::Interface,
+              class_name: "".to_string(),
               code: output,
             });
           }
