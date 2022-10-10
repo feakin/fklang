@@ -1,4 +1,6 @@
+/// Hello Got event ?
 impl HelloGot {
+  aggregate: Hello;
   endpoint {
     GET "/hello";
     response: String;
@@ -14,7 +16,7 @@ layered DDD {
     "interface" -> "infrastructure"
   }
   layer interface {
-    package: "com.feakin.demo.interface";
+    package: "com.feakin.demo.rest";
   }
   layer domain {
     package: "com.feakin.demo.domain";

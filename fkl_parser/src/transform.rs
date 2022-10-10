@@ -8,7 +8,7 @@ use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, LayeredDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -184,6 +184,19 @@ impl MirTransform {
     } else {
       None
     };
+
+    if let Some(target) = &implementation.target {
+      match target.target_type {
+        ImplementationTargetType::None => {}
+        ImplementationTargetType::Aggregate => {
+          http_api_impl.target_aggregate = target.name.clone();
+        }
+        ImplementationTargetType::Entity => {
+          http_api_impl.target_entity = target.name.clone()
+        }
+        ImplementationTargetType::ValueObject => {}
+      }
+    }
 
     http_api_impl
   }
@@ -411,6 +424,7 @@ Entity Shopping {
   fn impl_support() {
     let str = r#"
 impl CinemaCreatedEvent {
+  aggregate: Cinema;
   endpoint {
     GET "/book/{id}";
     authorization: Basic admin admin;
@@ -422,7 +436,7 @@ impl CinemaCreatedEvent {
     let context_map = MirTransform::mir(str).unwrap();
     assert_eq!(context_map.implementations[0], Implementation::PublishHttpApi(HttpApiImpl {
       name: "CinemaCreatedEvent".to_string(),
-      target_aggregate: "".to_string(),
+      target_aggregate: "Cinema".to_string(),
       target_entity: "".to_string(),
       qualified: "".to_string(),
       endpoint: HttpEndpoint {
@@ -512,13 +526,13 @@ impl CinemaCreatedEvent {
   fn lower_layered() {
     let str = r#"layered DDD {
   dependency {
-    "interface" -> "application"
-    "interface" -> "domain"
+    "rest" -> "application"
+    "rest" -> "domain"
     "domain" -> "application"
     "application" -> "infrastructure"
-    "interface" -> "infrastructure"
+    "rest" -> "infrastructure"
   }
-  layer interface {
+  layer rest {
      package: "com.example.book";
   }
   layer domain {
@@ -537,7 +551,7 @@ impl CinemaCreatedEvent {
       name: "DDD".to_string(),
       layers: vec![
         Layer {
-          name: "interface".to_string(),
+          name: "rest".to_string(),
           package: "com.example.book".to_string(),
         },
         Layer {
@@ -555,11 +569,11 @@ impl CinemaCreatedEvent {
       ],
       dependencies: vec![
         Dependency {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "application".to_string(),
         },
         Dependency {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "domain".to_string(),
         },
         Dependency {
@@ -571,7 +585,7 @@ impl CinemaCreatedEvent {
           target: "infrastructure".to_string(),
         },
         Dependency {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "infrastructure".to_string(),
         },
       ],

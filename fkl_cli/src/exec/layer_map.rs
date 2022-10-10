@@ -31,7 +31,7 @@ impl LayerMap {
     for layer in &layered.layers {
       let string: &str = &layer.name;
       match string {
-        "interface" => map.interface = layer.package.clone(),
+        "rest" => map.interface = layer.package.clone(),
         "application" => map.application = layer.package.clone(),
         "domain" => map.domain = layer.package.clone(),
         "infrastructure" => map.infrastructure = layer.package.clone(),
@@ -86,7 +86,7 @@ mod tests {
       dependencies: vec![],
       layers: vec![
         Layer {
-          name: "interface".to_string(),
+          name: "rest".to_string(),
           package: "com.feakin.fklang".to_string(),
         },
       ],

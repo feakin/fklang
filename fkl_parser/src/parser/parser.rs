@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -416,10 +416,31 @@ fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
       Rule::flow_decl => {
         implementation.flow = consume_flow(p);
       }
+      Rule::set_target_object => {
+        implementation.target = Some(consume_set_target_object(p));
+      }
       _ => println!("unreachable implementation rule: {:?}", p.as_rule())
     };
   }
   return implementation;
+}
+
+fn consume_set_target_object(pair: Pair<Rule>) -> ImplementationTarget {
+  let mut target = ImplementationTarget::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::set_aggregate_name => {
+        target.target_type = ImplementationTargetType::Aggregate;
+        target.name = p.as_str().to_string();
+      }
+      Rule::set_entity_name => {
+        target.target_type = ImplementationTargetType::Entity;
+        target.name = p.as_str().to_string();
+      }
+      _ => println!("unreachable set_target_object rule: {:?}", p.as_rule())
+    };
+  }
+  return target;
 }
 
 fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
@@ -698,6 +719,7 @@ fn parse_inline_doc(pair: Pair<Rule>) -> String {
 #[cfg(test)]
 mod tests {
   use crate::parser::ast::*;
+  use crate::parser::ast::ImplementationTargetType::Aggregate;
   use crate::parser::ast::RelationDirection::{BiDirected, PositiveDirected};
   use crate::parser::ast::StepDecl::{Message, MethodCall};
   use crate::parser::parser::parse;
@@ -1178,6 +1200,7 @@ struct Cinema {
           name: "Cinema".to_string()
         }),
       },
+      target: None,
       flow: None,
     }));
 
@@ -1216,6 +1239,7 @@ imple CinemaCreatedEvent {
   #[test]
   fn impl_with_flow() {
     let decls = parse(r#"impl CinemaUpdated {
+    aggregate: Cinema;
     endpoint {
         POST "/book/{id}";
         request: CinemaUpdatedRequest;
@@ -1254,6 +1278,10 @@ imple CinemaCreatedEvent {
           name: "Cinema".to_string()
         }),
       },
+      target: Some(ImplementationTarget {
+        target_type: Aggregate,
+        name: "Cinema".to_string(),
+      }),
       flow: Some(FlowDecl {
         inline_doc: "".to_string(),
         steps: vec![
@@ -1297,13 +1325,13 @@ imple CinemaCreatedEvent {
   fn layered_architecture() {
     let decls = parse(r#"layered DDD {
   dependency {
-    "interface" -> "application"
-    "interface" -> "domain"
+    "rest" -> "application"
+    "rest" -> "domain"
     "domain" -> "application"
     "application" -> "infrastructure"
-    "interface" -> "infrastructure"
+    "rest" -> "infrastructure"
   }
-  layer interface {
+  layer rest {
      package: "com.example.book";
   }
   layer domain {
@@ -1325,11 +1353,11 @@ imple CinemaCreatedEvent {
       inline_doc: "".to_string(),
       dependencies: vec![
         LayerRelationDecl {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "application".to_string(),
         },
         LayerRelationDecl {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "domain".to_string(),
         },
         LayerRelationDecl {
@@ -1341,13 +1369,13 @@ imple CinemaCreatedEvent {
           target: "infrastructure".to_string(),
         },
         LayerRelationDecl {
-          source: "interface".to_string(),
+          source: "rest".to_string(),
           target: "infrastructure".to_string(),
         },
       ],
       layers: vec![
         LayerDecl {
-          name: "interface".to_string(),
+          name: "rest".to_string(),
           inline_doc: "".to_string(),
           package: "com.example.book".to_string(),
         },

@@ -99,12 +99,20 @@ struct_decl = {
 }
 
 implementation_decl = {
-  "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl | flow_decl)* ~ "}"
+  "impl" ~ identifier ~ "{" ~ (inline_doc | endpoint_decl | flow_decl | set_target_object )* ~ "}"
 }
 
 endpoint_decl = {
   "endpoint" ~ "{" ~ http_request_decl ~ request_body? ~ authorization_decl? ~ http_response_decl? ~ "}"
 }
+
+set_target_object = {
+  "aggregate" ~ ":" ~ set_aggregate_name ~ ";"?
+  | "entity" ~ ":" ~ set_entity_name ~ ";"?
+}
+
+set_aggregate_name = { identifier }
+set_entity_name = { identifier }
 
 flow_decl = {
   "flow" ~ "{" ~ (via_method_decl | via_message_decl)* ~ "}"

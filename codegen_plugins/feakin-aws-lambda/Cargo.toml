@@ -1,5 +1,5 @@
 [package]
-name = "feakin-aws-lambda"
+name = "fkl_plugin_aws"
 version = "0.1.0"
 edition = "2021"
 

@@ -201,7 +201,28 @@ pub struct ImplementationDecl {
   pub qualified_name: String,
   // can be file path or url
   pub endpoint: EndpointDecl,
+  pub target: Option<ImplementationTarget>,
   pub flow: Option<FlowDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ImplementationTarget {
+  pub target_type: ImplementationTargetType,
+  pub name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ImplementationTargetType {
+  None,
+  Aggregate,
+  Entity,
+  ValueObject
+}
+
+impl Default for ImplementationTargetType {
+  fn default() -> Self {
+    ImplementationTargetType::None
+  }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

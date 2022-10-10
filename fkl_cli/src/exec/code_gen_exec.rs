@@ -44,7 +44,7 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
     let layer_map = LayerMap::from(mir.layered.clone().unwrap());
 
     code_blocks.iter().for_each(|code_block| {
-      let file_name = code_block.class_name.clone() + ".java";
+      let file_name = code_block.class_name.clone() + "Controller.java";
       let mut target_path = base_path.clone();
       target_path.push(layer_map.interface_path().clone());
       target_path.push(file_name);
@@ -55,7 +55,8 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
 
       let path = format!("{}", target_path.display());
 
-      let code_file = JavaIdent::parse(&path);
+      let code = fs::read_to_string(&path).unwrap();
+      let code_file = JavaIdent::parse(&code);
       let first_class = &code_file.classes[0];
 
       let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
