@@ -12,7 +12,7 @@ use crate::line_separator::line_separator;
 pub struct JavaInserter {}
 
 impl JavaInserter {
-  fn insert(&self, path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
+  pub fn insert(&self, path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
     let file_path = PathBuf::from(path);
     if !file_path.exists() {
       return Err(format!("path {} not exists", path));

@@ -6,12 +6,12 @@ use clap::ArgMatches;
 
 use fkl_parser::parse;
 
-use crate::gen_exec::run_gen;
+use crate::exec::code_gen_exec;
 
 pub mod ident;
 pub mod class_info;
 pub mod inserter;
-pub mod gen_exec;
+pub mod exec;
 pub mod line_separator;
 
 // todo: add code highlight support
@@ -54,7 +54,7 @@ fn main() {
       let feakin_path = matches.get_one::<PathBuf>("path");
       let filter_impl = matches.get_one::<String>("impl");
 
-      run_gen(feakin_path, filter_impl);
+      code_gen_exec::code_gen_exec(feakin_path, filter_impl);
     }
     Some(("dot", matches)) => {
       let manifest_path = matches.get_one::<PathBuf>("path");
