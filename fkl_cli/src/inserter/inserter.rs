@@ -49,7 +49,6 @@ mod tests {
   use super::*;
 
   #[test]
-  #[ignore]
   fn test_insert() {
     let inserter = JavaInserter {};
     let clazz = CodeClass {
@@ -67,11 +66,11 @@ mod tests {
     let path = "test.java";
     fs::write(path, code).unwrap();
     inserter.insert(path, &clazz, vec![
-      "    public void demo() {\n".to_string(),
+      "    public void demo() {".to_string(),
       "    }".to_string(),
     ]).unwrap();
 
     let content = fs::read_to_string(path).unwrap();
-    assert_eq!(content, "public class Test {public class Test {");
+    assert_eq!(content, "public class Test {\n    public void demo() {\n    }\n}");
   }
 }
