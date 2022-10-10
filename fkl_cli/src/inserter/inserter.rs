@@ -1,4 +1,3 @@
-use std::fs;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
@@ -12,7 +11,7 @@ use crate::line_separator::line_separator;
 pub struct JavaInserter {}
 
 impl JavaInserter {
-  pub fn insert(&self, path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
+  pub fn insert(path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
     let file_path = PathBuf::from(path);
     if !file_path.exists() {
       return Err(format!("path {} not exists", path));
@@ -47,7 +46,6 @@ mod tests {
 
   #[test]
   fn test_insert() {
-    let inserter = JavaInserter {};
     let clazz = CodeClass {
       name: "Test".to_string(),
       path: "Test.java".to_string(),
@@ -62,7 +60,7 @@ mod tests {
     let code = "public class Test {\n}";
     let path = "test.java";
     fs::write(path, code).unwrap();
-    inserter.insert(path, &clazz, vec![
+    JavaInserter::insert(path, &clazz, vec![
       "    public void demo() {".to_string(),
       "    }".to_string(),
     ]).unwrap();

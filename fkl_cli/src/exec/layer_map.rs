@@ -59,10 +59,12 @@ impl LayerMap {
   }
 }
 
-// "com.feakin.fklang" => "src/main/java/com/feakin.fklang"
+/// convert java package to path
+/// Unix: "com.feakin.fklang" => "src/main/java/com/feakin.fklang"
+/// Windows: "com.feakin.fklang" => "src\\main\\java\\com\\feakin.fklang"
 pub fn java_package_to_path(package: &str) -> String {
-  let mut path = String::from("src/main/java/");
-  path.push_str(&*package.replace(".", "/"));
+  let mut path = "src/main/java/".to_string();
+  path.push_str(&package.replace(".", "/"));
   path
 }
 
@@ -87,7 +89,7 @@ mod tests {
           name: "interface".to_string(),
           package: "com.feakin.fklang".to_string(),
         },
-      ]
+      ],
     });
 
     assert_eq!(layer_map.interface_path(), "src/main/java/com/feakin/fklang")

@@ -8,6 +8,9 @@ use fkl_parser::mir::{ContextMap, Implementation};
 use fkl_parser::parse;
 
 use crate::exec::layer_map::LayerMap;
+use crate::ident::base_ident::CodeIdent;
+use crate::ident::java_ident::JavaIdent;
+use crate::inserter::inserter::JavaInserter;
 
 pub struct CodeBlock {
   pub target_layer: DddLayer,
@@ -36,11 +39,20 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
   }).unwrap();
 
   let code_blocks = collect_codes(filter_impl, &mir);
-  let mut has_layered_define = mir.layered.is_some();
-  if has_layered_define {
+  let has_layered_define = mir.layered.is_some();
+  if !code_blocks.is_empty() && has_layered_define {
     let layer_map = LayerMap::from(mir.layered.clone().unwrap());
-    let target_path = layer_map.interface_path();
-    // JavaInserter::insert(&layer_map, code_blocks).expect("TODO: panic message");
+
+    code_blocks.iter().for_each(|code_block| {
+      let file_name = code_block.class_name.clone() + ".java";
+      let target_path: String = layer_map.interface_path().clone() + &file_name;
+      let code_file = JavaIdent::parse(&target_path);
+      let first_class = &code_file.classes[0];
+
+      let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
+      JavaInserter::insert(&target_path, first_class, lines)
+        .expect("TODO: panic message");
+    });
   }
 }
 
@@ -56,7 +68,7 @@ fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBloc
               let output = gen_http_api(http, "java");
               codes.push(CodeBlock {
                 target_layer: DddLayer::Interface,
-                class_name: "".to_string(),
+                class_name: http.target(),
                 code: output,
               });
             }
@@ -64,7 +76,7 @@ fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBloc
             let output = gen_http_api(http, "java");
             codes.push(CodeBlock {
               target_layer: DddLayer::Interface,
-              class_name: "".to_string(),
+              class_name: http.target(),
               code: output,
             });
           }
