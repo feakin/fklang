@@ -57,7 +57,7 @@ pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_pa
       JavaInserter::insert(&path, first_class, &lines)
         .expect("TODO: panic message");
 
-      info!("inserted code to {}, {:?}", path, &lines);
+      info!("inserted to {}, code: {}", path, &lines.join("\n"));
     });
   }
 }

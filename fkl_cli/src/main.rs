@@ -18,7 +18,8 @@ mod e2e;
 
 // todo: add code highlight support
 fn main() {
-  env_logger::init();
+  env_logger::init_from_env(
+    env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
 
   let cmd = clap::Command::new("fkl")
     .bin_name("fkl")
