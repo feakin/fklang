@@ -13,6 +13,7 @@ pub mod class_info;
 pub mod inserter;
 pub mod exec;
 pub mod line_separator;
+mod e2e;
 
 // todo: add code highlight support
 fn main() {
@@ -54,7 +55,7 @@ fn main() {
       let feakin_path = matches.get_one::<PathBuf>("path");
       let filter_impl = matches.get_one::<String>("impl");
 
-      code_gen_exec::code_gen_exec(feakin_path, filter_impl);
+      code_gen_exec::code_gen_exec(feakin_path, filter_impl, &PathBuf::from("."));
     }
     Some(("dot", matches)) => {
       let manifest_path = matches.get_one::<PathBuf>("path");

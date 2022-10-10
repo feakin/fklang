@@ -40,6 +40,7 @@ impl JavaInserter {
 
 #[cfg(test)]
 mod tests {
+  use std::fs;
   use crate::class_info::CodePoint;
 
   use super::*;

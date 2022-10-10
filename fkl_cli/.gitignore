@@ -1,1 +1,3 @@
 *.java
+test_data/**/build/**
+!test_data/**/*.java

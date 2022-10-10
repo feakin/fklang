@@ -25,7 +25,7 @@ pub enum DddLayer {
   Infrastructure,
 }
 
-pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>) {
+pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>, base_path: &PathBuf) {
   if feakin_path.is_none() {
     error!("Please provide a path to a manifest file");
     return;
@@ -45,12 +45,21 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
 
     code_blocks.iter().for_each(|code_block| {
       let file_name = code_block.class_name.clone() + ".java";
-      let target_path: String = layer_map.interface_path().clone() + &file_name;
-      let code_file = JavaIdent::parse(&target_path);
+      let mut target_path = base_path.clone();
+      target_path.push(layer_map.interface_path().clone());
+      target_path.push(file_name);
+
+      if !target_path.exists() {
+        panic!("target file not found: {}", target_path.to_str().unwrap());
+      }
+
+      let path = format!("{}", target_path.display());
+
+      let code_file = JavaIdent::parse(&path);
       let first_class = &code_file.classes[0];
 
       let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
-      JavaInserter::insert(&target_path, first_class, lines)
+      JavaInserter::insert(&path, first_class, lines)
         .expect("TODO: panic message");
     });
   }
