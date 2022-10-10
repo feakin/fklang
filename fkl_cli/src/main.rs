@@ -1,17 +1,17 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+
 use clap::ArgMatches;
-use log::info;
-use fkl_codegen_java::gen_http_api;
-use fkl_parser::mir::ContextMap;
-use fkl_parser::mir::implementation::Implementation;
 
 use fkl_parser::parse;
+
+use crate::gen_exec::run_gen;
 
 pub mod ident;
 pub mod class_info;
 pub mod inserter;
+pub mod gen_exec;
 
 // todo: add code highlight support
 fn main() {
@@ -50,38 +50,10 @@ fn main() {
   let matches: ArgMatches = cmd.get_matches();
   match matches.subcommand() {
     Some(("gen", matches)) => {
-      let mut is_success = false;
       let feakin_path = matches.get_one::<PathBuf>("path");
-      if let Some(path) = feakin_path {
-        let feakin = fs::read_to_string(path).unwrap();
-        let mir: ContextMap = parse(&feakin).or_else(|e| { info!("{}", e); Err(e) }).unwrap();
-        let filter_impl = matches.get_one::<String>("impl");
+      let filter_impl = matches.get_one::<String>("impl");
 
-        mir.implementations.iter()
-          .for_each(|implementation| {
-            match implementation {
-              Implementation::PublishHttpApi(http) => {
-                if let Some(filter_impl) = filter_impl {
-                  if &http.name == filter_impl {
-                    let output = gen_http_api(http.clone(), "java");
-                    info!("{}", output);
-                  }
-                } else {
-                  let output = gen_http_api(http.clone(), "java");
-                  info!("{}", output);
-                }
-              }
-              Implementation::PublishEvent => {}
-              Implementation::PublishMessage => {}
-            }
-          });
-
-        is_success = true;
-      }
-
-      if !is_success {
-        info!("run gen failure!")
-      }
+      run_gen(feakin_path, filter_impl);
     }
     Some(("dot", matches)) => {
       let manifest_path = matches.get_one::<PathBuf>("path");
@@ -91,7 +63,7 @@ fn main() {
         panic!("Please provide a path to a manifest file");
       }
     }
-    Some(("parse", matches)) => {
+    Some(("ast", matches)) => {
       let manifest_path = matches.get_one::<PathBuf>("path");
       if let Some(path) = manifest_path {
         parse_to_ast(path);
