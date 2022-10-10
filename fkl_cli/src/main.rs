@@ -2,6 +2,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 use clap::ArgMatches;
+use log::info;
 use fkl_codegen_java::gen_http_api;
 use fkl_parser::mir::ContextMap;
 use fkl_parser::mir::implementation::Implementation;
@@ -14,6 +15,8 @@ pub mod inserter;
 
 // todo: add code highlight support
 fn main() {
+  env_logger::init();
+
   let cmd = clap::Command::new("fkl")
     .bin_name("fkl")
     .subcommand_required(true)
@@ -51,7 +54,7 @@ fn main() {
       let feakin_path = matches.get_one::<PathBuf>("path");
       if let Some(path) = feakin_path {
         let feakin = fs::read_to_string(path).unwrap();
-        let mir: ContextMap = parse(&feakin).or_else(|e| { println!("{}", e); Err(e) }).unwrap();
+        let mir: ContextMap = parse(&feakin).or_else(|e| { info!("{}", e); Err(e) }).unwrap();
         let filter_impl = matches.get_one::<String>("impl");
 
         mir.implementations.iter()
@@ -61,11 +64,11 @@ fn main() {
                 if let Some(filter_impl) = filter_impl {
                   if &http.name == filter_impl {
                     let output = gen_http_api(http.clone(), "java");
-                    println!("{}", output);
+                    info!("{}", output);
                   }
                 } else {
                   let output = gen_http_api(http.clone(), "java");
-                  println!("{}", output);
+                  info!("{}", output);
                 }
               }
               Implementation::PublishEvent => {}
@@ -77,7 +80,7 @@ fn main() {
       }
 
       if !is_success {
-        println!("run gen failure!")
+        info!("run gen failure!")
       }
     }
     Some(("dot", matches)) => {
