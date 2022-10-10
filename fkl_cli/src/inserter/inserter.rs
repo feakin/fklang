@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::class_info::CodeClass;
+use crate::line_separator::line_separator;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 pub struct JavaInserter {}
@@ -32,13 +33,9 @@ impl JavaInserter {
     });
 
     let mut dst = File::create(&file_path).unwrap();
-    dst.write(all_lines.join(&*Self::get_line_separator()).as_bytes()).unwrap();
+    dst.write(all_lines.join(&*line_separator()).as_bytes()).unwrap();
 
     Ok(())
-  }
-
-  fn get_line_separator() -> String {
-    "\n".to_string()
   }
 }
 

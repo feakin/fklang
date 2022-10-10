@@ -12,6 +12,7 @@ pub mod ident;
 pub mod class_info;
 pub mod inserter;
 pub mod gen_exec;
+pub mod line_separator;
 
 // todo: add code highlight support
 fn main() {
