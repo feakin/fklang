@@ -14,7 +14,7 @@ impl Default for LayerMap {
       interface: "".to_string(),
       application: "".to_string(),
       domain: "".to_string(),
-      infrastructure: "".to_string()
+      infrastructure: "".to_string(),
     }
   }
 }
@@ -42,8 +42,20 @@ impl LayerMap {
     map
   }
 
-  pub fn interface_path(&self) {
+  pub fn interface_path(&self) -> String {
+    java_package_to_path(&self.interface)
+  }
 
+  pub fn application_path(&self) -> String {
+    java_package_to_path(&self.application)
+  }
+
+  pub fn domain_path(&self) -> String {
+    java_package_to_path(&self.domain)
+  }
+
+  pub fn infrastructure_path(&self) -> String {
+    java_package_to_path(&self.infrastructure)
   }
 }
 
@@ -56,11 +68,29 @@ pub fn java_package_to_path(package: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-  use crate::exec::layer_map::java_package_to_path;
+  use fkl_parser::mir::{Layer, LayeredArchitecture};
+  use crate::exec::layer_map::{java_package_to_path, LayerMap};
 
   #[test]
   fn package_convert() {
     assert_eq!(java_package_to_path("com.feakin.fklang"), "src/main/java/com/feakin/fklang")
+  }
+
+  #[test]
+  fn package_convert_with_trailing_slash() {
+    let layer_map = LayerMap::from(LayeredArchitecture {
+      name: "".to_string(),
+      description: "".to_string(),
+      dependencies: vec![],
+      layers: vec![
+        Layer {
+          name: "interface".to_string(),
+          package: "com.feakin.fklang".to_string(),
+        },
+      ]
+    });
+
+    assert_eq!(layer_map.interface_path(), "src/main/java/com/feakin/fklang/")
   }
 }
 

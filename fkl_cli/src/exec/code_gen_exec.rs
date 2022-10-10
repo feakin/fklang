@@ -1,9 +1,13 @@
+use std::fs;
+use std::path::PathBuf;
+
+use log::error;
+
 use fkl_codegen_java::gen_http_api;
 use fkl_parser::mir::{ContextMap, Implementation};
-use std::path::PathBuf;
-use std::fs;
-use log::error;
 use fkl_parser::parse;
+
+use crate::exec::layer_map::LayerMap;
 
 pub struct CodeBlock {
   pub target_layer: DddLayer,
@@ -33,10 +37,10 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
   let code_blocks = collect_codes(filter_impl, &mir);
   let mut has_layered_define = mir.layered.is_some();
   if has_layered_define {
-    // let layer_map = LayerMap::from(mir.layered.clone().unwrap());
+    let layer_map = LayerMap::from(mir.layered.clone().unwrap());
+    let target_path = layer_map.interface_path();
     // JavaInserter::insert(&layer_map, code_blocks).expect("TODO: panic message");
   }
-
 }
 
 /// collect codes for generate.
