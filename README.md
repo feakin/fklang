@@ -1,7 +1,7 @@
 # Fklang
 
 [![Build](https://github.com/feakin/fklang/actions/workflows/build.yml/badge.svg)](https://github.com/feakin/fklang/actions/workflows/build.yml)
-![Crates.io](https://img.shields.io/crates/v/fklang)
+![Crates.io](https://img.shields.io/crates/v/fkl_cli)
 [![codecov](https://codecov.io/gh/feakin/fklang/branch/master/graph/badge.svg?token=PCIL3T0NDR)](https://codecov.io/gh/feakin/fklang)
 
 > Fklang 是一个架构设计 DSL，通过显性化软件架构设计，以确保软件系统描述与实现的一致性。并在工作流中，内嵌对于 AI 代码生成软件的支持，以构筑完整的开发者体验。
