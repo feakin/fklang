@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use log::error;
+use log::{error, info};
 
 use fkl_codegen_java::gen_http_api;
 use fkl_parser::mir::{ContextMap, Implementation};
@@ -25,14 +25,8 @@ pub enum DddLayer {
   Infrastructure,
 }
 
-pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>, base_path: &PathBuf) {
-  if feakin_path.is_none() {
-    error!("Please provide a path to a manifest file");
-    return;
-  }
-
-  let path = feakin_path.unwrap();
-  let feakin = fs::read_to_string(path).unwrap();
+pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_path: &PathBuf) {
+  let feakin = fs::read_to_string(input_path).unwrap();
   let mir: ContextMap = parse(&feakin).or_else(|e| {
     error!("{}", e);
     Err(e)
@@ -60,8 +54,10 @@ pub fn code_gen_exec(feakin_path: Option<&PathBuf>, filter_impl: Option<&String>
       let first_class = &code_file.classes[0];
 
       let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
-      JavaInserter::insert(&path, first_class, lines)
+      JavaInserter::insert(&path, first_class, &lines)
         .expect("TODO: panic message");
+
+      info!("inserted code to {}, {:?}", path, &lines);
     });
   }
 }

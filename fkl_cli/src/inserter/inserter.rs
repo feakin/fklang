@@ -11,7 +11,7 @@ use crate::line_separator::line_separator;
 pub struct JavaInserter {}
 
 impl JavaInserter {
-  pub fn insert(path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
+  pub fn insert(path: &str, clazz: &CodeClass, lines: &Vec<String>) -> Result<(), String> {
     let file_path = PathBuf::from(path);
     if !file_path.exists() {
       return Err(format!("path {} not exists", path));
@@ -61,7 +61,7 @@ mod tests {
     let code = "public class Test {\n}";
     let path = "test.java";
     fs::write(path, code).unwrap();
-    JavaInserter::insert(path, &clazz, vec![
+    JavaInserter::insert(path, &clazz, &vec![
       "    public void demo() {".to_string(),
       "    }".to_string(),
     ]).unwrap();

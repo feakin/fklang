@@ -14,7 +14,7 @@ mod tests {
     let mut input_path = d.clone();
     input_path.push(format!("spring.fkl"));
 
-    code_gen_exec::code_gen_exec(Some(&input_path), Some(&"HelloGot".to_string()), &base_path);
+    code_gen_exec::code_gen_exec(&input_path, Some(&"HelloGot".to_string()), &base_path);
 
     let controller = "test_data/spring/src/main/java/com/feakin/demo/rest/HelloController.java";
     let output = fs::read_to_string(controller).expect("Something went wrong reading the file");

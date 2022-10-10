@@ -8,6 +8,7 @@ impl HelloGot {
 }
 
 layered DDD {
+  // by default
   dependency {
     "interface" -> "application"
     "interface" -> "domain"

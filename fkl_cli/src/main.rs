@@ -3,6 +3,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::ArgMatches;
+use log::error;
 
 use fkl_parser::parse;
 
@@ -55,7 +56,15 @@ fn main() {
       let feakin_path = matches.get_one::<PathBuf>("path");
       let filter_impl = matches.get_one::<String>("impl");
 
-      code_gen_exec::code_gen_exec(feakin_path, filter_impl, &PathBuf::from("."));
+      if feakin_path.is_none() {
+        error!("Please provide a path to a manifest file");
+        return;
+      }
+
+      let path = feakin_path.unwrap();
+      let base_path = path.parent().unwrap().to_path_buf();
+
+      code_gen_exec::code_gen_exec(path, filter_impl, &base_path);
     }
     Some(("dot", matches)) => {
       let manifest_path = matches.get_one::<PathBuf>("path");
