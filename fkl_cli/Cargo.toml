@@ -1,6 +1,6 @@
 [package]
 name = "fkl_cli"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["Phodal Huang <h@phodal.com>"]
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
 repository = "https://github.com/feakin/fklang"
@@ -30,8 +30,8 @@ syntect = "5.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 
-fkl-parser = { path = "../fkl_parser", version = "0.2.1" }
-fkl_codegen_java = { path = "../fkl_codegen_java", version = "0.2.1" }
+fkl-parser = { path = "../fkl_parser", version = "0.2.2" }
+fkl_codegen_java = { path = "../fkl_codegen_java", version = "0.2.2" }
 
 tree-sitter = "=0.19.3"
 tree-sitter-java = "0.19.0"
