@@ -1,6 +1,6 @@
 use std::fs;
 use std::fs::File;
-use std::io::{BufRead, BufReader, LineWriter, Write};
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
@@ -11,13 +11,13 @@ use crate::class_info::CodeClass;
 pub struct JavaInserter {}
 
 impl JavaInserter {
-  fn insert(&self, path: &str, clazz: &CodeClass, code: Vec<String>) -> Result<(), String> {
+  fn insert(&self, path: &str, clazz: &CodeClass, lines: Vec<String>) -> Result<(), String> {
     let file_path = PathBuf::from(path);
     if !file_path.exists() {
       return Err(format!("path {} not exists", path));
     }
 
-    let will_insert_line = clazz.end.row - 1;
+    let will_insert_line = clazz.end.row;
 
     let file = File::options()
       .read(true)
@@ -25,16 +25,20 @@ impl JavaInserter {
       .open(&file_path).unwrap();
 
     let buf = BufReader::new(&file);
-    buf.lines().enumerate().for_each(|(index, line)| {
-      if index == will_insert_line {
-        let mut writer = LineWriter::new(&file);
-        code.iter().for_each(|line| {
-          writer.write(line.as_bytes()).unwrap();
-        });
-      }
+    let mut all_lines: Vec<String> = buf.lines().map(|l| l.unwrap()).collect();
+
+    lines.iter().enumerate().for_each(|(index, line)| {
+      all_lines.insert(will_insert_line + index, line.clone());
     });
 
+    let mut dst = File::create(&file_path).unwrap();
+    dst.write(all_lines.join(&*Self::get_line_separator()).as_bytes()).unwrap();
+
     Ok(())
+  }
+
+  fn get_line_separator() -> String {
+    "\n".to_string()
   }
 }
 
