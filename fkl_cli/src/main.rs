@@ -10,7 +10,7 @@ use fkl_parser::parse;
 use crate::exec::code_gen_exec;
 
 pub mod ident;
-pub mod class_info;
+pub mod code_meta;
 pub mod inserter;
 pub mod exec;
 pub mod line_separator;

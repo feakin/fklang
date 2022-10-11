@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use crate::class_info::{CodeClass, CodeFunction};
+use crate::code_meta::{CodeClass, CodeFunction};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct CodeFile {

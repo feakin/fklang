@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::class_info::CodeClass;
+use crate::code_meta::CodeClass;
 use crate::line_separator::line_separator;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
@@ -41,7 +41,7 @@ impl JavaInserter {
 #[cfg(test)]
 mod tests {
   use std::fs;
-  use crate::class_info::CodePoint;
+  use crate::code_meta::CodePoint;
 
   use super::*;
 

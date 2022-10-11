@@ -1,5 +1,5 @@
 use tree_sitter::{Node, QueryCapture};
-use crate::class_info::{CodeFile, CodeFunction, Location};
+use crate::code_meta::{CodeFile, CodeFunction, Location};
 
 pub trait CodeIdent {
   fn parse(code: &str) -> CodeFile;

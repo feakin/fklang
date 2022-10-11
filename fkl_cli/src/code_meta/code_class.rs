@@ -1,19 +1,19 @@
 use serde::{Deserialize, Serialize};
-use crate::class_info::{CodePoint, Location};
+use crate::code_meta::{CodeFunction, CodePoint, Location};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
-pub struct CodeFunction {
+pub struct CodeClass {
   pub name: String,
-  // todo: add support
-  pub return_type: String,
-  // todo: add support
-  pub variable: Vec<String>,
+  pub path: String,
+  pub module: String,
+  pub package: String,
+  pub implements: Vec<String>,
+  pub functions: Vec<CodeFunction>,
   pub start: CodePoint,
-  pub end: CodePoint,
+  pub end: CodePoint
 }
 
-
-impl Location for CodeFunction {
+impl Location for CodeClass {
   fn set_start(&mut self, row: usize, column: usize) {
     self.start.row = row;
     self.start.column = column;
