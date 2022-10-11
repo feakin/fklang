@@ -34,31 +34,36 @@ pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_pa
 
   let code_blocks = collect_codes(filter_impl, &mir);
   let has_layered_define = mir.layered.is_some();
-  if !code_blocks.is_empty() && has_layered_define {
-    let layer_map = LayerMap::from(mir.layered.clone().unwrap());
+  if !code_blocks.is_empty() {
+    if has_layered_define {
+      let layer_map = LayerMap::from(mir.layered.clone().unwrap());
+      code_blocks.iter().for_each(|code_block| {
+        let file_name = code_block.class_name.clone() + "Controller.java";
+        let mut target_path = base_path.clone();
+        target_path.push(layer_map.interface_path().clone());
+        target_path.push(file_name);
 
-    code_blocks.iter().for_each(|code_block| {
-      let file_name = code_block.class_name.clone() + "Controller.java";
-      let mut target_path = base_path.clone();
-      target_path.push(layer_map.interface_path().clone());
-      target_path.push(file_name);
+        if !target_path.exists() {
+          panic!("target file not found: {}", target_path.to_str().unwrap());
+        }
 
-      if !target_path.exists() {
-        panic!("target file not found: {}", target_path.to_str().unwrap());
-      }
+        let path = format!("{}", target_path.display());
 
-      let path = format!("{}", target_path.display());
+        let code = fs::read_to_string(&path).unwrap();
+        let code_file = JavaIdent::parse(&code);
+        let first_class = &code_file.classes[0];
 
-      let code = fs::read_to_string(&path).unwrap();
-      let code_file = JavaIdent::parse(&code);
-      let first_class = &code_file.classes[0];
+        let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
+        JavaInserter::insert(&path, first_class, &lines)
+          .expect("TODO: panic message");
 
-      let lines: Vec<String> = code_block.code.split("\n").map(|s| s.to_string()).collect();
-      JavaInserter::insert(&path, first_class, &lines)
-        .expect("TODO: panic message");
-
-      info!("inserted to {}, code: {}", path, &lines.join("\n"));
-    });
+        info!("inserted to {}, code: {}", path, &lines.join("\n"));
+      });
+    } else {
+      code_blocks.iter().for_each(|block| {
+        info!("no layered define found, generate code {}", block.code);
+      });
+    }
   }
 }
 
