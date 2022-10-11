@@ -9,8 +9,8 @@ use fkl_parser::parse;
 
 use crate::exec::layer_map::LayerMap;
 use crate::exec::layer_path_builder::LayerPathBuilder;
-use crate::ident::base_ident::CodeIdent;
-use crate::ident::java_ident::JavaIdent;
+use crate::construct::code_construct::CodeConstruct;
+use crate::construct::java_construct::JavaConstruct;
 use crate::inserter::inserter::JavaInserter;
 
 pub struct CodeBlock {
@@ -42,7 +42,7 @@ pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_pa
         let path = LayerPathBuilder::controller(base_path, &layer_map, block.class_name.clone());
 
         let code = fs::read_to_string(&path).unwrap();
-        let code_file = JavaIdent::parse(&code);
+        let code_file = JavaConstruct::parse(&code);
         let first_class = &code_file.classes[0];
 
         let lines: Vec<String> = block.code.split("\n").map(|s| s.to_string()).collect();

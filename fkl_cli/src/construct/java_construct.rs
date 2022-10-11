@@ -1,7 +1,7 @@
 use tree_sitter::{Node, Parser, Query, QueryCursor};
 
 use crate::code_meta::{CodeClass, CodeFile};
-use crate::ident::base_ident::CodeIdent;
+use crate::construct::code_construct::CodeConstruct;
 
 const JAVA_QUERY: &'static str = "
 (package_declaration
@@ -32,13 +32,13 @@ const JAVA_QUERY: &'static str = "
 )";
 
 
-pub struct JavaIdent {
+pub struct JavaConstruct {
   parser: Parser,
   query: Query,
 }
 
-impl JavaIdent {
-  pub fn new() -> JavaIdent {
+impl JavaConstruct {
+  pub fn new() -> JavaConstruct {
     let mut parser = Parser::new();
     let language = tree_sitter_java::language();
     parser.set_language(language).unwrap();
@@ -46,22 +46,22 @@ impl JavaIdent {
     let query = Query::new(language, &JAVA_QUERY)
       .map_err(|e| println!("{}", format!("Query compilation failed: {:?}", e))).unwrap();
 
-    JavaIdent {
+    JavaConstruct {
       parser,
       query,
     }
   }
 }
 
-impl CodeIdent for JavaIdent {
+impl CodeConstruct for JavaConstruct {
   fn parse(code: &str) -> CodeFile {
-    let mut ident = JavaIdent::new();
-    JavaIdent::do_parse(&code, &mut ident)
+    let mut ident = JavaConstruct::new();
+    JavaConstruct::do_parse(&code, &mut ident)
   }
 }
 
-impl JavaIdent {
-  fn do_parse(code: &&str, ident: &mut JavaIdent) -> CodeFile {
+impl JavaConstruct {
+  fn do_parse(code: &&str, ident: &mut JavaConstruct) -> CodeFile {
     let tree = ident.parser.parse(code, None).unwrap();
     let text_callback = |n: Node| &code[n.byte_range()];
     let mut query_cursor = QueryCursor::new();
@@ -96,7 +96,7 @@ impl JavaIdent {
           class.package = code_file.package.clone();
 
           let class_node = capture.node.parent().unwrap();
-          JavaIdent::insert_location(&mut class, class_node);
+          JavaConstruct::insert_location(&mut class, class_node);
           if !is_last_node {
             is_last_node = true;
           }
@@ -105,7 +105,7 @@ impl JavaIdent {
           class.implements.push(text.to_string());
         }
         "function-name" => {
-          class.functions.push(JavaIdent::insert_function(capture, text));
+          class.functions.push(JavaConstruct::insert_function(capture, text));
         }
         "parameter" => {}
         &_ => {
@@ -132,8 +132,8 @@ impl JavaIdent {
 #[cfg(test)]
 mod tests {
   use crate::code_meta::{CodeClass, CodeFunction, CodePoint};
-  use crate::ident::base_ident::CodeIdent;
-  use crate::ident::java_ident::JavaIdent;
+  use crate::construct::code_construct::CodeConstruct;
+  use crate::construct::java_construct::JavaConstruct;
 
   #[test]
   fn should_parse_import() {
@@ -141,7 +141,7 @@ mod tests {
 import java.io.InputStream;
 import payroll.Employee;
 ";
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(3, file.imports.len());
   }
 
@@ -153,7 +153,7 @@ import payroll.Employee;
         return new Date();
     }
 }";
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(1, file.classes.len());
     assert_eq!("DateTimeImpl", file.classes[0].name);
   }
@@ -165,7 +165,7 @@ import payroll.Employee;
         return new Date();
     }
 }";
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(1, file.classes.len());
     assert_eq!("DateTimeImpl", file.classes[0].name);
   }
@@ -178,7 +178,7 @@ import payroll.Employee;
 class DateTimeImpl2 {
 }
 ";
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(2, file.classes.len());
     assert_eq!("DateTimeImpl", file.classes[0].name);
     assert_eq!("DateTimeImpl2", file.classes[1].name);
@@ -188,7 +188,7 @@ class DateTimeImpl2 {
   fn should_support_package_name() {
     let source_code = "package com.phodal.pepper.powermock;
 ";
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!("com.phodal.pepper.powermock", file.package);
   }
 
@@ -202,7 +202,7 @@ class DateTimeImpl2 {
   }
 }";
 
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(1, file.classes.len());
   }
 
@@ -214,7 +214,7 @@ class DateTimeImpl2 {
     }
 }";
 
-    let file = JavaIdent::parse(source_code);
+    let file = JavaConstruct::parse(source_code);
     assert_eq!(file.classes[0], CodeClass {
       name: "DateTimeImpl".to_string(),
       path: "".to_string(),

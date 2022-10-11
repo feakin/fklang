@@ -1,7 +1,7 @@
 use tree_sitter::{Node, QueryCapture};
 use crate::code_meta::{CodeFile, CodeFunction, Location};
 
-pub trait CodeIdent {
+pub trait CodeConstruct {
   fn parse(code: &str) -> CodeFile;
 
   fn insert_location<T: Location>(model: &mut T, node: Node) {
