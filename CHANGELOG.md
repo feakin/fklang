@@ -1,34 +1,38 @@
-# [](https://github.com/feakin/fklang/compare/v0.2.1...v) (2022-10-08)
-
-
-
-## [0.2.1](https://github.com/feakin/fklang/compare/v0.2.0...v0.2.1) (2022-10-08)
+# [](https://github.com/feakin/fklang/compare/v0.2.0...v) (2022-10-11)
 
 
 ### Bug Fixes
 
 * fix demos issues ([bd008d3](https://github.com/feakin/fklang/commit/bd008d34be0a47637df1c4686c00fbff08e5efe8))
 * fix endpoints issues ([7324b9b](https://github.com/feakin/fklang/commit/7324b9b401c64a1b711b9d8dcef568476d4b4a49))
+* fix format issues for newline ([3a51fce](https://github.com/feakin/fklang/commit/3a51fce5605d6f213ea4d15be294237adc29c29b))
+* fix tests ([5e9bdcf](https://github.com/feakin/fklang/commit/5e9bdcf6c0cc39e1361aea4705ecc2d753f3438d))
+* fix tests ([a154c0f](https://github.com/feakin/fklang/commit/a154c0f06e9a37cb932bc6e18194dc337576bc0c))
 
 
 ### Features
 
+* add basic display for contextmap ([83491e7](https://github.com/feakin/fklang/commit/83491e71464d8be4917862b874c0ce0cff54c3a9))
+* add domain binding to aggregate ([72b4bc8](https://github.com/feakin/fklang/commit/72b4bc842eb755a75374f52bd1de38c27b0e93b0))
+* add layered for guarding ([59d3cf4](https://github.com/feakin/fklang/commit/59d3cf4f807f9d6a3cfa017bf8658dbd3b5fe223))
+* add lowerer for content ([5a57545](https://github.com/feakin/fklang/commit/5a575456bf751762b92f4bad0829410985b3cf64))
+* add sample for testing by file ([d6e9300](https://github.com/feakin/fklang/commit/d6e9300bd2736f925d4d025499c389165ecb1acc))
 * add support for transflow ai comments ([c6107b0](https://github.com/feakin/fklang/commit/c6107b062848491f381b1293103076c986677fdf))
 * **flow:** add lower to mir ([fa823aa](https://github.com/feakin/fklang/commit/fa823aa539ceb8e1395e3a3411e714b180c29079))
 * **flow:** init to process ([8314425](https://github.com/feakin/fklang/commit/83144258bf3235764c3f2df87d28d418f55bf25d))
+* **ident:** add java function name support [#6](https://github.com/feakin/fklang/issues/6) ([c516f1c](https://github.com/feakin/fklang/commit/c516f1c57a5be7b1afcc38d5dfa9297a14761173))
+* **ident:** add java ident ([d27bfe7](https://github.com/feakin/fklang/commit/d27bfe71d92258b316b4894663cc6fe3a6ce3b2b))
+* import tree-sitter as code parser [#6](https://github.com/feakin/fklang/issues/6) ([64a96ca](https://github.com/feakin/fklang/commit/64a96caca8ef59aff0944495310cf20f9dc34a4a))
+* init basic write line function [#6](https://github.com/feakin/fklang/issues/6) ([896b2d2](https://github.com/feakin/fklang/commit/896b2d20c74435829d1c74d2b26224f125d0c601))
+* make e2e can works ([a814a00](https://github.com/feakin/fklang/commit/a814a00f4c606383e78ca94b7a9f0503f639e71d))
+* make inserter works~~ ([190e3bf](https://github.com/feakin/fklang/commit/190e3bf4c8c4003b548eca453428a761d7ddf355))
+* make line write by line ([12aa346](https://github.com/feakin/fklang/commit/12aa346a831b92dcf83be6075e5e01135cf1bfa7))
+* make tests works ([7fe4926](https://github.com/feakin/fklang/commit/7fe49268461f79d3dcd2d302e7498df19d91f8fe))
+* parse for impl ([fedbee9](https://github.com/feakin/fklang/commit/fedbee9b8d028634a11ad5b719a1459224ac109b))
 
 
 
-# [0.2.0](https://github.com/feakin/fklang/compare/v0.4.0...v0.2.0) (2022-10-07)
-
-
-### Bug Fixes
-
-* format code ([4372c20](https://github.com/feakin/fklang/commit/4372c20e5b611a5b3938893f7b3a276277f56e18))
-
-
-
-# [0.4.0](https://github.com/feakin/fklang/compare/e7712dceff1d88cb8a55a9cd6ea57b21acbc23c8...v0.4.0) (2022-10-07)
+# [0.2.0](https://github.com/feakin/fklang/compare/e7712dceff1d88cb8a55a9cd6ea57b21acbc23c8...v0.2.0) (2022-10-07)
 
 
 ### Bug Fixes
@@ -39,6 +43,7 @@
 * fix structure ([351c357](https://github.com/feakin/fklang/commit/351c3571216132d8fb3cd2ef371679c79c85ac17))
 * fix typo ([10d057e](https://github.com/feakin/fklang/commit/10d057e83fc377c3e2c7e39f5545612da087228d))
 * fix typos ([164689c](https://github.com/feakin/fklang/commit/164689c5fa0bed26a516db167dff8727126f67a5))
+* format code ([4372c20](https://github.com/feakin/fklang/commit/4372c20e5b611a5b3938893f7b3a276277f56e18))
 * make gen to works for java ([637d905](https://github.com/feakin/fklang/commit/637d905a2437c03aea6396e81f33125f78611174))
 * remove language from feakin cli ([218909c](https://github.com/feakin/fklang/commit/218909c741fc48eb1313ed1be6831fcae8966043))
 
