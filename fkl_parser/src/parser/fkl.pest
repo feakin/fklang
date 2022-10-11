@@ -279,7 +279,7 @@ special_string = @{ (ASCII_ALPHANUMERIC | "-" | "_" )* }
 uri_string = @{ (ASCII_ALPHANUMERIC | "-" | "_" | "{" | "}" )* }
 
 inline_doc = {
-  "\"\"\"" ~ (inline_doc | !"\"\"\"" ~ ANY)* ~ "\"\"\""
+  "\"\"\"" ~ (!"\"\"\"" ~ ANY)* ~ "\"\"\""
 }
 
 // comments
