@@ -12,14 +12,16 @@ pub struct SpringCodeGen {
   pub imports: Vec<String>,
   pub method_annotation: String,
   pub method_header: String,
+  pub method_name: String,
   pub ai_comments: Vec<String>,
 }
 
 // todo: add api for generate service
 impl SpringCodeGen {
   pub fn from(http: &HttpEndpoint, flow: &Option<Flow>) -> Self {
+    let method_name = Self::method_name(http);
     let method_annotation = Self::method_annotation(&http);
-    let method_header = Self::method_header(&http);
+    let method_header = Self::method_header(&http, &method_name);
     let ai_comments = if let Some(flow) = flow {
       Self::ai_comments(&flow.steps)
     } else {
@@ -30,6 +32,7 @@ impl SpringCodeGen {
       imports: vec![],
       method_annotation,
       method_header,
+      method_name,
       ai_comments,
     }
   }
@@ -54,8 +57,7 @@ impl SpringCodeGen {
     method_annotation
   }
 
-  fn method_header(http: &HttpEndpoint) -> String {
-    let method_name = Self::method_name(http);
+  fn method_header(http: &HttpEndpoint, method_name: &String) -> String {
     let request = Self::request_to_string(&http.request);
     let return_type = Self::response_to_return_type(&http.response);
     format!("public {} {}({})", return_type, method_name, request)

@@ -10,7 +10,13 @@ pub struct CodeClass {
   pub implements: Vec<String>,
   pub functions: Vec<CodeFunction>,
   pub start: CodePoint,
-  pub end: CodePoint
+  pub end: CodePoint,
+}
+
+impl CodeClass {
+  pub fn is_contain_method(&self, method_name: &str) -> bool {
+    self.functions.iter().any(|func| func.name == method_name)
+  }
 }
 
 impl Location for CodeClass {

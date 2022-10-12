@@ -16,6 +16,7 @@ use crate::inserter::inserter::JavaInserter;
 pub struct CodeBlock {
   pub target_layer: DddLayer,
   pub class_name: String,
+  pub method_name: String,
   pub code: String,
 }
 
@@ -45,6 +46,10 @@ pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_pa
         let code_file = JavaConstruct::parse(&code);
         let first_class = &code_file.classes[0];
 
+        if first_class.is_contain_method(&block.class_name) {
+          panic!("{} already has method {}", block.class_name, block.method_name);
+        }
+
         let lines: Vec<String> = block.code.split("\n").map(|s| s.to_string()).collect();
         JavaInserter::insert(&path, first_class, &lines)
           .expect("TODO: panic message");
@@ -72,7 +77,8 @@ fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBloc
               codes.push(CodeBlock {
                 target_layer: DddLayer::Interface,
                 class_name: http.target(),
-                code: output,
+                method_name: output.method_name.clone(),
+                code: output.code,
               });
             }
           } else {
@@ -80,7 +86,8 @@ fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBloc
             codes.push(CodeBlock {
               target_layer: DddLayer::Interface,
               class_name: http.target(),
-              code: output,
+              method_name: output.method_name.clone(),
+              code: output.code,
             });
           }
         }
