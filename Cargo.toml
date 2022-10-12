@@ -8,7 +8,10 @@ members = [
   "fkl_parser_wasm",
   "fkl_dot",
   "fkl_codegen_java",
-  "codegen_plugins/feakin-aws-lambda",
+  # for codegen
+  "extensions/codegen-aws-lambda",
+  # for swagger
+  "extensions/sourceset-swagger",
 ]
 
 [profile.release]
