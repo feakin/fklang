@@ -2,12 +2,10 @@
 
 members = [
   "domain_derive",
-  "fklang",
   "fkl_cli",
   "fkl_lsp",
   "fkl_parser",
   "fkl_parser_wasm",
-
   "fkl_codegen_dot",
   "fkl_codegen_java",
   "codegen_plugins/feakin-aws-lambda",
