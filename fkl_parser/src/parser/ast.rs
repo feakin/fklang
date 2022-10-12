@@ -33,6 +33,7 @@ pub enum FklDeclaration {
   Binding(BindingDecl),
   Component(ComponentDecl),
   Layered(LayeredDecl),
+  SourceSets(SourceSetsDecl),
 }
 
 // todo: add Loc support
@@ -174,7 +175,7 @@ pub struct VariableDefinition {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct AttributeDefinition {
   pub key: String,
-  pub value: String,
+  pub value: Vec<String>,
 }
 
 // ???
@@ -216,7 +217,7 @@ pub enum ImplementationTargetType {
   None,
   Aggregate,
   Entity,
-  ValueObject
+  ValueObject,
 }
 
 impl Default for ImplementationTargetType {
@@ -226,10 +227,15 @@ impl Default for ImplementationTargetType {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct SourceSetsDecl {
+  pub name: String,
+  pub sets: Vec<SourceSetDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SourceSetDecl {
   pub name: String,
-  pub inline_doc: String,
-  pub file: String,
+  pub attributes: Vec<AttributeDefinition>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -310,7 +316,7 @@ pub struct BindingDecl {
   pub domain_object_type: String,
   pub events: Vec<String>,
   pub source_set: Option<SourceSet>,
-  pub extra_config: Option<BindingExtraConfig>
+  pub extra_config: Option<BindingExtraConfig>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

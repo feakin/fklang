@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -55,6 +55,9 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         }
         Rule::layered_decl => {
           decl = FklDeclaration::Layered(consume_layered(p));
+        }
+        Rule::source_sets_decl => {
+          decl = FklDeclaration::SourceSets(consume_source_sets(p));
         }
         _ => println!("unreachable content rule: {:?}", p.as_rule())
       };
@@ -378,26 +381,36 @@ fn consume_attribute(pair: Pair<Rule>) -> AttributeDefinition {
       Rule::attr_value => {
         attribute.value = consume_attr_value(p);
       }
+      Rule::attr_list => {
+        for inner in p.into_inner() {
+          match inner.as_rule() {
+            Rule::attr_value => {
+              attribute.value = [attribute.value, consume_attr_value(inner)].concat();
+            }
+            _ => println!("unreachable attr_list rule: {:?}", inner.as_rule())
+          };
+        }
+      }
       _ => println!("unreachable attribute rule: {:?}", p.as_rule())
     };
   }
   return attribute;
 }
 
-fn consume_attr_value(pair: Pair<Rule>) -> String {
-  let mut value = String::new();
+fn consume_attr_value(pair: Pair<Rule>) -> Vec<String> {
+  let mut values = vec![];
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
-        value = p.as_str().to_string();
+        values.push(p.as_str().to_string());
       }
       Rule::string => {
-        value = parse_string(p.as_str());
+        values.push(parse_string(p.as_str()));
       }
       _ => println!("unreachable attr_value rule: {:?}", p.as_rule())
     };
   }
-  return value;
+  return values;
 }
 
 fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
@@ -685,6 +698,40 @@ fn consume_dependency_entry(pair: Pair<Rule>) -> LayerRelationDecl {
   }
 
   return relation;
+}
+
+fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
+  let mut source_sets = SourceSetsDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        source_sets.name = p.as_str().to_string();
+      }
+      Rule::source_set_decl => {
+        source_sets.sets.push(consume_source_set_decl(p));
+      }
+      _ => println!("unreachable source_sets rule: {:?}", p.as_rule())
+    };
+  }
+
+  return source_sets;
+}
+
+fn consume_source_set_decl(pair: Pair<Rule>) -> SourceSetDecl {
+  let mut source_set = SourceSetDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        source_set.name = p.as_str().to_string();
+      }
+      Rule::attr_decl => {
+        source_set.attributes.push(consume_attribute(p));
+      }
+      _ => println!("unreachable source_set rule: {:?}", p.as_rule())
+    };
+  }
+
+  return source_set;
 }
 
 fn parse_ident_or_string(pair: Pair<Rule>) -> String {
@@ -1051,10 +1098,10 @@ Component SalesComponent {
       attributes: vec![
         AttributeDefinition {
           key: "name".to_string(),
-          value: "Sample Phodal".to_string(),
+          value: vec!["Sample Phodal".to_string()],
         }, AttributeDefinition {
           key: "type".to_string(),
-          value: "Application".to_string(),
+          value: vec!["Application".to_string()],
         },
       ],
       used_domain_objects: vec![
@@ -1395,6 +1442,47 @@ imple CinemaCreatedEvent {
           package: "com.example.infrastructure".to_string(),
         },
       ],
+    }));
+  }
+
+  #[test]
+  fn parse_source_set() {
+    let decls = parse(r#"SourceSet sourceSet {
+  feakin {
+    srcDir: ["src/main/resources/uml"]
+  }
+  puml {
+    parser: "PlantUML"
+    srcDir: ["src/main/resources/uml"]
+  }
+}"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::SourceSets(SourceSetsDecl {
+      name: "sourceSet".to_string(),
+      sets: vec![
+        SourceSetDecl {
+          name: "feakin".to_string(),
+          attributes: vec![
+            AttributeDefinition {
+              key: "srcDir".to_string(),
+              value: vec!["src/main/resources/uml".to_string()],
+            }],
+        },
+        SourceSetDecl {
+          name: "puml".to_string(),
+          attributes: vec![
+            AttributeDefinition {
+              key: "parser".to_string(),
+              value: vec!["PlantUML".to_string()],
+            },
+            AttributeDefinition {
+              key: "srcDir".to_string(),
+              value: vec!["src/main/resources/uml".to_string()],
+            }],
+        }],
     }));
   }
 }

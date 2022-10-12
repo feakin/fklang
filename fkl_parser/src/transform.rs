@@ -125,6 +125,7 @@ impl MirTransform {
         FklDeclaration::Layered(decl) => {
           self.layered = Some(self.transform_layered(&decl));
         }
+        FklDeclaration::SourceSets(_) => {}
       }
     });
   }

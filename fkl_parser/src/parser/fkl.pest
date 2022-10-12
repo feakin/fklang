@@ -12,6 +12,8 @@ declaration = {
   | component_decl
   | implementation_decl
   | layered_decl
+  // extension
+  | source_sets_decl
 }
 
 context_map_decl = {
@@ -226,9 +228,20 @@ component_decl = {
   "Component" ~ identifier ~ "{" ~ (attr_decl | inline_doc | used_domain_objects_decl )* ~ "}"
 }
 
+source_sets_decl = {
+  "SourceSet" ~ identifier ~ "{" ~ (source_set_decl | inline_doc)* ~ "}"
+}
+
+source_set_decl = {
+  identifier ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
+}
+
 attr_decl = {
-  // component_type
-  identifier ~ (":" | "=") ~ attr_value ~ ";"?
+  identifier ~ (":" | "=") ~ (attr_value | attr_list) ~ ";"?
+}
+
+attr_list = {
+ "[" ~ (attr_value ~ ","?)* ~ "]"
 }
 
 attr_value = {
