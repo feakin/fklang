@@ -15,7 +15,7 @@ pub struct CodeClass {
 
 impl CodeClass {
   pub fn is_contain_method(&self, method_name: &str) -> bool {
-    self.functions.iter().any(|func| func.name == method_name)
+    self.functions.iter().filter(|f| f.name == method_name).count() > 0
   }
 }
 

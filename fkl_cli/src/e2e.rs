@@ -28,6 +28,7 @@ mod tests {
   }
 
   #[test]
+  #[should_panic]
   fn panic_for_duplicated_method() {
     let mut d: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     d.push("test_data/spring");
@@ -38,16 +39,6 @@ mod tests {
     input_path.push(format!("spring.fkl"));
 
     code_gen_exec::code_gen_exec(&input_path, Some(&"index".to_string()), &base_path);
-
-    let controller = "test_data/spring/src/main/java/com/feakin/demo/rest/HelloController.java";
-    let output = fs::read_to_string(controller).expect("Something went wrong reading the file");
-    assert!(output.contains(r#"
-    @GetMapping("/hello")
-    public String gotHello() {
-
-    }"#));
-
-    reset_test(controller);
   }
 
   fn reset_test(controller: &str) {

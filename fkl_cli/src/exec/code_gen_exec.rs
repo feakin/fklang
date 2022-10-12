@@ -46,7 +46,7 @@ pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_pa
         let code_file = JavaConstruct::parse(&code);
         let first_class = &code_file.classes[0];
 
-        if first_class.is_contain_method(&block.class_name) {
+        if first_class.is_contain_method(&block.method_name) {
           panic!("{} already has method {}", block.class_name, block.method_name);
         }
 
