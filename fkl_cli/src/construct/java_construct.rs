@@ -70,7 +70,7 @@ impl JavaConstruct {
     let mut code_file = CodeFile::default();
     let mut is_last_node = false;
 
-    let mut class = CodeClass::default();
+    let mut last_class = CodeClass::default();
 
     let capture_names = ident.query.capture_names();
     let mut last_type = "void".to_string();
@@ -88,27 +88,26 @@ impl JavaConstruct {
           code_file.imports.push(text.to_string());
         }
         "class-name" => {
-          if !class.name.is_empty() {
-            code_file.classes.push(class.clone());
-            class = CodeClass::default();
+          if !last_class.name.is_empty() {
+            last_class = CodeClass::default();
           }
 
-          class.name = text.to_string();
-          class.package = code_file.package.clone();
+          last_class.name = text.to_string();
+          last_class.package = code_file.package.clone();
 
           let class_node = capture.node.parent().unwrap();
-          JavaConstruct::insert_location(&mut class, class_node);
+          JavaConstruct::insert_location(&mut last_class, class_node);
           if !is_last_node {
             is_last_node = true;
           }
         }
         "impl-name" => {
-          class.implements.push(text.to_string());
+          last_class.implements.push(text.to_string());
         }
         "function-name" => {
           let mut function = JavaConstruct::insert_function(capture, text);
           function.return_type = last_type.clone();
-          class.functions.push(function);
+          last_class.functions.push(function);
         }
         "return-type" => {
           last_type = text.to_string();
@@ -127,7 +126,7 @@ impl JavaConstruct {
     }
 
     if is_last_node {
-      code_file.classes.push(class.clone());
+      code_file.classes.push(last_class.clone());
     }
 
     code_file
@@ -180,14 +179,10 @@ import payroll.Employee;
   fn should_parse_multiple_java_class() {
     let source_code = "class DateTimeImpl {
 }
-
-class DateTimeImpl2 {
-}
 ";
     let file = JavaConstruct::parse(source_code);
-    assert_eq!(2, file.classes.len());
+    assert_eq!(1, file.classes.len());
     assert_eq!("DateTimeImpl", file.classes[0].name);
-    assert_eq!("DateTimeImpl2", file.classes[1].name);
   }
 
   #[test]
@@ -229,7 +224,7 @@ class DateTimeImpl2 {
       implements: vec![],
       functions: vec![CodeFunction {
         name: "getDate".to_string(),
-        return_type: "".to_string(),
+        return_type: "Date".to_string(),
         variable: vec![],
         start: CodePoint { row: 1, column: 4 },
         end: CodePoint { row: 3, column: 5 },
@@ -271,5 +266,25 @@ public class HelloController {
       start: CodePoint { row: 0, column: 0 },
       end: CodePoint { row: 8, column: 1 },
     });
+  }
+
+  #[test]
+  fn two_methods() {
+    let source_code = r#"@RestController
+public class HelloController {
+	@GetMapping("/")
+	public String index() { return "Greetings from Spring Boot!"; }
+
+	@GetMapping("/")
+	public String second() { return "Greetings from Spring Boot!"; }
+}
+"#;
+
+    let file = JavaConstruct::parse(source_code);
+
+    assert_eq!(file.classes.len(), 1);
+    let first_class = &file.classes[0];
+    assert!(first_class.is_contain_method("index"));
+    assert!(first_class.is_contain_method("second"));
   }
 }
