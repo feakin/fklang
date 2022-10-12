@@ -229,7 +229,7 @@ impl Default for ImplementationTargetType {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SourceSetsDecl {
   pub name: String,
-  pub sets: Vec<SourceSetDecl>,
+  pub source_sets: Vec<SourceSetDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

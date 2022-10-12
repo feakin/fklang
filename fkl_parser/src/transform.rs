@@ -8,19 +8,20 @@ use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, SourceSetsDecl, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
   pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
   // pub contexts: HashMap<String, BoundedContext>,
-  pub relations: Vec<mir::ContextRelation>,
+  pub relations: Vec<ContextRelation>,
   pub aggregates: HashMap<String, Aggregate>,
   pub entities: IndexMap<String, Entity>,
   pub value_objects: IndexMap<String, ValueObject>,
   pub implementations: Vec<HttpApiImpl>,
   pub layered: Option<LayeredArchitecture>,
+  pub source_sets: Option<mir::SourceSets>,
 }
 
 impl MirTransform {
@@ -34,6 +35,7 @@ impl MirTransform {
       value_objects: Default::default(),
       implementations: vec![],
       layered: Default::default(),
+      source_sets: None,
     };
 
     match ast_parse(str) {
@@ -54,6 +56,7 @@ impl MirTransform {
         .map(|impl_| Implementation::PublishHttpApi(impl_))
         .collect(),
       layered: transform.layered,
+      source_sets: transform.source_sets,
     })
   }
 
@@ -125,7 +128,9 @@ impl MirTransform {
         FklDeclaration::Layered(decl) => {
           self.layered = Some(self.transform_layered(&decl));
         }
-        FklDeclaration::SourceSets(_) => {}
+        FklDeclaration::SourceSets(decl) => {
+          self.source_sets = Some(self.transform_source_sets(&decl));
+        }
       }
     });
   }
@@ -291,6 +296,38 @@ impl MirTransform {
 
     layered
   }
+
+  fn transform_source_sets(&self, decl: &SourceSetsDecl) -> mir::SourceSets {
+    let mut source_sets = mir::SourceSets::default();
+    source_sets.name = decl.name.clone();
+    source_sets.source_sets = decl.source_sets.iter().map(|source_set| {
+      let mut set = mir::SourceSet {
+        name: source_set.name.clone(),
+        description: "".to_string(),
+        parser: "".to_string(),
+        extension: "".to_string(),
+        src_dirs: vec![],
+        source_set_type: Default::default(),
+      };
+
+
+      source_set.attributes.iter().for_each(|attr| {
+        match attr.key.as_str() {
+          "description" => set.description = attr.value[0].clone(),
+          "parser" => set.parser = attr.value[0].clone(),
+          "extension" => set.extension = attr.value[0].clone(),
+          "srcDir" => set.src_dirs = attr.value.clone(),
+          &_ => {
+            println!("Unknown attribute {}", attr.key);
+          }
+        }
+      });
+
+      set
+    }).collect();
+
+    source_sets
+  }
 }
 
 fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
@@ -304,7 +341,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, Layer, LayeredArchitecture, MethodCall, Step, VariableDefinition};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -590,7 +627,45 @@ impl CinemaCreatedEvent {
           target: "infrastructure".to_string(),
         },
       ],
-      description: "".to_string()
+      description: "".to_string(),
     }));
+  }
+
+  #[test]
+  fn mir_source_set() {
+    let str = r#"SourceSet sourceSet {
+  feakin {
+    srcDir: ["src/main/resources/uml"]
+  }
+  puml {
+    parser: "PlantUML"
+    srcDir: ["src/main/resources/uml"]
+  }
+}"#;
+    let context_map = MirTransform::mir(str).unwrap();
+
+    assert_eq!(context_map.source_sets, Some(
+      SourceSets {
+        name: "sourceSet".to_string(),
+        source_sets: vec![
+          SourceSet {
+            name: "feakin".to_string(),
+            parser: "".to_string(),
+            extension: "".to_string(),
+            src_dirs: vec!["src/main/resources/uml".to_string()],
+            description: "".to_string(),
+            source_set_type: Default::default(),
+          },
+          SourceSet {
+            name: "puml".to_string(),
+            parser: "PlantUML".to_string(),
+            extension: "".to_string(),
+            src_dirs: vec!["src/main/resources/uml".to_string()],
+            description: "".to_string(),
+            source_set_type: Default::default(),
+          },
+        ],
+      }
+    ));
   }
 }

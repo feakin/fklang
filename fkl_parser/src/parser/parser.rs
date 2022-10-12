@@ -708,7 +708,7 @@ fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
         source_sets.name = p.as_str().to_string();
       }
       Rule::source_set_decl => {
-        source_sets.sets.push(consume_source_set_decl(p));
+        source_sets.source_sets.push(consume_source_set_decl(p));
       }
       _ => println!("unreachable source_sets rule: {:?}", p.as_rule())
     };
@@ -1462,7 +1462,7 @@ imple CinemaCreatedEvent {
 
     assert_eq!(decls[0], FklDeclaration::SourceSets(SourceSetsDecl {
       name: "sourceSet".to_string(),
-      sets: vec![
+      source_sets: vec![
         SourceSetDecl {
           name: "feakin".to_string(),
           attributes: vec![
