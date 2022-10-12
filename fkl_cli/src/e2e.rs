@@ -18,11 +18,26 @@ mod tests {
 
     let controller = "test_data/spring/src/main/java/com/feakin/demo/rest/HelloController.java";
     let output = fs::read_to_string(controller).expect("Something went wrong reading the file");
-    assert!(output.contains(r#"
+    assert_eq!(output, r#"package com.feakin.demo.rest;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+
+	@GetMapping("/")
+	public String index() {
+		return "Greetings from Spring Boot!";
+	}
+
+
     @GetMapping("/hello")
     public String gotHello() {
 
-    }"#));
+    }
+
+}"#);
 
     reset_test(controller);
   }
