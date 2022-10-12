@@ -30,7 +30,7 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 wee_alloc = { version = "0.4.5", optional = true }
 
 fkl-parser = { path = "../fkl_parser", version = "0.2.2" }
-fkl-dot = { path = "../fkl_codegen_dot", version = "0.1.0" }
+fkl-dot = { path = "../fkl_dot", version = "0.1.0" }
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
