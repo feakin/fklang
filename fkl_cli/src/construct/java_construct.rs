@@ -73,6 +73,7 @@ impl JavaConstruct {
     let mut class = CodeClass::default();
 
     let capture_names = ident.query.capture_names();
+    let mut last_type = "void".to_string();
 
     for (mat, capture_index) in captures {
       let capture = mat.captures[capture_index];
@@ -105,7 +106,12 @@ impl JavaConstruct {
           class.implements.push(text.to_string());
         }
         "function-name" => {
-          class.functions.push(JavaConstruct::insert_function(capture, text));
+          let mut function = JavaConstruct::insert_function(capture, text);
+          function.return_type = last_type.clone();
+          class.functions.push(function);
+        }
+        "return-type" => {
+          last_type = text.to_string();
         }
         "parameter" => {}
         &_ => {
@@ -230,6 +236,40 @@ class DateTimeImpl2 {
       }],
       start: CodePoint { row: 0, column: 0 },
       end: CodePoint { row: 4, column: 1 },
+    });
+  }
+
+  #[test]
+  fn hello_world_controller() {
+    let source_code = r#"@RestController
+public class HelloController {
+
+	@GetMapping("/")
+	public String index() {
+		return "Greetings from Spring Boot!";
+	}
+
+}
+"#;
+
+    let file = JavaConstruct::parse(source_code);
+
+    assert_eq!(file.classes.len(), 1);
+    assert_eq!(file.classes[0], CodeClass {
+      name: "HelloController".to_string(),
+      path: "".to_string(),
+      module: "".to_string(),
+      package: "".to_string(),
+      implements: vec![],
+      functions: vec![CodeFunction {
+        name: "index".to_string(),
+        return_type: "String".to_string(),
+        variable: vec![],
+        start: CodePoint { row: 3, column: 1 },
+        end: CodePoint { row: 6, column: 2 },
+      }],
+      start: CodePoint { row: 0, column: 0 },
+      end: CodePoint { row: 8, column: 1 },
     });
   }
 }

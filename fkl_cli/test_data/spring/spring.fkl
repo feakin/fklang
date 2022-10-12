@@ -6,6 +6,14 @@ impl HelloGot {
     response: String;
   }
 }
+/// Hello Got event ?
+impl index {
+  aggregate: Hello;
+  endpoint {
+    GET "/";
+    response: String;
+  }
+}
 
 layered DDD {
   // by default
