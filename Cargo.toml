@@ -6,8 +6,12 @@ members = [
   "fkl_lsp",
   "fkl_parser",
   "fkl_parser_wasm",
+  # codegen
   "fkl_dot",
   "fkl_codegen_java",
+  # extension
+  "fkl_ext_api",
+  "fkl_ext_loader",
   # for codegen
   "extensions/codegen-aws-lambda",
   # for swagger
