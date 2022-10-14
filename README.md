@@ -10,20 +10,25 @@ Try it: [Feakin Quick Start](https://book.feakin.com/quick-start.html)
 
 Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 
-## Landscape
+## Roadmap
 
 1. DSL binding/integration
-   - [ ] with Spring
+    - [ ] with Spring
 2. contract base testing
-   - [ ] with HTTP API
-3. database integration
-   - [ ] database schema generation
-   - [ ] database migration
-4. bootstrapping DDD DSL
-   - [ ] use type system to describe domain model
-5. build system inside
-   - [ ] better code generation
-6. general programming language (if possible)
+    - [ ] with HTTP API
+3. database integration: JPA, JDBC, etc.
+    - [ ] database schema generation
+    - [ ] database migration
+4. module support
+    - [ ] module dependency
+    - [ ] module versioning
+5. bootstrapping DDD DSL
+    - [ ] use type system to describe domain model
+6. build system inside: cache, incremental build, etc.
+    - [ ] better code generation
+7. general programming language (if possible)
+    - [ ] function support
+    - [ ] expression support
   
 
 ## Modules
