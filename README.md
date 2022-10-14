@@ -10,6 +10,16 @@ Try it: [Feakin Quick Start](https://book.feakin.com/quick-start.html)
 
 Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 
+## Landscape
+
+- 0.5 DSL design
+  - [ ] Syntax
+  - [ ] Codegen
+- 0.8 bootstrapping DDD DSL
+  - [ ] use type system to describe domain model
+- 1.0 build system inside
+  - [ ] better code generation
+
 ## Modules
 
 - Parser
