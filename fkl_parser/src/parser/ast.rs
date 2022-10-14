@@ -22,6 +22,7 @@ pub struct Identifier {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FklDeclaration {
   None,
+  Include(IncludeDecl),
   ContextMap(ContextMapDecl),
   BoundedContext(BoundedContextDecl),
   Aggregate(AggregateDecl),
@@ -34,6 +35,12 @@ pub enum FklDeclaration {
   Component(ComponentDecl),
   Layered(LayeredDecl),
   SourceSets(SourceSetsDecl),
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IncludeDecl {
+  pub path: String,
+  pub loc: Loc,
 }
 
 // todo: add Loc support

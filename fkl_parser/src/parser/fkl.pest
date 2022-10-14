@@ -1,7 +1,8 @@
 declarations = _{ SOI ~ declaration* ~ EOI }
 
 declaration = {
-  context_map_decl
+  include_decl
+  | context_map_decl
   | context_decl
   | ext_module_decl
   | aggregate_decl
@@ -15,6 +16,8 @@ declaration = {
   // extension
   | source_sets_decl
 }
+
+include_decl = { "include" ~ string }
 
 context_map_decl = {
   "ContextMap" ~ identifier? ~ "{" ~ (used_context_node | context_node_rel | inline_doc)* ~ "}"

@@ -1485,4 +1485,12 @@ imple CinemaCreatedEvent {
         }],
     }));
   }
+
+  #[test]
+  fn include_other_file() {
+    let _decls = parse(r#"include "./layer.rs""#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+  }
 }

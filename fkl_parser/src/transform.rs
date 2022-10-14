@@ -131,6 +131,7 @@ impl MirTransform {
         FklDeclaration::SourceSets(decl) => {
           self.source_sets = Some(self.transform_source_sets(&decl));
         }
+        FklDeclaration::Include(_) => {}
       }
     });
   }
