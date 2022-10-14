@@ -12,13 +12,19 @@ Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 
 ## Landscape
 
-- 0.5 DSL design
-  - [ ] Syntax
-  - [ ] Codegen
-- 0.8 bootstrapping DDD DSL
-  - [ ] use type system to describe domain model
-- 1.0 build system inside
-  - [ ] better code generation
+1. DSL binding/integration
+   - [ ] with Spring
+2. contract base testing
+   - [ ] with HTTP API
+3. database integration
+   - [ ] database schema generation
+   - [ ] database migration
+4. bootstrapping DDD DSL
+   - [ ] use type system to describe domain model
+5. build system inside
+   - [ ] better code generation
+6. general programming language (if possible)
+  
 
 ## Modules
 
