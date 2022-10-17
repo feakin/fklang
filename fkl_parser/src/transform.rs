@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Dependency, Entity, Field, Flow, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Dependency, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
@@ -239,8 +239,8 @@ impl MirTransform {
 
   fn transform_endpoint(endpoint_decl: &EndpointDecl) -> HttpEndpoint {
     let mut endpoint = HttpEndpoint::new(endpoint_decl.name.clone());
+    endpoint.method = HttpMethod::from(&endpoint_decl.method);
     endpoint.path = endpoint_decl.uri.clone();
-    endpoint.method = endpoint_decl.method.clone();
     if let Some(decl) = &endpoint_decl.response {
       endpoint.response = Some(Response {
         name: decl.name.clone(),
@@ -344,7 +344,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -484,7 +484,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
-        method: "GET".to_string(),
+        method: HttpMethod::GET,
         request: None,
         response: Some(Response {
           name: "Cinema".to_string(),
@@ -522,7 +522,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
-        method: "GET".to_string(),
+        method: HttpMethod::GET,
         request: None,
         response: Some(Response {
           name: "Cinema".to_string(),

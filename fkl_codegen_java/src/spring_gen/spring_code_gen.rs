@@ -1,4 +1,4 @@
-use fkl_parser::mir::{Flow, Step};
+use fkl_parser::mir::{Flow, HttpMethod, Step};
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 use crate::nlp::past_tense_to_normal;
 
@@ -38,13 +38,13 @@ impl SpringCodeGen {
   }
 
   fn method_annotation(http: &HttpEndpoint) -> String {
-    let annotation_key = match http.method.to_lowercase().as_str() {
-      "get" => "@GetMapping",
-      "post" => "@PostMapping",
-      "put" => "@PutMapping",
-      "delete" => "@DeleteMapping",
-      "patch" => "@PatchMapping",
-      _ => "@GetMapping",
+    let annotation_key = match http.method {
+      HttpMethod::GET => "@GetMapping",
+      HttpMethod::POST => "@PostMapping",
+      HttpMethod::PUT => "@PutMapping",
+      HttpMethod::DELETE => "@DeleteMapping",
+      HttpMethod::PATCH => "@PatchMapping",
+      _ => "@GetMapping"
     };
 
 
@@ -148,7 +148,7 @@ impl SpringCodeGen {
 #[cfg(test)]
 mod tests {
   use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
-  use fkl_parser::mir::{Message, MethodCall, Step, VariableDefinition};
+  use fkl_parser::mir::{HttpMethod, Message, MethodCall, Step, VariableDefinition};
 
   use crate::spring_gen::spring_code_gen::SpringCodeGen;
 
@@ -171,14 +171,14 @@ import org.springframework.web.bind.annotation.RestController;
     assert_eq!(annotation.method_annotation, "@GetMapping");
 
     let annotation = SpringCodeGen::from(&HttpEndpoint {
-      method: "POST".to_string(),
+      method: HttpMethod::POST,
       ..Default::default()
     }, &None,
     );
     assert_eq!(annotation.method_annotation, "@PostMapping");
 
     let annotation = SpringCodeGen::from(&HttpEndpoint {
-      method: "PUT".to_string(),
+      method: HttpMethod::PUT,
       path: "/employees".to_string(),
       ..Default::default()
     }, &None,
@@ -196,7 +196,7 @@ import org.springframework.web.bind.annotation.RestController;
       name: "all".to_string(),
       description: "".to_string(),
       path: "".to_string(),
-      method: "GET".to_string(),
+      method: HttpMethod::GET,
       request: None,
       response: Some(Response {
         name: "List<Employee>".to_string(),
@@ -214,7 +214,7 @@ import org.springframework.web.bind.annotation.RestController;
       name: "EmployeeCreated".to_string(),
       description: "".to_string(),
       path: "".to_string(),
-      method: "PUT".to_string(),
+      method: HttpMethod::PUT,
       request: Some(Request {
         name: "CreateEmployeeRequest".to_string(),
         pre_validate: None,

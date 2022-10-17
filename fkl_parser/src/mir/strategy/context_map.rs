@@ -67,7 +67,7 @@ impl Display for ContextMap {
       match imp {
         Implementation::PublishHttpApi(api) => {
           writeln!(f, "    PublishHttpApi({})", api.name)?;
-          writeln!(f, "      {} Path({})", api.endpoint.method, api.endpoint.path)?;
+          writeln!(f, "      {:?} Path({})", api.endpoint.method, api.endpoint.path)?;
 
           if let Some(request) = &api.endpoint.request {
             writeln!(f, "      Request: {}", request.name)?;

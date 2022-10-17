@@ -1,4 +1,3 @@
-use log::info;
 use fkl_parser::mir::HttpEndpoint;
 
 pub struct EndpointRunner {
