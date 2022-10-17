@@ -75,6 +75,24 @@ mod tests {
       description: "".to_string()
     };
     let runner = EndpointRunner::new(endpoint);
-    let map = runner.send_request();
+    let _resp = runner.send_request();
   }
+
+  #[ignore]
+  #[test]
+  fn http_github() {
+    // todo: find a better way
+    let endpoint = HttpEndpoint {
+      name: "".to_string(),
+      method: HttpMethod::GET,
+      path: "https://github.com/feakin/".to_string(),
+      request: None,
+      response: None,
+      description: "".to_string()
+    };
+    let runner = EndpointRunner::new(endpoint);
+    let _resp = runner.send_request();
+  }
+
+
 }
