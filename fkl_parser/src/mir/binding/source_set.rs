@@ -38,11 +38,28 @@ pub enum SourceSetType {
   StructProtobuf,
   StructAvro,
   OpenApi,
-  UniqueLanguage,
+  Csv,
 }
 
 impl Default for SourceSetType {
   fn default() -> Self {
     SourceSetType::None
+  }
+}
+
+impl SourceSetType {
+  pub fn from_str(s: &str) -> Self {
+    match s.to_lowercase().as_str() {
+      "uml" => SourceSetType::StructUml,
+      "puml" => SourceSetType::StructUml,
+      "json_schema" => SourceSetType::StructJsonSchema,
+      "jsonschema" => SourceSetType::StructJsonSchema,
+      "protobuf" => SourceSetType::StructProtobuf,
+      "avro" => SourceSetType::StructAvro,
+      "open_api" => SourceSetType::OpenApi,
+      "openapi" => SourceSetType::OpenApi,
+      "csv" => SourceSetType::Csv,
+      _ => SourceSetType::None,
+    }
   }
 }
