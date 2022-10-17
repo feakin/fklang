@@ -131,7 +131,7 @@ impl MirTransform {
         FklDeclaration::SourceSets(decl) => {
           self.source_sets = Some(self.transform_source_sets(&decl));
         }
-        FklDeclaration::Include(include) => {
+        FklDeclaration::Include(_include) => {
           // todo: resolve include with DAG
         }
       }

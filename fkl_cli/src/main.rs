@@ -13,6 +13,7 @@ pub mod construct;
 pub mod code_meta;
 pub mod inserter;
 pub mod exec;
+pub mod builtin;
 pub mod line_separator;
 mod e2e;
 
