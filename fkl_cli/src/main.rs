@@ -35,6 +35,15 @@ fn main() {
         .arg(clap::arg!(--"impl" <String>))
     )
     .subcommand(
+      clap::command!("run")
+        .about("Run builtin feakin function, like mock, verify or others")
+        .arg(
+          clap::arg!(--"path" <PATH>)
+            .value_parser(clap::value_parser!(std::path::PathBuf)),
+        )
+        .arg(clap::arg!(--"impl" <String>))
+    )
+    .subcommand(
       clap::command!("dot")
         .about("Generate dot file from a fkl file")
         .arg(
@@ -55,6 +64,20 @@ fn main() {
   let matches: ArgMatches = cmd.get_matches();
   match matches.subcommand() {
     Some(("gen", matches)) => {
+      let feakin_path = matches.get_one::<PathBuf>("path");
+      let filter_impl = matches.get_one::<String>("impl");
+
+      if feakin_path.is_none() {
+        error!("Please provide a path to a manifest file");
+        return;
+      }
+
+      let path = feakin_path.unwrap();
+      let base_path = path.parent().unwrap().to_path_buf();
+
+      code_gen_exec::code_gen_exec(path, filter_impl, &base_path);
+    }
+    Some(("run", matches)) => {
       let feakin_path = matches.get_one::<PathBuf>("path");
       let filter_impl = matches.get_one::<String>("impl");
 
