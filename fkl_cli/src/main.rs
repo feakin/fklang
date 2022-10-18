@@ -2,8 +2,7 @@ use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
-use clap::ArgMatches;
-use log::error;
+use clap::{Args, Parser, Subcommand};
 
 use fkl_parser::parse;
 
@@ -17,86 +16,65 @@ pub mod builtin;
 pub mod line_separator;
 mod e2e;
 
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+#[command(propagate_version = true)]
+struct Cli {
+  #[command(subcommand)]
+  command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+  Dot {
+    #[arg(short, long)]
+    path: PathBuf,
+  },
+  Ast {
+    #[arg(short, long)]
+    path: PathBuf,
+  },
+  Gen {
+    #[arg(short, long, required = true)]
+    path: PathBuf,
+    #[arg(short, long, required = true, long = "impl")]
+    impl_name: Option<String>,
+  },
+  Run(RunOpt),
+}
+
+#[derive(Args)]
+struct RunOpt {
+  #[arg(short, long, required = true)]
+  path: PathBuf,
+  #[arg(short, long, required = true, long = "impl")]
+  impl_name: String,
+  #[arg(short, required = true, long = "func")]
+  func_name: String,
+}
+
 // todo: add code highlight support
 fn main() {
   env_logger::init_from_env(
     env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
 
-  let cmd = clap::Command::new("fkl")
-    .bin_name("fkl")
-    .subcommand_required(true)
-    .subcommand(
-      clap::command!("gen")
-        .about("Generate code from a fkl file, current support Java")
-        .arg(
-          clap::arg!(--"path" <PATH>)
-            .value_parser(clap::value_parser!(std::path::PathBuf)),
-        )
-        .arg(clap::arg!(--"impl" <String>))
-    )
-    .subcommand(
-      clap::command!("run")
-        .about("Run builtin feakin function, like mock, verify or others")
-        .arg(
-          clap::arg!(--"path" <PATH>)
-            .value_parser(clap::value_parser!(std::path::PathBuf)),
-        )
-        .arg(clap::arg!(--"func" <String>))
-        .arg(clap::arg!(--"impl" <String>))
-    )
-    .subcommand(
-      clap::command!("dot")
-        .about("Generate dot file from a fkl file")
-        .arg(
-          clap::arg!(--"path" <PATH>)
-            .value_parser(clap::value_parser!(std::path::PathBuf)),
-        ),
-    )
-    .subcommand(
-      clap::command!("parse")
-        .about("Parse a fkl file and print the AST")
-        .arg(
-          clap::arg!(--"path" <PATH>)
-            .value_parser(clap::value_parser!(std::path::PathBuf)),
-        ),
-    );
-
-  let matches: ArgMatches = cmd.get_matches();
-  match matches.subcommand() {
-    Some(("dot", matches)) => {
-      let path = matches.get_one::<PathBuf>("path").unwrap();
+  let cli: Cli = Cli::parse();
+  match &cli.command {
+    Commands::Dot { path } => {
       gen_to_dot(path);
     }
-    Some(("ast", _matches)) => {
-      let path = matches.get_one::<PathBuf>("path").unwrap();
+    Commands::Ast { path } => {
       parse_to_ast(path);
     }
-    Some(("gen", matches)) => {
-      let path = matches.get_one::<PathBuf>("path").unwrap();
-      let filter_impl = matches.get_one::<String>("impl");
+    Commands::Gen { path, impl_name } => {
       let parent = path.parent().unwrap().to_path_buf();
-      code_gen_exec::code_gen_by_path(path, filter_impl, &parent);
+      code_gen_exec::code_gen_by_path(path, impl_name.clone(), &parent);
     }
-    Some(("run", matches)) => {
-      let path = matches.get_one::<PathBuf>("path").unwrap();
-      let function = matches.get_one::<String>("func");
-      let impl_name = matches.get_one::<String>("impl");
-
-      if function.is_none() {
-        error!("Please provide a function name");
-        return;
-      }
-
-      if impl_name.is_none() {
-        error!("Please provide a impl name");
-        return;
-      }
-
-      let mir = mir_from_file(&path);
-      builtin::endpoint_runner::execute(&mir, function.unwrap(), impl_name.unwrap());
+    Commands::Run(run) => {
+      let mir = mir_from_file(&run.path);
+      builtin::endpoint_runner::execute(&mir, &run.func_name, &run.impl_name);
     }
-    _ => unreachable!("clap should ensure we don't get here"),
-  };
+  }
 }
 
 fn gen_to_dot(path: &PathBuf) {

@@ -30,12 +30,12 @@ pub enum DddLayer {
   Infrastructure,
 }
 
-pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<&String>, base_path: &PathBuf) {
+pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<String>, base_path: &PathBuf) {
   let mir = exec::mir_from_file(input_path);
   code_gen_by_mir(&mir, filter_impl, base_path);
 }
 
-pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<&String>, base_path: &PathBuf) {
+pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<String>, base_path: &PathBuf) {
   let code_blocks = collect_codes(filter_impl, &mir);
   let has_layered_define = mir.layered.is_some();
   if !code_blocks.is_empty() {
@@ -67,13 +67,13 @@ pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<&String>, base_path
 }
 
 /// collect codes for generate.
-fn collect_codes(filter_impl: Option<&String>, mir: &ContextMap) -> Vec<CodeBlock> {
+fn collect_codes(filter_impl: Option<String>, mir: &ContextMap) -> Vec<CodeBlock> {
   let mut codes: Vec<CodeBlock> = vec![];
   mir.implementations.iter()
     .for_each(|implementation| {
       match implementation {
         Implementation::PublishHttpApi(http) => {
-          if let Some(filter_impl) = filter_impl {
+          if let Some(filter_impl) = &filter_impl {
             if &http.name == filter_impl {
               let output = gen_http_api(http, "java");
               codes.push(CodeBlock {
