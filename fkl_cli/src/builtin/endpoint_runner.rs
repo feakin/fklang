@@ -27,7 +27,7 @@ pub(crate) fn execute(context_map: &ContextMap, func_name: &str, impl_name: &str
 
   match func_name {
     "request" => {
-      let mut endpoint_runner = EndpointRunner::new(endpoint.clone());
+      let endpoint_runner = EndpointRunner::new(endpoint.clone());
       endpoint_runner.send_request().expect("TODO: panic message");
     }
     _ => {

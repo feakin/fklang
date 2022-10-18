@@ -165,7 +165,6 @@ mod tests {
   }
 }"#;
 
-    let mut output = String::new();
     let context_map: ContextMap = parse(source).unwrap();
 
     builtin::endpoint_runner::execute(&context_map, "request", "CinemaCreated");
