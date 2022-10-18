@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use log::info;
 use reqwest::blocking::Response;
-use reqwest::StatusCode;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 
@@ -82,13 +81,17 @@ impl EndpointRunner {
       }
     }
 
-    match resp.status() {
-      StatusCode::OK => info!("success!"),
-      StatusCode::PAYLOAD_TOO_LARGE => {
-        info!("Request payload is too large!");
+    let content_type = resp.headers().get("content-type").unwrap().to_str().unwrap();
+    match content_type {
+      "application/json" => {
+        let json: serde_json::Value = resp.json().expect("Failed to parse response");
+        println!("{}", json);
       }
-      s => info!("Received response status: {:?}", s),
-    };
+      _ => {
+        let text = resp.text().expect("Failed to parse response");
+        println!("{}", text);
+      }
+    }
 
     Ok(())
   }

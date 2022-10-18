@@ -26,26 +26,30 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+  #[command(about = "generate Graphviz/Dot from fkl file")]
   Dot {
     #[arg(short, long)]
     path: PathBuf,
   },
+  #[command(about = "generate ast from fkl file")]
   Ast {
     #[arg(short, long)]
     path: PathBuf,
   },
+  #[command(about = "generate code from fkl file")]
   Gen {
-    #[arg(short, required = true)]
+    #[arg(short, long, required = true)]
     path: PathBuf,
     #[arg(short, long = "impl")]
     impl_name: Option<String>,
   },
+  #[command(about = "run function from fkl file")]
   Run(RunOpt),
 }
 
 #[derive(Args)]
 struct RunOpt {
-  #[arg(short, required = true)]
+  #[arg(short, long, required = true)]
   path: PathBuf,
   #[arg(short, required = true, long = "impl")]
   impl_name: String,
@@ -140,6 +144,21 @@ mod tests {
     let source = r#"impl CinemaCreated {
   endpoint {
     GET "/book/{id}";
+    response: Cinema;
+  }
+}"#;
+
+    let context_map: ContextMap = parse(source).unwrap();
+
+    builtin::endpoint_runner::execute(&context_map, "request", "CinemaCreated");
+  }
+
+  #[test]
+  #[ignore]
+  fn test_normal_request() {
+    let source = r#"impl CinemaCreated {
+  endpoint {
+    GET "https://book.feakin.com/";
     response: Cinema;
   }
 }"#;

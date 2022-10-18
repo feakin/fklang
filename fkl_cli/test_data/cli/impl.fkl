@@ -5,3 +5,10 @@ impl GitHubOpened {
     response: String;
   }
 }
+/// Hello Got event ?
+impl FeakinJson {
+  endpoint {
+    GET "https://raw.githubusercontent.com/feakin/vscode-feakin/master/package.json";
+    response: String;
+  }
+}
