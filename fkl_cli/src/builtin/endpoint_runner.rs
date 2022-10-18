@@ -2,10 +2,15 @@ use std::collections::HashMap;
 
 use log::info;
 
-use fkl_parser::mir::{HttpEndpoint, HttpMethod};
+use fkl_parser::mir::{ContextMap, HttpEndpoint, HttpMethod};
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
+}
+
+
+pub(crate) fn execute(_context_map: &ContextMap, _func_name: &str) {
+  // todo!()
 }
 
 impl EndpointRunner {

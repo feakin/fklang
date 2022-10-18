@@ -1,20 +1,20 @@
-pub mod layer_map;
-pub mod layer_path_builder;
-
 use std::fs;
 use std::path::PathBuf;
 
-use log::{error, info};
+use log::info;
 
 use fkl_codegen_java::gen_http_api;
 use fkl_parser::mir::{ContextMap, Implementation};
-use fkl_parser::parse;
 
-use crate::exec::LayerMap;
-use crate::exec::LayerPathBuilder;
 use crate::construct::code_construct::CodeConstruct;
 use crate::construct::java_construct::JavaConstruct;
+use crate::exec;
+use crate::exec::LayerMap;
+use crate::exec::LayerPathBuilder;
 use crate::inserter::inserter::JavaInserter;
+
+pub mod layer_map;
+pub mod layer_path_builder;
 
 pub struct CodeBlock {
   pub target_layer: DddLayer,
@@ -30,13 +30,12 @@ pub enum DddLayer {
   Infrastructure,
 }
 
-pub fn code_gen_exec(input_path: &PathBuf, filter_impl: Option<&String>, base_path: &PathBuf) {
-  let feakin = fs::read_to_string(input_path).unwrap();
-  let mir: ContextMap = parse(&feakin).or_else(|e| {
-    error!("{}", e);
-    Err(e)
-  }).unwrap();
+pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<&String>, base_path: &PathBuf) {
+  let mir = exec::mir_from_file(input_path);
+  code_gen_by_mir(&mir, filter_impl, base_path);
+}
 
+pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<&String>, base_path: &PathBuf) {
   let code_blocks = collect_codes(filter_impl, &mir);
   let has_layered_define = mir.layered.is_some();
   if !code_blocks.is_empty() {

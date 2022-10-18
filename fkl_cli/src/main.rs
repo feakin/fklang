@@ -7,7 +7,7 @@ use log::error;
 
 use fkl_parser::parse;
 
-use crate::exec::code_gen_exec;
+use crate::exec::{code_gen_exec, mir_from_file};
 
 pub mod construct;
 pub mod code_meta;
@@ -76,7 +76,7 @@ fn main() {
     Some(("gen", matches)) => {
       let filter_impl = matches.get_one::<String>("impl");
       let parent = path.parent().unwrap().to_path_buf();
-      code_gen_exec::code_gen_exec(path, filter_impl, &parent);
+      code_gen_exec::code_gen_by_path(path, filter_impl, &parent);
     }
     Some(("run", matches)) => {
       let function = matches.get_one::<String>("func");
@@ -85,10 +85,8 @@ fn main() {
         return;
       }
 
-      let path = feakin_path.unwrap();
-      let parent = path.parent().unwrap().to_path_buf();
-
-      code_gen_exec::code_gen_exec(path, function, &parent);
+      let mir = mir_from_file(&feakin_path.unwrap());
+      builtin::endpoint_runner::execute(&mir, function.unwrap());
     }
     _ => unreachable!("clap should ensure we don't get here"),
   };
