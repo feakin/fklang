@@ -80,13 +80,20 @@ fn main() {
     }
     Some(("run", matches)) => {
       let function = matches.get_one::<String>("func");
+      let filter_impl = matches.get_one::<String>("impl");
+
+      if function.is_none() {
+        error!("Please provide a function name");
+        return;
+      }
+
       if function.is_none() {
         error!("Please provide a function name");
         return;
       }
 
       let mir = mir_from_file(&feakin_path.unwrap());
-      builtin::endpoint_runner::execute(&mir, function.unwrap());
+      builtin::endpoint_runner::execute(&mir, function.unwrap(), filter_impl.unwrap());
     }
     _ => unreachable!("clap should ensure we don't get here"),
   };

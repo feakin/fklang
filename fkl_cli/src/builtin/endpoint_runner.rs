@@ -9,7 +9,7 @@ pub struct EndpointRunner {
 }
 
 
-pub(crate) fn execute(_context_map: &ContextMap, _func_name: &str) {
+pub(crate) fn execute(_context_map: &ContextMap, _func_name: &str, _impl_name: &str) {
   // todo!()
 }
 
@@ -77,7 +77,7 @@ mod tests {
       path: "/test".to_string(),
       request: None,
       response: None,
-      description: "".to_string()
+      description: "".to_string(),
     };
     let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
@@ -93,11 +93,9 @@ mod tests {
       path: "https://github.com/feakin/".to_string(),
       request: None,
       response: None,
-      description: "".to_string()
+      description: "".to_string(),
     };
     let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
   }
-
-
 }
