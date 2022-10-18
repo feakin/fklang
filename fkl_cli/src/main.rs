@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::ArgMatches;
-use log::{error, info};
+use log::error;
 
 use fkl_parser::parse;
 
@@ -61,25 +61,24 @@ fn main() {
         ),
     );
 
-
   let matches: ArgMatches = cmd.get_matches();
-  let feakin_path = matches.get_one::<PathBuf>("path");
-
-  if feakin_path.is_none() {
-    error!("Please provide a path to a feakin file");
-    return;
-  }
-
-  let path = feakin_path.unwrap();
   match matches.subcommand() {
-    Some(("dot", _matches)) => gen_to_dot(path),
-    Some(("ast", _matches)) => parse_to_ast(path),
+    Some(("dot", matches)) => {
+      let path = matches.get_one::<PathBuf>("path").unwrap();
+      gen_to_dot(path);
+    }
+    Some(("ast", _matches)) => {
+      let path = matches.get_one::<PathBuf>("path").unwrap();
+      parse_to_ast(path);
+    }
     Some(("gen", matches)) => {
+      let path = matches.get_one::<PathBuf>("path").unwrap();
       let filter_impl = matches.get_one::<String>("impl");
       let parent = path.parent().unwrap().to_path_buf();
       code_gen_exec::code_gen_by_path(path, filter_impl, &parent);
     }
     Some(("run", matches)) => {
+      let path = matches.get_one::<PathBuf>("path").unwrap();
       let function = matches.get_one::<String>("func");
       let impl_name = matches.get_one::<String>("impl");
 
@@ -93,7 +92,7 @@ fn main() {
         return;
       }
 
-      let mir = mir_from_file(&feakin_path.unwrap());
+      let mir = mir_from_file(&path);
       builtin::endpoint_runner::execute(&mir, function.unwrap(), impl_name.unwrap());
     }
     _ => unreachable!("clap should ensure we don't get here"),

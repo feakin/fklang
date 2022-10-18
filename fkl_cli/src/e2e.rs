@@ -5,6 +5,14 @@ mod tests {
   use crate::code_gen_exec;
 
   #[test]
+  #[ignore]
+  fn cli_tests() {
+    trycmd::TestCases::new()
+      .case("fkl_cli/*.toml")
+      .case("README.md");
+  }
+
+  #[test]
   fn test_java_package_to_path() {
     let mut d: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     d.push("test_data/spring");

@@ -1,0 +1,7 @@
+/// Hello Got event ?
+impl GitHubOpened {
+  endpoint {
+    GET "https://book.feakin.com/";
+    response: String;
+  }
+}
