@@ -35,9 +35,9 @@ enum Commands {
     path: PathBuf,
   },
   Gen {
-    #[arg(short, long, required = true)]
+    #[arg(short, required = true)]
     path: PathBuf,
-    #[arg(short, long, required = true, long = "impl")]
+    #[arg(short, long = "impl")]
     impl_name: Option<String>,
   },
   Run(RunOpt),
@@ -45,9 +45,9 @@ enum Commands {
 
 #[derive(Args)]
 struct RunOpt {
-  #[arg(short, long, required = true)]
+  #[arg(short, required = true)]
   path: PathBuf,
-  #[arg(short, long, required = true, long = "impl")]
+  #[arg(short, required = true, long = "impl")]
   impl_name: String,
   #[arg(short, required = true, long = "func")]
   func_name: String,
