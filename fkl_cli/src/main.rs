@@ -93,10 +93,9 @@ fn gen_to_dot(path: &PathBuf) {
   let contents = fs::read_to_string(path).expect("Something went wrong reading the file");
   let context_map = parse(&*contents).expect("TODO: panic message");
 
-  // struct to json
   let json = serde_json::to_string(&context_map).expect("TODO: panic message");
-  // json to file
-  let mut file = std::fs::File::create("test.json").expect("TODO: panic message");
+
+  let mut file = std::fs::File::create("dot.dot").expect("TODO: panic message");
   file.write_all(json.as_bytes()).expect("TODO: panic message");
 }
 
@@ -106,10 +105,9 @@ fn parse_to_ast(path: &PathBuf) {
   let contents = fs::read_to_string(path).expect("Something went wrong reading the file");
   let context_map = parse(&*contents).expect("TODO: panic message");
 
-  // struct to json
   let json = serde_json::to_string(&context_map).expect("TODO: panic message");
-  // json to file
-  let mut file = std::fs::File::create("ast.json").expect("TODO: panic message");
+
+  let mut file = fs::File::create("ast.json").expect("TODO: panic message");
   file.write_all(json.as_bytes()).expect("TODO: panic message");
 }
 
