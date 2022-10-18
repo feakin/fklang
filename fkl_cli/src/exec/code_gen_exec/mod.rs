@@ -1,3 +1,6 @@
+pub mod layer_map;
+pub mod layer_path_builder;
+
 use std::fs;
 use std::path::PathBuf;
 
@@ -7,8 +10,8 @@ use fkl_codegen_java::gen_http_api;
 use fkl_parser::mir::{ContextMap, Implementation};
 use fkl_parser::parse;
 
-use crate::exec::layer_map::LayerMap;
-use crate::exec::layer_path_builder::LayerPathBuilder;
+use crate::exec::LayerMap;
+use crate::exec::LayerPathBuilder;
 use crate::construct::code_construct::CodeConstruct;
 use crate::construct::java_construct::JavaConstruct;
 use crate::inserter::inserter::JavaInserter;

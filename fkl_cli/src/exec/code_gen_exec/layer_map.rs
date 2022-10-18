@@ -71,7 +71,7 @@ pub fn java_package_to_path(package: &str) -> String {
 #[cfg(test)]
 mod tests {
   use fkl_parser::mir::{Layer, LayeredArchitecture};
-  use crate::exec::layer_map::{java_package_to_path, LayerMap};
+  use crate::exec::{java_package_to_path, LayerMap};
 
   #[test]
   fn package_convert() {

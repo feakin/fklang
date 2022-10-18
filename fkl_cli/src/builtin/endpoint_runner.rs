@@ -17,7 +17,7 @@ impl EndpointRunner {
 
   pub fn send_request(&self) -> Result<(), ()> {
     let client = reqwest::blocking::Client::new();
-    let req = self.request_to_hashmap();
+    let _req = self.request_to_hashmap();
 
     match self.endpoint.method {
       HttpMethod::GET => {
@@ -53,7 +53,7 @@ impl EndpointRunner {
     Ok(())
   }
   fn request_to_hashmap(&self) -> HashMap<String, String> {
-    let mut map = HashMap::new();
+    let map = HashMap::new();
     // todo: convert request
     map
   }
