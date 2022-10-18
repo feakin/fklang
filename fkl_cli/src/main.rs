@@ -62,50 +62,33 @@ fn main() {
 
 
   let matches: ArgMatches = cmd.get_matches();
+  let feakin_path = matches.get_one::<PathBuf>("path");
+
+  if feakin_path.is_none() {
+    error!("Please provide a path to a manifest file");
+    return;
+  }
+
+  let path = feakin_path.unwrap();
   match matches.subcommand() {
+    Some(("dot", _matches)) => gen_to_dot(path),
+    Some(("ast", _matches)) => parse_to_ast(path),
     Some(("gen", matches)) => {
-      let feakin_path = matches.get_one::<PathBuf>("path");
       let filter_impl = matches.get_one::<String>("impl");
-
-      if feakin_path.is_none() {
-        error!("Please provide a path to a manifest file");
-        return;
-      }
-
-      let path = feakin_path.unwrap();
-      let base_path = path.parent().unwrap().to_path_buf();
-
-      code_gen_exec::code_gen_exec(path, filter_impl, &base_path);
+      let parent = path.parent().unwrap().to_path_buf();
+      code_gen_exec::code_gen_exec(path, filter_impl, &parent);
     }
     Some(("run", matches)) => {
-      let feakin_path = matches.get_one::<PathBuf>("path");
-      let filter_impl = matches.get_one::<String>("impl");
-
-      if feakin_path.is_none() {
-        error!("Please provide a path to a manifest file");
+      let function = matches.get_one::<String>("func");
+      if function.is_none() {
+        error!("Please provide a function name");
         return;
       }
 
       let path = feakin_path.unwrap();
-      let base_path = path.parent().unwrap().to_path_buf();
+      let parent = path.parent().unwrap().to_path_buf();
 
-      code_gen_exec::code_gen_exec(path, filter_impl, &base_path);
-    }
-    Some(("dot", matches)) => {
-      let manifest_path = matches.get_one::<PathBuf>("path");
-      if let Some(path) = manifest_path {
-        gen_to_dot(path);
-      } else {
-        panic!("Please provide a path to a manifest file");
-      }
-    }
-    Some(("ast", matches)) => {
-      let manifest_path = matches.get_one::<PathBuf>("path");
-      if let Some(path) = manifest_path {
-        parse_to_ast(path);
-      } else {
-        panic!("Please provide a path to a manifest file");
-      }
+      code_gen_exec::code_gen_exec(path, function, &parent);
     }
     _ => unreachable!("clap should ensure we don't get here"),
   };
