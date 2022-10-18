@@ -2,15 +2,38 @@ use std::collections::HashMap;
 
 use log::info;
 
-use fkl_parser::mir::{ContextMap, HttpEndpoint, HttpMethod};
+use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
 }
 
+pub(crate) fn execute(context_map: &ContextMap, func_name: &str, impl_name: &str) {
+  let mut apis: Vec<HttpApiImpl> = vec![];
+  context_map.implementations.iter().for_each(|implementation| {
+    if let Implementation::PublishHttpApi(api) = implementation {
+      if api.name == impl_name {
+        apis.push(api.clone());
+      }
+    }
+  });
 
-pub(crate) fn execute(_context_map: &ContextMap, _func_name: &str, _impl_name: &str) {
-  // todo!()
+  if apis.len() == 0 {
+    info!("No implementation found for {}", impl_name);
+    return;
+  }
+
+  let endpoint = apis[0].endpoint.clone();
+
+  match func_name {
+    "request" => {
+      let mut endpoint_runner = EndpointRunner::new(endpoint.clone());
+      endpoint_runner.send_request().expect("TODO: panic message");
+    }
+    _ => {
+      info!("No function found for {}", func_name);
+    }
+  }
 }
 
 impl EndpointRunner {

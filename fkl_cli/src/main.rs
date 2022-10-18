@@ -128,6 +128,7 @@ mod tests {
   use fkl_parser::mir::ContextMap;
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
+  use crate::builtin;
 
   #[test]
   fn convert_for_cli() {
@@ -152,5 +153,21 @@ mod tests {
       });
 
     // assert_eq!(output, r#"@GetMapping(\"/book/{id}\")\npublic Cinema creatCinema() { }\n"#)
+  }
+
+  #[test]
+  #[should_panic]
+  fn test_execute_request() {
+    let source = r#"impl CinemaCreated {
+  endpoint {
+    GET "/book/{id}";
+    response: Cinema;
+  }
+}"#;
+
+    let mut output = String::new();
+    let context_map: ContextMap = parse(source).unwrap();
+
+    builtin::endpoint_runner::execute(&context_map, "request", "CinemaCreated");
   }
 }
