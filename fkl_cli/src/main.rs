@@ -3,7 +3,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::ArgMatches;
-use log::error;
+use log::{error, info};
 
 use fkl_parser::parse;
 
@@ -41,6 +41,7 @@ fn main() {
           clap::arg!(--"path" <PATH>)
             .value_parser(clap::value_parser!(std::path::PathBuf)),
         )
+        .arg(clap::arg!(--"func" <String>))
         .arg(clap::arg!(--"impl" <String>))
     )
     .subcommand(
@@ -65,7 +66,7 @@ fn main() {
   let feakin_path = matches.get_one::<PathBuf>("path");
 
   if feakin_path.is_none() {
-    error!("Please provide a path to a manifest file");
+    error!("Please provide a path to a feakin file");
     return;
   }
 
@@ -128,6 +129,7 @@ mod tests {
   use fkl_parser::mir::ContextMap;
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
+
   use crate::builtin;
 
   #[test]

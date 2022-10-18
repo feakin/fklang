@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 use log::info;
+use reqwest::blocking::Response;
+use reqwest::StatusCode;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 
@@ -47,36 +49,46 @@ impl EndpointRunner {
     let client = reqwest::blocking::Client::new();
     let _req = self.request_to_hashmap();
 
+    let resp: Response;
+
     match self.endpoint.method {
       HttpMethod::GET => {
-        client.get(&self.endpoint.path)
+        resp = client.get(&self.endpoint.path)
           .send()
           .expect("Failed to send request");
       }
       HttpMethod::POST => {
-        client.post(&self.endpoint.path)
+        resp = client.post(&self.endpoint.path)
           .send()
           .expect("Failed to send request");
       }
       HttpMethod::PUT => {
-        client.put(&self.endpoint.path)
+        resp = client.put(&self.endpoint.path)
           .send()
           .expect("Failed to send request");
       }
       HttpMethod::DELETE => {
-        client.delete(&self.endpoint.path)
+        resp = client.delete(&self.endpoint.path)
           .send()
           .expect("Failed to send request");
       }
       HttpMethod::PATCH => {
-        client.patch(&self.endpoint.path)
+        resp = client.patch(&self.endpoint.path)
           .send()
           .expect("Failed to send request");
       }
       _ => {
-        info!("Unsupported method: {:?}", self.endpoint.method);
+        panic!("Unsupported method: {:?}", self.endpoint.method);
       }
     }
+
+    match resp.status() {
+      StatusCode::OK => info!("success!"),
+      StatusCode::PAYLOAD_TOO_LARGE => {
+        info!("Request payload is too large!");
+      }
+      s => info!("Received response status: {:?}", s),
+    };
 
     Ok(())
   }
@@ -118,6 +130,7 @@ mod tests {
       response: None,
       description: "".to_string(),
     };
+
     let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
   }
