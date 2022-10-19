@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
 use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Dependency, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
+use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
@@ -248,6 +249,11 @@ impl MirTransform {
       });
     }
 
+    if let Some(decl) = &endpoint_decl.authorization {
+      let authorization = HttpAuthorization::from(&decl.auth_type, decl.username.clone(), decl.password.clone());
+      endpoint.auth = Some(authorization);
+    }
+
     if let Some(decl) = &endpoint_decl.request {
       endpoint.request = Some(Request {
         name: decl.name.clone(),
@@ -345,6 +351,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 #[cfg(test)]
 mod tests {
   use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
+  use crate::mir::authorization::HttpAuthorization;
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -484,7 +491,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
-        auth: None,
+        auth: Some(HttpAuthorization::Basic("admin".to_string(), "admin".to_string())),
         method: HttpMethod::GET,
         request: None,
         response: Some(Response {
@@ -523,7 +530,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
-        auth: None,
+        auth: Some(HttpAuthorization::Basic("admin".to_string(), "admin".to_string())),
         method: HttpMethod::GET,
         request: None,
         response: Some(Response {

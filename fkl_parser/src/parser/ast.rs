@@ -257,7 +257,7 @@ pub struct EndpointDecl {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct AuthorizationDecl {
-  pub authorization_type: String,
+  pub auth_type: String,
   pub username: Option<String>,
   pub password: Option<String>,
 }

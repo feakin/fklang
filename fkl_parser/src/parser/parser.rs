@@ -524,7 +524,7 @@ fn consume_authorization(pair: Pair<Rule>) -> AuthorizationDecl {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::authorization_type => {
-        authorization.authorization_type = p.as_str().to_string();
+        authorization.auth_type = p.as_str().to_string();
       }
       Rule::username => {
         authorization.username = Some(p.as_str().to_string());
@@ -1238,7 +1238,7 @@ struct Cinema {
         method: "GET".to_string(),
         uri: "/book/{id}".to_string(),
         authorization: Some(AuthorizationDecl {
-          authorization_type: "Basic".to_string(),
+          auth_type: "Basic".to_string(),
           username: Some("admin".to_string()),
           password: Some("admin".to_string()),
         }),
@@ -1314,7 +1314,7 @@ imple CinemaCreatedEvent {
         method: "POST".to_string(),
         uri: "/book/{id}".to_string(),
         authorization: Some(AuthorizationDecl {
-          authorization_type: "Basic".to_string(),
+          auth_type: "Basic".to_string(),
           username: Some("admin".to_string()),
           password: Some("admin".to_string()),
         }),
