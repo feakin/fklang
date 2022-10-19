@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
 use log::info;
-use reqwest::blocking::Response;
+use reqwest::blocking::{Client, Response};
 use reqwest::header;
+use reqwest::header::HeaderMap;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 use fkl_parser::mir::authorization::HttpAuthorization;
+
 use crate::RunFuncName;
 
 pub struct EndpointRunner {
@@ -48,36 +50,37 @@ impl EndpointRunner {
   }
 
   pub fn send_request(&self) -> Result<(), ()> {
-    let mut headers = header::HeaderMap::new();
-    if let Some(http_auth) = &self.endpoint.auth {
-      match http_auth {
-        HttpAuthorization::Basic(username, password) => {
-          let header = format!("Basic {}", base64::encode(format!("{}:{}", username, password)));
-          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
-        }
-        HttpAuthorization::Bearer(token) => {
-          let header = format!("Bearer {}", token);
-          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
-        }
-        HttpAuthorization::Digest(username, password) => {
-          let header = format!("Digest {}", base64::encode(format!("{}:{}", username, password)));
-          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
-        }
-        HttpAuthorization::None => {}
+    let headers = self.headers();
+
+    let body = self.request_to_hashmap();
+    let resp = self.do_request(headers, body);
+
+    self.handle_response(resp);
+
+    Ok(())
+  }
+
+  fn handle_response(&self, resp: Response) {
+    let content_type = resp.headers().get("content-type").unwrap().to_str().unwrap();
+    match content_type {
+      "application/json" => {
+        let json: serde_json::Value = resp.json().expect("Failed to parse response");
+        println!("{}", json);
+      }
+      _ => {
+        let text = resp.text().expect("Failed to parse response");
+        println!("{}", text);
       }
     }
+  }
 
-    info!("headers: {:?}", headers.clone());
-
-
-    let _req = self.request_to_hashmap();
-    let client = reqwest::blocking::Client::builder()
+  fn do_request(&self, headers: HeaderMap, _req: HashMap<String, String>) -> Response {
+    let client = Client::builder()
       .default_headers(headers)
       .build()
       .expect("TODO: panic message");
 
     let resp: Response;
-
     match self.endpoint.method {
       HttpMethod::GET => {
         resp = client.get(&self.endpoint.path)
@@ -108,21 +111,33 @@ impl EndpointRunner {
         panic!("Unsupported method: {:?}", self.endpoint.method);
       }
     }
+    resp
+  }
 
-    let content_type = resp.headers().get("content-type").unwrap().to_str().unwrap();
-    match content_type {
-      "application/json" => {
-        let json: serde_json::Value = resp.json().expect("Failed to parse response");
-        println!("{}", json);
-      }
-      _ => {
-        let text = resp.text().expect("Failed to parse response");
-        println!("{}", text);
+  fn headers(&self) -> HeaderMap {
+    let mut headers = header::HeaderMap::new();
+    if let Some(http_auth) = &self.endpoint.auth {
+      match http_auth {
+        HttpAuthorization::Basic(username, password) => {
+          let header = format!("Basic {}", base64::encode(format!("{}:{}", username, password)));
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::Bearer(token) => {
+          let header = format!("Bearer {}", token);
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::Digest(username, password) => {
+          let header = format!("Digest {}", base64::encode(format!("{}:{}", username, password)));
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::None => {}
       }
     }
 
-    Ok(())
+    info!("headers: {:?}", headers.clone());
+    headers
   }
+
   fn request_to_hashmap(&self) -> HashMap<String, String> {
     let map = HashMap::new();
     // todo: convert request
