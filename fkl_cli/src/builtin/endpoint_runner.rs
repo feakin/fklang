@@ -4,12 +4,13 @@ use log::info;
 use reqwest::blocking::Response;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
+use crate::RunFuncName;
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
 }
 
-pub(crate) fn execute(context_map: &ContextMap, func_name: &str, impl_name: &str) {
+pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str) {
   let mut apis: Vec<HttpApiImpl> = vec![];
   context_map.implementations.iter().for_each(|implementation| {
     if let Implementation::PublishHttpApi(api) = implementation {
@@ -27,12 +28,9 @@ pub(crate) fn execute(context_map: &ContextMap, func_name: &str, impl_name: &str
   let endpoint = apis[0].endpoint.clone();
 
   match func_name {
-    "request" => {
+    RunFuncName::Request => {
       let endpoint_runner = EndpointRunner::new(endpoint.clone());
       endpoint_runner.send_request().expect("TODO: panic message");
-    }
-    _ => {
-      info!("No function found for {}", func_name);
     }
   }
 }

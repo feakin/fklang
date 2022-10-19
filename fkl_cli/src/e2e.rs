@@ -65,7 +65,6 @@ public class HelloController {
   }
 
   fn reset_test(controller: &str) {
-// reset test
     fs::write(controller, r#"package com.feakin.demo.rest;
 
 import org.springframework.web.bind.annotation.GetMapping;

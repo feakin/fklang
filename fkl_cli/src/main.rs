@@ -54,7 +54,12 @@ struct RunOpt {
   #[arg(short, required = true, long = "impl")]
   impl_name: String,
   #[arg(short, required = true, long = "func")]
-  func_name: String,
+  func_name: RunFuncName,
+}
+
+#[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
+pub enum RunFuncName {
+  Request
 }
 
 // todo: add code highlight support
