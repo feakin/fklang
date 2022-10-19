@@ -5,7 +5,6 @@ mod tests {
   use crate::code_gen_exec;
 
   #[test]
-  #[ignore]
   fn cli_tests() {
     trycmd::TestCases::new()
       .case("fkl_cli/*.toml")
