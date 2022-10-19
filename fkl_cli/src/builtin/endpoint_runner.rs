@@ -2,8 +2,10 @@ use std::collections::HashMap;
 
 use log::info;
 use reqwest::blocking::Response;
+use reqwest::header;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
+use fkl_parser::mir::authorization::HttpAuthorization;
 use crate::RunFuncName;
 
 pub struct EndpointRunner {
@@ -46,8 +48,30 @@ impl EndpointRunner {
   }
 
   pub fn send_request(&self) -> Result<(), ()> {
-    let client = reqwest::blocking::Client::new();
+    let mut headers = header::HeaderMap::new();
+    if let Some(http_auth) = &self.endpoint.auth {
+      match http_auth {
+        HttpAuthorization::Basic(username, password) => {
+          let header = format!("Basic {}", base64::encode(format!("{}:{}", username, password)));
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::Bearer(token) => {
+          let header = format!("Bearer {}", token);
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::Digest(username, password) => {
+          let header = format!("Digest {}", base64::encode(format!("{}:{}", username, password)));
+          headers.insert(header::AUTHORIZATION, header.parse().unwrap());
+        }
+        HttpAuthorization::None => {}
+      }
+    }
+
     let _req = self.request_to_hashmap();
+    let client = reqwest::blocking::Client::builder()
+      .default_headers(headers)
+      .build()
+      .expect("TODO: panic message");
 
     let resp: Response;
 
@@ -117,7 +141,7 @@ mod tests {
       request: None,
       response: None,
       description: "".to_string(),
-      auth: None
+      auth: None,
     };
     let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
@@ -133,7 +157,7 @@ mod tests {
       request: None,
       response: None,
       description: "".to_string(),
-      auth: None
+      auth: None,
     };
 
     let runner = EndpointRunner::new(endpoint);
