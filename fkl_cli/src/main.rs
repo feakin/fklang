@@ -59,7 +59,7 @@ struct RunOpt {
 
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
 pub enum RunFuncName {
-  Request
+  HttpRequest
 }
 
 // todo: add code highlight support
