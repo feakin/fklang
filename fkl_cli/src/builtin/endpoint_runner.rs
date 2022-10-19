@@ -67,6 +67,9 @@ impl EndpointRunner {
       }
     }
 
+    info!("headers: {:?}", headers.clone());
+
+
     let _req = self.request_to_hashmap();
     let client = reqwest::blocking::Client::builder()
       .default_headers(headers)
