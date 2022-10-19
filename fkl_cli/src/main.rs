@@ -116,7 +116,7 @@ mod tests {
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
 
-  use crate::builtin;
+  use crate::{builtin, RunFuncName};
 
   #[test]
   fn convert_for_cli() {
@@ -155,7 +155,7 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, "request", "CinemaCreated");
+    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
   }
 
   #[test]
@@ -170,6 +170,6 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, "request", "CinemaCreated");
+    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
   }
 }
