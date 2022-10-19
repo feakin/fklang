@@ -29,7 +29,13 @@ Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 7. general programming language (if possible)
     - [ ] function support
     - [ ] expression support
-  
+
+
+## Install
+
+```
+cargo install fkl_cli
+```
 
 ## Modules
 
