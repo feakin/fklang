@@ -196,6 +196,7 @@ import org.springframework.web.bind.annotation.RestController;
       name: "all".to_string(),
       description: "".to_string(),
       path: "".to_string(),
+      auth: None,
       method: HttpMethod::GET,
       request: None,
       response: Some(Response {
@@ -214,6 +215,7 @@ import org.springframework.web.bind.annotation.RestController;
       name: "EmployeeCreated".to_string(),
       description: "".to_string(),
       path: "".to_string(),
+      auth: None,
       method: HttpMethod::PUT,
       request: Some(Request {
         name: "CreateEmployeeRequest".to_string(),

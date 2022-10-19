@@ -484,6 +484,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
+        auth: None,
         method: HttpMethod::GET,
         request: None,
         response: Some(Response {
@@ -522,6 +523,7 @@ impl CinemaCreatedEvent {
         name: "".to_string(),
         description: "".to_string(),
         path: "/book/{id}".to_string(),
+        auth: None,
         method: HttpMethod::GET,
         request: None,
         response: Some(Response {

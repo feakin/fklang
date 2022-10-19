@@ -7,6 +7,7 @@ pub struct HttpEndpoint {
   pub name: String,
   pub description: String,
   pub path: String,
+  pub auth: Option<String>,
   pub method: HttpMethod,
   pub request: Option<Request>,
   pub response: Option<Response>,

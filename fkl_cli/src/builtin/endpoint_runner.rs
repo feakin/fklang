@@ -117,6 +117,7 @@ mod tests {
       request: None,
       response: None,
       description: "".to_string(),
+      auth: None
     };
     let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
@@ -125,7 +126,6 @@ mod tests {
   #[ignore]
   #[test]
   fn http_github() {
-    // todo: find a better way
     let endpoint = HttpEndpoint {
       name: "".to_string(),
       method: HttpMethod::GET,
@@ -133,6 +133,7 @@ mod tests {
       request: None,
       response: None,
       description: "".to_string(),
+      auth: None
     };
 
     let runner = EndpointRunner::new(endpoint);
