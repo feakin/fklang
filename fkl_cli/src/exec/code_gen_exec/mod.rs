@@ -11,7 +11,8 @@ use crate::construct::java_construct::JavaConstruct;
 use crate::exec;
 use crate::exec::LayerMap;
 use crate::exec::LayerPathBuilder;
-use crate::inserter::inserter::JavaInserter;
+use crate::inserter::inserter::Inserter;
+use crate::inserter::java_inserter::JavaInserter;
 
 pub mod layer_map;
 pub mod layer_path_builder;
