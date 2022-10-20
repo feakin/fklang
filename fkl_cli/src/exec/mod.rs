@@ -10,6 +10,7 @@ use fkl_parser::mir::ContextMap;
 use fkl_parser::parse;
 
 pub mod code_gen_exec;
+pub mod layered_guarding_exec;
 
 pub fn mir_from_file(input_path: &PathBuf) -> ContextMap {
   let code = fs::read_to_string(input_path).unwrap();
