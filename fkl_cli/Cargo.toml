@@ -33,8 +33,10 @@ serde_json = "1.0"
 fkl-parser = { path = "../fkl_parser", version = "0.2.2" }
 fkl_codegen_java = { path = "../fkl_codegen_java", version = "0.2.2" }
 
+# code ident
 tree-sitter = "=0.19.3"
 tree-sitter-java = "0.19.0"
+walkdir = "2"
 
 # logging
 log = "0.4.0"
