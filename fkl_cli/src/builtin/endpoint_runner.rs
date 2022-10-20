@@ -30,11 +30,10 @@ pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_na
   }
 
   let endpoint = apis[0].endpoint.clone();
-
   match func_name {
     RunFuncName::HttpRequest => {
-      let endpoint_runner = EndpointRunner::new(endpoint.clone());
-      endpoint_runner.send_request().expect("TODO: panic message");
+      let runner = EndpointRunner::new(endpoint);
+      runner.send_request().expect("TODO: panic message");
     }
     RunFuncName::MockServer => {
       // TODO: implement mock server
