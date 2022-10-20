@@ -43,12 +43,15 @@ impl ModelBuilder {
         continue;
       }
 
-      ModelBuilder::build_model_by_file(&mut models, path)
+      if let Some(file) = ModelBuilder::model_by_file(path) {
+        models.push(file);
+      }
     }
+
     models
   }
 
-  pub fn build_model_by_file(models: &mut Vec<CodeFile>, path: &Path) {
+  pub fn model_by_file(path: &Path) -> Option<CodeFile> {
     let ext = path.extension().unwrap().to_str().unwrap();
     let file_name = path.file_name().unwrap().to_str().unwrap();
 
@@ -57,9 +60,9 @@ impl ModelBuilder {
         let mut file = JavaConstruct::parse(ModelBuilder::read_content(path).as_str());
         file.path = ModelBuilder::format_path(path);
         file.file_name = file_name.to_string();
-        models.push(file);
+        Some(file)
       }
-      _ => {}
+      _ => None
     }
   }
 
