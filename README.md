@@ -4,6 +4,8 @@
 ![Crates.io](https://img.shields.io/crates/v/fkl_cli)
 [![codecov](https://codecov.io/gh/feakin/fklang/branch/master/graph/badge.svg?token=PCIL3T0NDR)](https://codecov.io/gh/feakin/fklang)
 
+origin idea from [Forming](https://github.com/inherd/forming), but it's too complex. So I decide to rewrite it with TypeFlow
+
 > Fklang 是一个基于[软件开发工业化](https://book.feakin.com/design-principles)思想，设计的架构设计 DSL。以确保软件系统描述与实现的一致性。通过显式化的软件架构设计，用于支持 AI 代码生成系统的嵌入
 
 Try it: [Feakin Quick Start](https://book.feakin.com/quick-start.html)
