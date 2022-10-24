@@ -6,6 +6,9 @@ use log::error;
 pub use code_gen_exec::code_gen_by_path;
 pub use code_gen_exec::layer_map::*;
 pub use code_gen_exec::layer_path_builder::*;
+
+pub use layered_guarding_exec::LayeredGuardingExec;
+
 use fkl_parser::mir::ContextMap;
 use fkl_parser::parse;
 

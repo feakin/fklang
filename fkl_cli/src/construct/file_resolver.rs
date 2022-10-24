@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use std::sync::Arc;
 
 use crate::code_meta::{CodeFile, CodeLanguage};
@@ -34,23 +34,30 @@ impl Default for FileResolver {
 }
 
 impl FileResolver {
-  fn load_dir(&mut self, path: &Path) {
+  pub fn load_dir(&mut self, path: &PathBuf) {
     for entry in walkdir::WalkDir::new(path) {
       let entry = entry.unwrap();
       if !entry.file_type().is_file() {
         continue;
       }
 
-      let path = entry.path();
+      let path = entry.path().to_path_buf();
       if let None = path.extension() {
         continue;
       }
 
-      self.load_file(path).unwrap();
+      // java only
+      if let Some(ext) = path.extension() {
+        if ext != "java" {
+          continue;
+        }
+      }
+
+      self.load_file(&path).unwrap();
     }
   }
 
-  fn load_file(&mut self, path: &Path) -> Result<(), String> {
+  fn load_file(&mut self, path: &PathBuf) -> Result<(), String> {
     if self.cached_paths.get(path).is_some() {
       return Ok(());
     }
