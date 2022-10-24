@@ -60,6 +60,7 @@ impl ModelBuilder {
         let mut file = JavaConstruct::parse(ModelBuilder::read_content(path).as_str());
         file.path = ModelBuilder::format_path(path);
         file.file_name = file_name.to_string();
+        file.pure_name = file_name.replace(".java", "");
         Some(file)
       }
       _ => None

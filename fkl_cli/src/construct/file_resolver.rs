@@ -5,8 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use crate::code_meta::{CodeFile, CodeLanguage};
-use crate::construct::code_construct::CodeConstruct;
-use crate::construct::java_construct::JavaConstruct;
+use crate::construct::model_builder::ModelBuilder;
 
 // inspired by [Solang](https://github.com/hyperledger-labs/solang)
 pub struct FileResolver {
@@ -19,6 +18,7 @@ pub struct FileResolver {
 pub struct ResolvedFile {
   content: Arc<str>,
   imports: Vec<String>,
+  exports: Vec<String>,
   language: CodeLanguage,
   meta: Option<CodeFile>,
   path: PathBuf,
@@ -69,26 +69,19 @@ impl FileResolver {
     let pos = self.files.len();
     self.cached_paths.insert(path.to_path_buf(), pos);
 
+    let meta = ModelBuilder::model_by_file(path);
     let mut imports: Vec<String> = vec![];
-    let meta = match path.extension() {
-      Some(ext) => {
-        match ext.to_str().unwrap_or("") {
-          "java" => {
-            let code_file = JavaConstruct::parse(&content);
-            imports = code_file.imports.clone();
-            Some(code_file)
-          }
-          &_ => {
-            None
-          }
-        }
-      }
-      None => return Err(format!("{}: no file extension", path.display()))
-    };
+    let mut exports: Vec<String> = vec![];
+
+    if let Some(file) = &meta {
+      imports = file.imports.clone();
+      exports.push(format!("{}.{}", file.package, file.pure_name));
+    }
 
     let resolved_file = ResolvedFile {
       content: Arc::from(content),
       imports,
+      exports,
       language: CodeLanguage::Java,
       meta,
       path: path.to_path_buf(),
@@ -122,6 +115,9 @@ mod tests {
     assert_eq!(file.imports.len(), 2);
     assert_eq!(file.imports[0], "org.springframework.boot.SpringApplication");
     assert_eq!(file.meta.as_ref().unwrap().classes[0].name, "DemoApplication");
+
+    assert_eq!(file.exports.len(), 1);
+    assert_eq!(file.exports[0], "com.feakin.demo.DemoApplication");
   }
 
   #[test]
