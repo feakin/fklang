@@ -1,21 +1,24 @@
 use std::collections::HashMap;
-use std::ffi::OsString;
 use std::fs::File;
-use std::hash::Hash;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+use crate::code_meta::{CodeFile, CodeLanguage};
+
 // inspired by [Solang](https://github.com/hyperledger-labs/solang)
 pub struct FileResolver {
   cached_paths: HashMap<PathBuf, usize>,
-  files: HashMap<PathBuf, Arc<str>>,
+  files: HashMap<PathBuf, ResolvedFile>,
 }
 
 #[derive(Clone, Debug)]
 pub struct ResolvedFile {
+  content: Arc<str>,
+  import_paths: Vec<(String, PathBuf)>,
+  language: CodeLanguage,
+  meta: CodeFile,
   path: PathBuf,
-  import_paths: Vec<(Option<OsString>, PathBuf)>,
 }
 
 impl Default for FileResolver {
@@ -45,9 +48,16 @@ impl FileResolver {
     }
 
     let pos = self.files.len();
-
-    self.files.insert(path.to_path_buf(), Arc::from(content));
     self.cached_paths.insert(path.to_path_buf(), pos);
+
+    let resolved_file = ResolvedFile {
+      content: Arc::from(content),
+      import_paths: Default::default(),
+      language: CodeLanguage::Java,
+      meta: Default::default(),
+      path: path.to_path_buf(),
+    };
+    self.files.insert(path.to_path_buf(), resolved_file);
 
     Ok(())
   }
