@@ -19,7 +19,7 @@ layered DDD {
   dependency {
     interface -> application
     application -> domain
-    domain -> application
+    interface -> domain
     application -> infrastructure
     interface -> infrastructure
   }

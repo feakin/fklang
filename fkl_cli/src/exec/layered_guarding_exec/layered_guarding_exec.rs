@@ -56,6 +56,7 @@ mod tests {
     let arch = file.layered.unwrap();
     let errors = LayeredGuardingExec::guarding(base, &arch);
 
-    assert_eq!(errors.len(), 0);
+    assert_eq!(errors.len(), 1);
+    assert_eq!(errors[0], "package com.feakin.demo.domain imported com.feakin.demo.rest")
   }
 }

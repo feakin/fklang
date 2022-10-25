@@ -122,7 +122,7 @@ mod tests {
 
     resolver.load_dir(&d);
 
-    assert_eq!(resolver.files.len(), 2);
-    assert_eq!(resolver.cached_paths.len(), 2);
+    assert_eq!(resolver.files.len(), 3);
+    assert_eq!(resolver.cached_paths.len(), 3);
   }
 }

@@ -3,6 +3,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
+use log::info;
 
 use fkl_parser::parse;
 
@@ -46,8 +47,9 @@ enum Commands {
   Run(RunOpt),
 }
 
-#[derive(Args)]
+#[derive(Debug, Args)]
 struct RunOpt {
+  // todo: change to config
   #[arg(short, long, required = true)]
   path: PathBuf,
   #[arg(short, required = false, long = "impl")]
@@ -81,6 +83,7 @@ fn main() {
     }
     Commands::Run(run) => {
       let mir = mir_from_file(&run.path);
+      info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
           let impl_name = run.impl_name.as_ref().unwrap();
@@ -88,7 +91,15 @@ fn main() {
         }
         RunFuncName::Guarding => {
           let path_buf = PathBuf::from(&run.path);
-          LayeredGuardingExec::guarding(path_buf, &mir.layered.expect("cannot parse guarding rule"));
+          let root = path_buf.parent().unwrap().to_path_buf();
+
+          let errors = LayeredGuardingExec::guarding(root, &mir.layered.expect("cannot parse guarding rule"));
+
+          if errors.len() > 0 {
+            for error in errors {
+              println!("{}", error);
+            }
+          }
         }
       }
     }

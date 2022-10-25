@@ -80,12 +80,23 @@ impl PackageGuarding {
 
   fn filter_with_imports(&self, file: &&CodeFile, errors: &mut Vec<String>, rule: &&PackageRule) {
     for import in &file.imports {
-      if self.all_layer.contains(&import) && !rule.targets.contains(&import) {
-        errors.push(format!("package {} imported {}", file.package, import));
+      let package_name = package_name(import).to_string();
+      if self.all_layer.contains(&package_name) && !rule.targets.contains(&package_name) {
+        errors.push(format!("package {} imported {}", file.package, package_name));
       }
     }
   }
 }
+
+pub fn package_name(package_name: &str) -> &str {
+  let mut pkg = package_name;
+  if let Some(index) = pkg.rfind(".") {
+    pkg = &pkg[0..index];
+  }
+
+  pkg
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -93,7 +104,13 @@ mod tests {
   use crate::construct::java_construct::JavaConstruct;
 
   use crate::exec::{mir_from_str};
-  use crate::exec::layered_guarding_exec::package_guarding::PackageGuarding;
+  use crate::exec::layered_guarding_exec::package_guarding::{PackageGuarding, package_name};
+
+  #[test]
+  fn pure_package_name() {
+    assert_eq!(package_name("com.intellij.psi.StubBuilder"), "com.intellij.psi");
+    assert_eq!(package_name("com.intellij.psi.*"), "com.intellij.psi");
+  }
 
   fn sample_layer() -> &'static str {
     r#"
@@ -126,7 +143,7 @@ layered DDD {
     let java_code = r#"
 package com.phodal.domain;
 
-import com.phodal.application;
+import com.phodal.application.UserApplicationService;
 
 class Demo {}
 "#;
