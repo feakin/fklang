@@ -47,14 +47,21 @@ impl PackageGuarding {
         .push(target_name.clone());
     }
 
+    guarding.all_layer = layered_name_map.values().map(|v| v.clone()).collect();
+
+    // insert rules for empty layer
+    guarding.all_layer.iter().for_each(|layer| {
+      if let None = layered_relations.get(layer) {
+        layered_relations.insert(layer.clone(), vec![]);
+      }
+    });
+
     for (source, targets) in layered_relations {
       guarding.add_rule(PackageRule {
         source,
         targets,
       });
     }
-
-    guarding.all_layer = layered_name_map.values().map(|v| v.clone()).collect();
 
     guarding
   }
@@ -115,7 +122,6 @@ layered DDD {
   }
 
   #[test]
-  #[ignore]
   fn guarding_package_for_error() {
     let java_code = r#"
 package com.phodal.domain;
