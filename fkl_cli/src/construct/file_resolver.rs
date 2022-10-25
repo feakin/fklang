@@ -113,6 +113,7 @@ mod tests {
   }
 
   #[test]
+  #[cfg(not(target_os = "windows"))]
   fn test_load_dir() {
     let mut resolver = FileResolver::default();
 
