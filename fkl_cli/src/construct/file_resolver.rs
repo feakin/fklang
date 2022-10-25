@@ -36,7 +36,7 @@ impl Default for FileResolver {
 impl FileResolver {
   pub fn load_dir(&mut self, path: &PathBuf) {
     ignore::Walk::new(path)
-      .filter_map(|e| CodeLanguage::is_supported_file(e))
+      .filter_map(|e| CodeLanguage::filter_support_file(e))
       .for_each(|path| {
         self.load_file(&path).unwrap();
       });

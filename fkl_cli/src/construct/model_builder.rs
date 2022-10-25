@@ -23,7 +23,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::code_meta::CodeFile;
+use crate::code_meta::{CodeFile, CodeLanguage};
 use crate::construct::code_construct::CodeConstruct;
 use crate::construct::java_construct::JavaConstruct;
 
@@ -31,24 +31,13 @@ pub struct ModelBuilder {}
 
 impl ModelBuilder {
   pub fn build_models_by_dir(code_dir: PathBuf) -> Vec<CodeFile> {
-    let mut models = vec![];
-    for entry in walkdir::WalkDir::new(code_dir) {
-      let entry = entry.unwrap();
-      if !entry.file_type().is_file() {
-        continue;
-      }
-
-      let path = entry.path();
-      if let None = path.extension() {
-        continue;
-      }
-
-      if let Some(file) = ModelBuilder::model_by_file(path) {
-        models.push(file);
-      }
-    }
-
-    models
+    ignore::Walk::new(&code_dir)
+      .filter_map(|e| CodeLanguage::filter_support_file(e))
+      .map(|path| {
+        ModelBuilder::model_by_file(&path)
+      })
+      .flatten()
+      .collect()
   }
 
   pub fn model_by_file(path: &Path) -> Option<CodeFile> {

@@ -29,7 +29,7 @@ impl CodeLanguage {
     CodeLanguage::supported().contains(&ext.to_string())
   }
 
-  pub fn is_supported_file(entry: Result<DirEntry, Error>) -> Option<PathBuf> {
+  pub fn filter_support_file(entry: Result<DirEntry, Error>) -> Option<PathBuf> {
     if let Ok(entry) = entry {
       let path = entry.path().to_path_buf();
       if let Some(ext) = path.extension() {
