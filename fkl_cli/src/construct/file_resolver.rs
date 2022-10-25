@@ -20,7 +20,7 @@ pub struct ResolvedFile {
   imports: Vec<String>,
   exports: Vec<String>,
   language: CodeLanguage,
-  meta: Option<CodeFile>,
+  pub meta: Option<CodeFile>,
   path: PathBuf,
 }
 
