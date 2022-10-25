@@ -10,7 +10,7 @@ use crate::construct::model_builder::ModelBuilder;
 // inspired by [Solang](https://github.com/hyperledger-labs/solang)
 pub struct FileResolver {
   cached_paths: HashMap<PathBuf, usize>,
-  files: HashMap<PathBuf, ResolvedFile>,
+  pub files: HashMap<PathBuf, ResolvedFile>,
 }
 
 #[allow(dead_code)]

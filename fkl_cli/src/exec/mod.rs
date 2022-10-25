@@ -17,6 +17,10 @@ pub mod layered_guarding_exec;
 
 pub fn mir_from_file(input_path: &PathBuf) -> ContextMap {
   let code = fs::read_to_string(input_path).unwrap();
+  mir_from_str(&code)
+}
+
+pub fn mir_from_str(code: &str) -> ContextMap {
   let mir: ContextMap = parse(&code).or_else(|e| {
     error!("{}", e);
     Err(e)

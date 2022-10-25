@@ -1,6 +1,9 @@
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use fkl_parser::mir::LayeredArchitecture;
 use crate::construct::file_resolver::FileResolver;
+
+pub mod package_guarding;
+
 
 #[derive(Debug, Clone)]
 pub struct LayeredGuardingExec<'p> {

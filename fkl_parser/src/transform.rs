@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Dependency, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
 use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -288,8 +288,8 @@ impl MirTransform {
     let mut layered = LayeredArchitecture::default();
 
     layered.name = decl.name.clone();
-    layered.dependencies = decl.dependencies.iter().map(|rule| {
-      let mut dependency_rule = Dependency::default();
+    layered.relations = decl.dependencies.iter().map(|rule| {
+      let mut dependency_rule = LayerRelation::default();
       dependency_rule.source = rule.source.clone();
       dependency_rule.target = rule.target.clone();
 
@@ -350,7 +350,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Dependency, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, LayerRelation, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
   use crate::mir::authorization::HttpAuthorization;
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
@@ -617,24 +617,24 @@ impl CinemaCreatedEvent {
           package: "com.example.infrastructure".to_string(),
         },
       ],
-      dependencies: vec![
-        Dependency {
+      relations: vec![
+          LayerRelation {
           source: "rest".to_string(),
           target: "application".to_string(),
         },
-        Dependency {
+          LayerRelation {
           source: "rest".to_string(),
           target: "domain".to_string(),
         },
-        Dependency {
+          LayerRelation {
           source: "domain".to_string(),
           target: "application".to_string(),
         },
-        Dependency {
+          LayerRelation {
           source: "application".to_string(),
           target: "infrastructure".to_string(),
         },
-        Dependency {
+          LayerRelation {
           source: "rest".to_string(),
           target: "infrastructure".to_string(),
         },

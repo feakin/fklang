@@ -5,12 +5,13 @@ use serde::Serialize;
 pub struct LayeredArchitecture {
   pub name: String,
   pub description: String,
-  pub dependencies: Vec<Dependency>,
+  pub relations: Vec<LayerRelation>,
   pub layers: Vec<Layer>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
-pub struct Dependency {
+pub struct LayerRelation {
+  // todo: add identify vs string with Enum ?
   pub source: String,
   pub target: String,
 }

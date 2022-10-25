@@ -83,7 +83,7 @@ mod tests {
     let layer_map = LayerMap::from(LayeredArchitecture {
       name: "".to_string(),
       description: "".to_string(),
-      dependencies: vec![],
+      relations: vec![],
       layers: vec![
         Layer {
           name: "interface".to_string(),
