@@ -45,6 +45,7 @@ mod tests {
   use crate::exec::layered_guarding_exec::layered_guarding_exec::LayeredGuardingExec;
 
   #[test]
+  #[cfg(not(target_os = "windows"))]
   fn test() {
     let mut base: PathBuf = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     base.push("test_data/spring");
