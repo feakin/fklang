@@ -1,9 +1,9 @@
-use std::fs;
+use std::{fs, process};
 use std::io::Write;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
-use log::info;
+use log::{error, info};
 
 use fkl_parser::parse;
 
@@ -102,8 +102,10 @@ fn main() {
 
           if errors.len() > 0 {
             for error in errors {
-              println!("{}", error);
+              error!("error layered: {}", error);
             }
+
+            process::exit(0x0100);
           }
         }
       }
