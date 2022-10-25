@@ -29,17 +29,17 @@ enum Commands {
   #[command(about = "generate Graphviz/Dot from fkl file")]
   Dot {
     #[arg(short, long)]
-    path: PathBuf,
+    main: PathBuf,
   },
   #[command(about = "generate ast from fkl file")]
   Ast {
     #[arg(short, long)]
-    path: PathBuf,
+    main: PathBuf,
   },
   #[command(about = "generate code from fkl file")]
   Gen {
     #[arg(short, long, required = true)]
-    path: PathBuf,
+    main: PathBuf,
     #[arg(short, long = "impl")]
     impl_name: Option<String>,
   },
@@ -49,8 +49,10 @@ enum Commands {
 
 #[derive(Debug, Args)]
 struct RunOpt {
+  /// main file of feakin
   #[arg(short, long, required = true)]
-  config: PathBuf,
+  main: PathBuf,
+  /// the path of the function to run
   #[arg(short, long, required = false)]
   path: Option<PathBuf>,
   #[arg(short, required = false, long = "impl")]
@@ -72,18 +74,18 @@ fn main() {
 
   let cli: Cli = Cli::parse();
   match &cli.command {
-    Commands::Dot { path } => {
+    Commands::Dot { main: path } => {
       gen_to_dot(path);
     }
-    Commands::Ast { path } => {
+    Commands::Ast { main: path } => {
       parse_to_ast(path);
     }
-    Commands::Gen { path, impl_name } => {
+    Commands::Gen { main: path, impl_name } => {
       let parent = path.parent().unwrap().to_path_buf();
       code_gen_exec::code_gen_by_path(path, impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
-      let mir = mir_from_file(&run.config);
+      let mir = mir_from_file(&run.main);
       info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
@@ -93,7 +95,7 @@ fn main() {
         RunFuncName::Guarding => {
           let root = match &run.path {
             Some(path) => path.clone(),
-            None => run.config.parent().unwrap().to_path_buf(),
+            None => run.main.parent().unwrap().to_path_buf(),
           };
 
           let errors = LayeredGuardingExec::guarding(root, &mir.layered.expect("cannot parse guarding rule"));
