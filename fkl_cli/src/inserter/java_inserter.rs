@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::code_meta::CodeClass;
 use crate::inserter::inserter::Inserter;
-use crate::line_separator::line_separator;
+use crate::inserter::line_separator::line_separator;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq, Eq)]
 pub struct JavaInserter {}

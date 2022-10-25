@@ -28,6 +28,7 @@ impl LayeredGuardingExec<'_> {
       .flatten()
       .collect()
   }
+
   fn guarding_file(&self, file: &ResolvedFile) -> Vec<String> {
     if let Some(code) = &file.meta {
       return self.package_guarding.verify(code);
