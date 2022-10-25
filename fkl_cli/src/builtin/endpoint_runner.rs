@@ -35,9 +35,7 @@ pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_na
       let runner = EndpointRunner::new(endpoint);
       runner.send_request().expect("TODO: panic message");
     }
-    RunFuncName::MockServer => {
-      // TODO: implement mock server
-    }
+    RunFuncName::Guarding => {}
   }
 }
 

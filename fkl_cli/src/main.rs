@@ -6,7 +6,7 @@ use clap::{Args, Parser, Subcommand};
 
 use fkl_parser::parse;
 
-use crate::exec::{code_gen_exec, mir_from_file};
+use crate::exec::{code_gen_exec, LayeredGuardingExec, mir_from_file};
 
 pub mod construct;
 pub mod code_meta;
@@ -50,8 +50,8 @@ enum Commands {
 struct RunOpt {
   #[arg(short, long, required = true)]
   path: PathBuf,
-  #[arg(short, required = true, long = "impl")]
-  impl_name: String,
+  #[arg(short, required = false, long = "impl")]
+  impl_name: Option<String>,
   #[arg(short, required = true, long = "func")]
   func_name: RunFuncName,
 }
@@ -59,8 +59,7 @@ struct RunOpt {
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
 pub enum RunFuncName {
   HttpRequest,
-  // todo: add mock server support
-  MockServer,
+  Guarding,
 }
 
 // todo: add code highlight support
@@ -82,7 +81,16 @@ fn main() {
     }
     Commands::Run(run) => {
       let mir = mir_from_file(&run.path);
-      builtin::endpoint_runner::execute(&mir, &run.func_name, &run.impl_name);
+      match run.func_name {
+        RunFuncName::HttpRequest => {
+          let impl_name = run.impl_name.as_ref().unwrap();
+          builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name);
+        }
+        RunFuncName::Guarding => {
+          let path_buf = PathBuf::from(&run.path);
+          LayeredGuardingExec::guarding(path_buf, &mir.layered.expect("cannot parse guarding rule"));
+        }
+      }
     }
   }
 }
