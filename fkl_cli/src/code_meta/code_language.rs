@@ -1,4 +1,6 @@
 use std::ffi::OsStr;
+use std::path::PathBuf;
+use ignore::{DirEntry, Error};
 use serde::{Deserialize, Serialize};
 
 /// CodeLanguage is a enum type to represent the language of code file.
@@ -25,6 +27,19 @@ impl CodeLanguage {
   pub(crate) fn is_support(ext: &OsStr) -> bool {
     let ext = ext.to_str().unwrap();
     CodeLanguage::supported().contains(&ext.to_string())
+  }
+
+  pub fn is_supported_file(entry: Result<DirEntry, Error>) -> Option<PathBuf> {
+    if let Ok(entry) = entry {
+      let path = entry.path().to_path_buf();
+      if let Some(ext) = path.extension() {
+        if CodeLanguage::is_support(ext) {
+          return Some(path);
+        }
+      }
+    }
+
+    return None;
   }
 }
 

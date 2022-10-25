@@ -35,26 +35,11 @@ impl Default for FileResolver {
 
 impl FileResolver {
   pub fn load_dir(&mut self, path: &PathBuf) {
-    for entry in walkdir::WalkDir::new(path) {
-      let entry = entry.unwrap();
-      if !entry.file_type().is_file() {
-        continue;
-      }
-
-      let path = entry.path().to_path_buf();
-      if let None = path.extension() {
-        continue;
-      }
-
-      // java only
-      if let Some(ext) = path.extension() {
-        if !CodeLanguage::is_support(ext) {
-          continue;
-        }
-      }
-
-      self.load_file(&path).unwrap();
-    }
+    ignore::Walk::new(path)
+      .filter_map(|e| CodeLanguage::is_supported_file(e))
+      .for_each(|path| {
+        self.load_file(&path).unwrap();
+      });
   }
 
   fn load_file(&mut self, path: &PathBuf) -> Result<(), String> {
