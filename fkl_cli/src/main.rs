@@ -49,9 +49,10 @@ enum Commands {
 
 #[derive(Debug, Args)]
 struct RunOpt {
-  // todo: change to config
   #[arg(short, long, required = true)]
-  path: PathBuf,
+  config: PathBuf,
+  #[arg(short, long, required = false)]
+  path: Option<PathBuf>,
   #[arg(short, required = false, long = "impl")]
   impl_name: Option<String>,
   #[arg(short, required = true, long = "func")]
@@ -82,7 +83,7 @@ fn main() {
       code_gen_exec::code_gen_by_path(path, impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
-      let mir = mir_from_file(&run.path);
+      let mir = mir_from_file(&run.config);
       info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
@@ -90,8 +91,10 @@ fn main() {
           builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name);
         }
         RunFuncName::Guarding => {
-          let path_buf = PathBuf::from(&run.path);
-          let root = path_buf.parent().unwrap().to_path_buf();
+          let root = match &run.path {
+            Some(path) => path.clone(),
+            None => run.config.parent().unwrap().to_path_buf(),
+          };
 
           let errors = LayeredGuardingExec::guarding(root, &mir.layered.expect("cannot parse guarding rule"));
 
