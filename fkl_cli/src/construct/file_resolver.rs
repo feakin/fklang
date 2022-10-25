@@ -48,7 +48,7 @@ impl FileResolver {
 
       // java only
       if let Some(ext) = path.extension() {
-        if ext != "java" {
+        if !CodeLanguage::is_support(ext) {
           continue;
         }
       }
