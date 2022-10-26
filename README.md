@@ -14,21 +14,23 @@ Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 
 ## Roadmap
 
-1. DSL binding/integration
+1. DSL Design
+2. IDEA Plugin
+3. Code gen
     - [ ] with Spring
-2. contract base testing
+4. contract base testing
     - [ ] with HTTP API
-3. database integration: JPA, JDBC, etc.
+5. database integration: JPA, JDBC, etc.
     - [ ] database schema generation
     - [ ] database migration
-4. module support
+6. module support
     - [ ] module dependency
     - [ ] module versioning
-5. bootstrapping DDD DSL
+7. bootstrapping DDD DSL
     - [ ] use type system to describe domain model
-6. build system inside: cache, incremental build, etc.
+8. build system inside: cache, incremental build, etc.
     - [ ] better code generation
-7. general programming language (if possible)
+9. general programming language (if possible)
     - [ ] function support
     - [ ] expression support
 
