@@ -3,11 +3,11 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
-use log::{error, info};
+use log::info;
 
 use fkl_parser::parse;
 
-use crate::exec::{code_gen_exec, LayeredGuardingExec, mir_from_file};
+use crate::exec::{code_gen_exec, mir_from_file};
 
 pub mod construct;
 pub mod code_meta;
@@ -48,7 +48,7 @@ struct GenOpt {
   main: PathBuf,
   #[arg(short, long = "impl")]
   impl_name: Option<String>,
-  #[arg(short, required = true, long = "framework", default_value = "spring")]
+  #[arg(short, long = "framework", default_value = "spring")]
   framework: SupportedFramework,
 }
 

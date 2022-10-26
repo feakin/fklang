@@ -3,10 +3,9 @@ use std::process;
 
 use log::error;
 
-use fkl_parser::mir::{ContextMap, LayeredArchitecture};
+use fkl_parser::mir::LayeredArchitecture;
 
 use crate::exec::LayeredGuardingExec;
-use crate::RunFuncName;
 
 pub mod endpoint_runner;
 
