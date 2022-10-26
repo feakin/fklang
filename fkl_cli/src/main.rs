@@ -1,4 +1,4 @@
-use std::{fs, process};
+use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
 
@@ -37,14 +37,24 @@ enum Commands {
     main: PathBuf,
   },
   #[command(about = "generate code from fkl file")]
-  Gen {
-    #[arg(short, long, required = true)]
-    main: PathBuf,
-    #[arg(short, long = "impl")]
-    impl_name: Option<String>,
-  },
+  Gen(GenOpt),
   #[command(about = "run function from fkl file")]
   Run(RunOpt),
+}
+
+#[derive(Debug, Args)]
+struct GenOpt {
+  #[arg(short, long, required = true)]
+  main: PathBuf,
+  #[arg(short, long = "impl")]
+  impl_name: Option<String>,
+  #[arg(short, required = true, long = "framework", default_value = "spring")]
+  framework: SupportedFramework,
+}
+
+#[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
+pub enum SupportedFramework {
+  Spring,
 }
 
 #[derive(Debug, Args)]
@@ -80,15 +90,16 @@ fn main() {
     Commands::Ast { main: path } => {
       parse_to_ast(path);
     }
-    Commands::Gen { main: path, impl_name } => {
-      let parent = path.parent().unwrap().to_path_buf();
-      code_gen_exec::code_gen_by_path(path, impl_name.clone(), &parent);
+    Commands::Gen(opt) => {
+      let parent = &opt.main.parent().unwrap().to_path_buf();
+      code_gen_exec::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
       let root = match &run.path {
         Some(path) => path.clone(),
         None => run.main.parent().unwrap().to_path_buf(),
       };
+
       let mir = mir_from_file(&run.main);
 
       info!("runOpt: {:?}", run);
