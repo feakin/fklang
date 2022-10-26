@@ -85,7 +85,12 @@ fn main() {
       code_gen_exec::code_gen_by_path(path, impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
+      let root = match &run.path {
+        Some(path) => path.clone(),
+        None => run.main.parent().unwrap().to_path_buf(),
+      };
       let mir = mir_from_file(&run.main);
+
       info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
@@ -93,20 +98,8 @@ fn main() {
           builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name);
         }
         RunFuncName::Guarding => {
-          let root = match &run.path {
-            Some(path) => path.clone(),
-            None => run.main.parent().unwrap().to_path_buf(),
-          };
-
-          let errors = LayeredGuardingExec::guarding(root, &mir.layered.expect("cannot parse guarding rule"));
-
-          if errors.len() > 0 {
-            for error in errors {
-              error!("error layered: {}", error);
-            }
-
-            process::exit(0x0100);
-          }
+          let layered = mir.layered.expect("layered architecture is required");
+          builtin::guarding_runner(root, &layered);
         }
       }
     }
