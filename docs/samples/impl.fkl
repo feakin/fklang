@@ -1,15 +1,15 @@
 ContextMap TicketBooking {
-  Reservation <-> TicketCtx;
+  ReservationCtx <-> UserCtx;
 }
 
-Context TicketCtx {
-  Aggregate Ticket, Reservation;
+Context ReservationCtx { }
+
+Context UserCtx {
+  Aggregate Ticket, Reservation, User;
 }
 
-Entity Ticket {
-  Struct {
-    seat: String;
-  }
+Aggregate User {
+  DomainEvent UserCreated;
 }
 
 layered DDD {
