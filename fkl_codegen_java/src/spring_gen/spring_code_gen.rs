@@ -1,7 +1,7 @@
 use fkl_parser::mir::{Flow, HttpMethod, Step};
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
-use crate::naming;
+use crate::{comments, naming};
 
 /// generate spring code for a single endpoint
 /// contains the following:
@@ -23,8 +23,9 @@ impl SpringCodeGen {
     let method_name = Self::method_name(http);
     let method_annotation = Self::method_annotation(&http);
     let method_header = Self::method_header(&http, &method_name);
+
     let ai_comments = if let Some(flow) = flow {
-      Self::ai_comments(&flow.steps)
+      comments::ai_comments(&flow.steps)
     } else {
       vec![]
     };
@@ -90,22 +91,6 @@ impl SpringCodeGen {
       Some(r) => r.name.to_owned(),
       None => "void".to_owned(),
     }
-  }
-
-  fn ai_comments(steps: &Vec<Step>) -> Vec<String> {
-    steps.iter().enumerate().map(|(index, step)| {
-      match step {
-        Step::MethodCall(call) => {
-          format!("// {}. {}", index + 1, call)
-        }
-        Step::Message(msg) => {
-          format!("// {}. {}", index + 1, msg)
-        }
-        Step::RpcCall(_) => {
-          "".to_string()
-        }
-      }
-    }).collect()
   }
 }
 
@@ -190,30 +175,5 @@ import org.springframework.web.bind.annotation.RestController;
     );
 
     assert_eq!(annotation.method_header, "public void createEmployee(@RequestBody CreateEmployeeRequest request)");
-  }
-
-  #[test]
-  fn format_ai_comments() {
-    let comments = SpringCodeGen::ai_comments(&vec![
-      Step::MethodCall(MethodCall {
-        name: "all".to_string(),
-        object: "UserRepository".to_string(),
-        method: "save".to_string(),
-        parameters: vec![VariableDefinition {
-          name: "user".to_string(),
-          type_type: "User".to_string(),
-          initializer: None,
-        }],
-        return_type: None,
-      }),
-      Step::Message(Message {
-        from: "Content".to_string(),
-        to: "".to_string(),
-        topic: "sample:blabla".to_string(),
-        message: "hello".to_string(),
-      }),
-    ]);
-
-    assert_eq!(comments.join(" "), "// 1. call UserRepository.save with (user:User) // 2. send hello from Content to sample:blabla");
   }
 }

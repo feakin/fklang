@@ -1,6 +1,7 @@
 pub mod spring_gen;
 pub mod nlp;
 pub mod naming;
+pub mod comments;
 
 pub use spring_gen::entity_gen::*;
 pub use spring_gen::jpa_gen::*;
