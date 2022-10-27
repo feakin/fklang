@@ -68,7 +68,7 @@ impl EndpointRunner {
       "text/plain; charset=utf-8" => {
         let text = resp.text().unwrap();
         if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
-          highlighter::json(&json.to_string());
+          highlighter::json(&serde_json::to_string_pretty(&json).unwrap());
         } else {
           println!("{}", text);
         }
