@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -59,11 +59,29 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         Rule::source_sets_decl => {
           decl = FklDeclaration::SourceSets(consume_source_sets(p));
         }
+        Rule::include_decl => {
+          decl = FklDeclaration::Include(consume_include(p));
+        }
         _ => println!("unreachable content rule: {:?}", p.as_rule())
       };
     }
     return decl;
   }).collect::<Vec<FklDeclaration>>()
+}
+
+fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
+  let mut path = String::new();
+  let loc =  Loc::from_pair(pair.as_span());
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::string => {
+        path = p.as_str().to_string();
+      }
+      _ => println!("unreachable content rule: {:?}", p.as_rule())
+    };
+  }
+
+  return IncludeDecl { path, loc };
 }
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
