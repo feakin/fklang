@@ -11,6 +11,7 @@ impl LayerPathBuilder {
     target_path.push(layer.interface_path().clone());
     target_path.push(file_name);
 
+    // todo: create target file
     if !target_path.exists() {
       panic!("target file not found: {}", target_path.to_str().unwrap());
     }
