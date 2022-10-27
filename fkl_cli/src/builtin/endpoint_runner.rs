@@ -8,7 +8,8 @@ use reqwest::header::HeaderMap;
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 use fkl_parser::mir::authorization::HttpAuthorization;
 
-use crate::{highlighter, RunFuncName};
+use crate::highlighter::Highlighter;
+use crate::RunFuncName;
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
@@ -63,12 +64,12 @@ impl EndpointRunner {
     match content_type {
       "application/json" => {
         let json: serde_json::Value = resp.json().expect("Failed to parse response");
-        highlighter::json(&json.to_string());
+        Highlighter::json(&json.to_string());
       }
       "text/plain; charset=utf-8" => {
         let text = resp.text().unwrap();
         if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
-          highlighter::json(&serde_json::to_string_pretty(&json).unwrap());
+          Highlighter::json(&serde_json::to_string_pretty(&json).unwrap());
         } else {
           println!("{}", text);
         }
