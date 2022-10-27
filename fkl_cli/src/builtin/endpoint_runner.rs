@@ -7,16 +7,15 @@ use reqwest::header::HeaderMap;
 
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 use fkl_parser::mir::authorization::HttpAuthorization;
-use crate::cli_ctx::CliCtx;
 
+use crate::highlighter::Highlighter;
 use crate::RunFuncName;
 
-pub struct EndpointRunner<'c> {
+pub struct EndpointRunner {
   endpoint: HttpEndpoint,
-  ctx: &'c CliCtx,
 }
 
-pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str, ctx: &CliCtx) {
+pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str) {
   let mut apis: Vec<HttpApiImpl> = vec![];
   context_map.implementations.iter().for_each(|implementation| {
     if let Implementation::PublishHttpApi(api) = implementation {
@@ -34,18 +33,17 @@ pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_na
   let endpoint = apis[0].endpoint.clone();
   match func_name {
     RunFuncName::HttpRequest => {
-      let runner = EndpointRunner::new(endpoint, ctx);
+      let runner = EndpointRunner::new(endpoint);
       runner.send_request().expect("TODO: panic message");
     }
     RunFuncName::Guarding => {}
   }
 }
 
-impl<'c> EndpointRunner<'c> {
-  pub fn new(endpoint: HttpEndpoint, ctx: &'c CliCtx) -> Self {
+impl EndpointRunner {
+  pub fn new(endpoint: HttpEndpoint) -> Self {
     EndpointRunner {
-      endpoint,
-      ctx,
+      endpoint
     }
   }
 
@@ -66,12 +64,12 @@ impl<'c> EndpointRunner<'c> {
     match content_type {
       "application/json" => {
         let json: serde_json::Value = resp.json().expect("Failed to parse response");
-        self.ctx.highlighter.json(&json.to_string());
+        Highlighter::json(&json.to_string());
       }
       "text/plain; charset=utf-8" => {
         let text = resp.text().unwrap();
         if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
-          self.ctx.highlighter.json(&serde_json::to_string_pretty(&json).unwrap());
+          Highlighter::json(&serde_json::to_string_pretty(&json).unwrap());
         } else {
           println!("{}", text);
         }
@@ -170,8 +168,7 @@ mod tests {
       description: "".to_string(),
       auth: None,
     };
-    let ctx = CliCtx::new();
-    let runner = EndpointRunner::new(endpoint, &ctx);
+    let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
   }
 
@@ -188,8 +185,7 @@ mod tests {
       auth: None,
     };
 
-    let ctx = CliCtx::new();
-    let runner = EndpointRunner::new(endpoint, &ctx);
+    let runner = EndpointRunner::new(endpoint);
     let _resp = runner.send_request();
   }
 }
