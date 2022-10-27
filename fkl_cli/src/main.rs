@@ -15,6 +15,7 @@ pub mod inserter;
 pub mod exec;
 pub mod builtin;
 pub mod highlighter;
+pub mod cli_ctx;
 mod e2e;
 
 #[derive(Parser)]
@@ -83,6 +84,8 @@ fn main() {
   env_logger::init_from_env(
     env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
 
+  let ctx = cli_ctx::CliCtx::new();
+
   let cli: Cli = Cli::parse();
   match &cli.command {
     Commands::Dot { main: path } => {
@@ -107,7 +110,7 @@ fn main() {
       match run.func_name {
         RunFuncName::HttpRequest => {
           let impl_name = run.impl_name.as_ref().unwrap();
-          builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name);
+          builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name, &ctx);
         }
         RunFuncName::Guarding => {
           let layered = mir.layered.expect("layered architecture is required");
@@ -149,6 +152,7 @@ mod tests {
   use fkl_parser::parse;
 
   use crate::{builtin, RunFuncName};
+  use crate::cli_ctx::CliCtx;
 
   #[test]
   fn convert_for_cli() {
@@ -187,7 +191,7 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
+    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated", &CliCtx::new());
   }
 
   #[test]
@@ -202,6 +206,6 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
+    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated", &CliCtx::new());
   }
 }
