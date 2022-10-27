@@ -1,6 +1,7 @@
 use fkl_parser::mir::{Flow, HttpMethod, Step};
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
-use crate::nlp::past_tense_to_normal;
+
+use crate::naming;
 
 /// generate spring code for a single endpoint
 /// contains the following:
@@ -67,7 +68,7 @@ impl SpringCodeGen {
     let method_name = if http.name == "" {
       "main".to_string()
     } else {
-      Self::rename_domain_event_name(&http.name)
+      naming::from_event(&http.name)
     };
     method_name
   }
@@ -91,43 +92,6 @@ impl SpringCodeGen {
     }
   }
 
-  fn rename_domain_event_name(str: &String) -> String {
-    if Self::start_uppercase(str) {
-      Self::execute_rename(str)
-    } else {
-      str.to_owned()
-    }
-  }
-
-  fn start_uppercase(str: &String) -> bool {
-    str.chars().next().unwrap().is_uppercase()
-  }
-
-  fn execute_rename(str: &String) -> String {
-    let words = Self::split_words_by_uppercase(str);
-    let mut words = words;
-    let last_word = words.pop().unwrap();
-    let string = past_tense_to_normal(&last_word.to_lowercase());
-    words.insert(0, string);
-    // join words
-    words.join("")
-  }
-
-  fn split_words_by_uppercase(str: &String) -> Vec<String> {
-    let mut words: Vec<String> = vec![];
-    let mut word = "".to_string();
-    for c in str.chars() {
-      if c.is_uppercase() {
-        words.push(word);
-        word = "".to_string();
-      }
-      word.push(c);
-    };
-    words.push(word);
-
-    words
-  }
-
   fn ai_comments(steps: &Vec<Step>) -> Vec<String> {
     steps.iter().enumerate().map(|(index, step)| {
       match step {
@@ -147,8 +111,8 @@ impl SpringCodeGen {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
   use fkl_parser::mir::{HttpMethod, Message, MethodCall, Step, VariableDefinition};
+  use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
   use crate::spring_gen::spring_code_gen::SpringCodeGen;
 
@@ -225,7 +189,7 @@ import org.springframework.web.bind.annotation.RestController;
     }, &None,
     );
 
-    assert_eq!(annotation.method_header, "public void creatEmployee(@RequestBody CreateEmployeeRequest request)");
+    assert_eq!(annotation.method_header, "public void createEmployee(@RequestBody CreateEmployeeRequest request)");
   }
 
   #[test]
