@@ -65,6 +65,14 @@ impl EndpointRunner {
         let json: serde_json::Value = resp.json().expect("Failed to parse response");
         highlighter::json(&json.to_string());
       }
+      "text/plain; charset=utf-8" => {
+        let text = resp.text().unwrap();
+        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) {
+          highlighter::json(&json.to_string());
+        } else {
+          println!("{}", text);
+        }
+      }
       _ => {
         let text = resp.text().expect("Failed to parse response");
         println!("{}", text);
