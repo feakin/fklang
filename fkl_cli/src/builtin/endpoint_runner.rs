@@ -8,7 +8,7 @@ use reqwest::header::HeaderMap;
 use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
 use fkl_parser::mir::authorization::HttpAuthorization;
 
-use crate::RunFuncName;
+use crate::{highlighter, RunFuncName};
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
@@ -59,10 +59,11 @@ impl EndpointRunner {
 
   fn handle_response(&self, resp: Response) {
     let content_type = resp.headers().get("content-type").unwrap().to_str().unwrap();
+    info!("Content-Type: {}", content_type);
     match content_type {
       "application/json" => {
         let json: serde_json::Value = resp.json().expect("Failed to parse response");
-        println!("{}", json);
+        highlighter::json(&json.to_string());
       }
       _ => {
         let text = resp.text().expect("Failed to parse response");

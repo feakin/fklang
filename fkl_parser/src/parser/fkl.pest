@@ -24,7 +24,7 @@ context_map_decl = {
 }
 
 context_decl = {
-  "Context" ~ identifier ~ "{" ~ (aggregate_decl | used_domain_event_decl | used_domain_objects_decl | inline_doc)* ~ "}"
+  "Context" ~ identifier ~ "{" ~ (aggregate_decl | used_domain_objects_decl | inline_doc)* ~ "}"
 }
 
 used_context_node = {
@@ -36,7 +36,7 @@ used_domain_event_decl = {
 }
 
 domain_event_binding = {
-  identifier ~ "(" ~ "impl" ~ "=" ~ binding_id ~ ")"
+  identifier ~ ("(" ~ "impl" ~ "=" ~ binding_id ~ ")")?
 }
 
 binding_id = {
@@ -80,7 +80,7 @@ ext_module_decl = {
 }
 
 aggregate_decl = {
-  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc | used_domain_objects_decl )* ~ "}"
+  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc | used_domain_event_decl | used_domain_objects_decl )* ~ "}"
 }
 
 used_domain_objects_decl = {

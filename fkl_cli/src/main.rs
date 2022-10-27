@@ -14,6 +14,7 @@ pub mod code_meta;
 pub mod inserter;
 pub mod exec;
 pub mod builtin;
+pub mod highlighter;
 mod e2e;
 
 #[derive(Parser)]
@@ -77,7 +78,7 @@ pub enum RunFuncName {
   Guarding,
 }
 
-// todo: add code highlight support
+// todo: add app context for save highlighter
 fn main() {
   env_logger::init_from_env(
     env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
