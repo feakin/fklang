@@ -55,3 +55,15 @@ impl UserCreated {
     via Kafak send User to "user.create";
   }
 }
+
+env Local {
+  datasource {
+    url: "jdbc:postgresql://localhost:5432/yourdb"
+    driver: "org.postgresql.Driver"
+    user: "youruser"
+    password: "yourpassword"
+  }
+  server {
+    port: 9090;
+  }
+}

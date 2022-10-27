@@ -15,6 +15,8 @@ declaration = {
   | layered_decl
   // extension
   | source_sets_decl
+  // env
+  | env_decl
 }
 
 include_decl = { "include" ~ string }
@@ -239,6 +241,20 @@ source_set_decl = {
   identifier ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
 }
 
+env_decl = {
+  "env" ~ identifier ~ "{" ~ inline_doc? ~ (datasource_decl | server_decl )* ~ "}"
+}
+
+datasource_decl = {
+  "datasource" ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
+}
+
+server_decl = {
+  "server" ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
+}
+
+// ----------------------------- Attr -----------------------------
+
 attr_decl = {
   identifier ~ (":" | "=") ~ (attr_value | attr_list) ~ ";"?
 }
@@ -254,6 +270,9 @@ attr_value = {
 list = {
  "List" | "Vec" | "Set" | identifier
 }
+
+
+// ----------------------------- Lexer -----------------------------
 
 keywords = _{
   // DDD Keywords

@@ -1,4 +1,4 @@
-use fkl_parser::mir::{Flow, HttpMethod, Step};
+use fkl_parser::mir::{Flow, HttpMethod};
 use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
 use crate::{comments, naming};
