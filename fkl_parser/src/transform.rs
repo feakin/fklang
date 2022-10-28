@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject, Datasource, MySqlDatasource};
 use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, SourceSetsDecl, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, SourceSetsDecl, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -23,6 +23,7 @@ pub struct MirTransform {
   pub implementations: Vec<HttpApiImpl>,
   pub layered: Option<LayeredArchitecture>,
   pub source_sets: Option<mir::SourceSets>,
+  pub envs: Vec<mir::Environment>,
 }
 
 impl MirTransform {
@@ -37,6 +38,7 @@ impl MirTransform {
       implementations: vec![],
       layered: Default::default(),
       source_sets: None,
+      envs: vec![],
     };
 
     match ast_parse(str) {
@@ -58,6 +60,7 @@ impl MirTransform {
         .collect(),
       layered: transform.layered,
       source_sets: transform.source_sets,
+      envs: transform.envs,
     })
   }
 
@@ -135,8 +138,8 @@ impl MirTransform {
         FklDeclaration::Include(_include) => {
           // todo: resolve include with DAG
         }
-        FklDeclaration::Env(_) => {
-          // todo: resolve env
+        FklDeclaration::Env(decl) => {
+          self.envs.push(self.transform_environment(&decl));
         }
       }
     });
@@ -339,6 +342,39 @@ impl MirTransform {
     }).collect();
 
     source_sets
+  }
+
+  fn transform_environment(&self, decl: &EnvDecl) -> mir::Environment {
+    let mut environment = mir::Environment::default();
+    environment.name = decl.name.clone();
+
+    if let Some(ds) = &decl.datasource {
+      environment.datasources.push(self.transform_datasource(&ds));
+    }
+
+    environment
+  }
+
+  fn transform_datasource(&self, decl: &DatasourceDecl) -> mir::Datasource {
+    if !decl.url.is_empty() {
+      return Datasource::from(&decl.url).unwrap();
+    }
+
+    let driver: &str = &decl.driver;
+    match driver {
+      "mysql" => {
+        Datasource::MySql(MySqlDatasource {
+          host: decl.host.clone(),
+          port: decl.port.clone().parse().unwrap(),
+          username: decl.username.clone(),
+          password: decl.password.clone(),
+          database: decl.database.clone(),
+        })
+      }
+      _ => {
+        panic!("Unknown driver {}", driver);
+      }
+    }
   }
 }
 
@@ -621,23 +657,23 @@ impl CinemaCreatedEvent {
         },
       ],
       relations: vec![
-          LayerRelation {
+        LayerRelation {
           source: "rest".to_string(),
           target: "application".to_string(),
         },
-          LayerRelation {
+        LayerRelation {
           source: "rest".to_string(),
           target: "domain".to_string(),
         },
-          LayerRelation {
+        LayerRelation {
           source: "domain".to_string(),
           target: "application".to_string(),
         },
-          LayerRelation {
+        LayerRelation {
           source: "application".to_string(),
           target: "infrastructure".to_string(),
         },
-          LayerRelation {
+        LayerRelation {
           source: "rest".to_string(),
           target: "infrastructure".to_string(),
         },

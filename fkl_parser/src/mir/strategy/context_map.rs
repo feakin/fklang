@@ -3,6 +3,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step};
+use crate::mir::environment::Environment;
 use crate::mir::implementation::Implementation;
 
 //
@@ -23,6 +24,7 @@ pub struct ContextMap {
   pub implementations: Vec<Implementation>,
   pub layered: Option<LayeredArchitecture>,
   pub source_sets: Option<SourceSets>,
+  pub envs: Vec<Environment>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -137,7 +139,8 @@ mod tests {
       relations: vec![],
       implementations: vec![],
       layered: None,
-      source_sets: None
+      source_sets: None,
+      envs: vec![]
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)

@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use log::info;
-use sqlx::postgres::PgPoolOptions;
 
 use fkl_parser::parse;
 
