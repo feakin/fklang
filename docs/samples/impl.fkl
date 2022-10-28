@@ -58,8 +58,7 @@ impl UserCreated {
 
 env Local {
   datasource {
-    url: "postgresql://localhost:5432/yourdb"
-    // two different types?
+    url: "mysql://localhost:5432/yourdb"
     driver: postgresql
     host: "localhost"
     port: 5432

@@ -1,10 +1,11 @@
 use std::path::PathBuf;
 use std::process;
 
-use log::error;
+use log::{error, info};
 
-use fkl_parser::mir::LayeredArchitecture;
+use fkl_parser::mir::{Datasource, Environment, LayeredArchitecture};
 
+use crate::datasource::mysql_connector::MysqlConnector;
 use crate::exec::LayeredGuardingExec;
 
 pub mod endpoint_runner;
@@ -18,5 +19,16 @@ pub fn guarding_runner(root: PathBuf, layered: &LayeredArchitecture) {
     }
 
     process::exit(0x0100);
+  }
+}
+
+pub(crate) async fn test_connection_runner(env: &Environment) {
+  info!("test connection: {:?}", env);
+  match &env.datasources[0] {
+    Datasource::MySql(mysql) => {
+      MysqlConnector::new(mysql.clone()).test_connection().await;
+    }
+
+    Datasource::Postgres(_) => {}
   }
 }

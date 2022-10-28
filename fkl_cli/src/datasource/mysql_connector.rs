@@ -1,6 +1,9 @@
+use std::time::Duration;
+
+use log::error;
 use sqlx::mysql::MySqlPoolOptions;
+
 use fkl_parser::mir::MySqlDatasource;
-use crate::datasource::DatasourceConnector;
 
 pub struct MysqlConnector {
   config: MySqlDatasource,
@@ -14,12 +17,21 @@ impl MysqlConnector {
   }
 }
 
-// impl DatasourceConnector for MysqlConnector {
-//   fn test_connection(&self) -> bool {
-//     let pool = MySqlPoolOptions::new()
-//       .max_connections(5)
-//       .connect("postgres://postgres:password@localhost/test").await?;
-//
-//
-//   }
-// }
+impl MysqlConnector {
+  pub(crate) async fn test_connection(&self) -> bool {
+    let options = MySqlPoolOptions::new();
+
+    match options
+      .max_connections(5)
+      .max_lifetime(Duration::from_secs(10 * 60))
+      .connect(&self.config.url()).await {
+      Ok(_) => {
+        true
+      }
+      Err(err) => {
+        error!("error: {:?}", err);
+        false
+      }
+    }
+  }
+}

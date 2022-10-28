@@ -35,6 +35,7 @@ impl Datasource {
     }
   }
 
+  #[allow(dead_code)]
   fn url(&self) -> String {
     match self {
       Datasource::MySql(config) => MySqlDatasource::url(config),

@@ -117,7 +117,8 @@ async fn main() {
           builtin::guarding_runner(root, &layered);
         }
         RunFuncName::TestConnection => {
-
+          let env = mir.envs;
+          builtin::test_connection_runner( &env[0]).await;
         }
       }
     }
