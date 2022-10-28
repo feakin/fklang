@@ -157,11 +157,6 @@ pub struct UsedDomainObject {
   pub name: String,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DomainEvent {
-  pub name: String,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct EntityDecl {
   pub name: String,

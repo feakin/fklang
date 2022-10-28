@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DomainEventDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -71,7 +71,7 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
 
 fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
   let mut path = String::new();
-  let loc =  Loc::from_pair(pair.as_span());
+  let loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::string => {
@@ -228,11 +228,30 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
       Rule::used_domain_objects_decl => {
         aggregate.used_domain_objects = [aggregate.used_domain_objects, consume_use_domain_object(p)].concat();
       }
+      Rule::used_domain_event_decl => {
+        aggregate.domain_events = consume_use_domain_events(p);
+      }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
     };
   }
 
   return aggregate;
+}
+
+pub fn consume_use_domain_events(pair: Pair<Rule>) -> Vec<DomainEventDecl> {
+  let mut domain_events: Vec<DomainEventDecl> = vec![];
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::event_name => {
+        domain_events.push(DomainEventDecl {
+          name: p.as_str().to_string()
+        });
+      }
+      _ => println!("unreachable use_domain_events rule: {:?}", p.as_rule())
+    };
+  }
+
+  return domain_events;
 }
 
 fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
@@ -1501,6 +1520,28 @@ imple CinemaCreatedEvent {
               value: vec!["src/main/resources/uml".to_string()],
             }],
         }],
+    }));
+  }
+
+  #[test]
+  fn aggregate_domain_event() {
+    let decls = parse(r#"Aggregate User {
+  DomainEvent UserCreated, UserUpdated;
+}"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Aggregate(AggregateDecl {
+      name: "User".to_string(),
+      inline_doc: "".to_string(),
+      used_domain_objects: vec![],
+      entities: vec![],
+      value_objects: vec![],
+      domain_events: vec![
+        DomainEventDecl { name: "UserCreated".to_string() },
+        DomainEventDecl { name: "UserUpdated".to_string() }
+      ],
     }));
   }
 

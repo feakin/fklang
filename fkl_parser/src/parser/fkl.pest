@@ -34,14 +34,14 @@ used_context_node = {
 }
 
 used_domain_event_decl = {
-  "DomainEvent" ~ domain_event_binding ~ ("," ~ domain_event_binding)* ~ ";"?
+  "DomainEvent" ~ event_name ~ ("," ~ event_name)* ~ ";"?
 }
 
-domain_event_binding = {
-  identifier ~ ("(" ~ "impl" ~ "=" ~ binding_id ~ ")")?
-}
+// domain_event_binding = {
+//   identifier ~ ("(" ~ "impl" ~ "=" ~ binding_id ~ ")")?
+// }
 
-binding_id = {
+event_name = {
   identifier *
 }
 
