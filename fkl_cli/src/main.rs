@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use log::info;
+use sqlx::postgres::PgPoolOptions;
 
 use fkl_parser::parse;
 
@@ -76,10 +77,12 @@ struct RunOpt {
 pub enum RunFuncName {
   HttpRequest,
   Guarding,
+  TestConnection,
 }
 
 // todo: add app context for save highlighter
-fn main() {
+#[tokio::main]
+async fn main() {
   env_logger::init_from_env(
     env_logger::Env::default().filter_or(env_logger::DEFAULT_FILTER_ENV, "info"));
 
@@ -113,6 +116,7 @@ fn main() {
           let layered = mir.layered.expect("layered architecture is required");
           builtin::guarding_runner(root, &layered);
         }
+        RunFuncName::TestConnection => {}
       }
     }
   }

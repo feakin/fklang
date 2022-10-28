@@ -51,6 +51,22 @@ reqwest = { version = "0.11", features = ["blocking", "json"] }
 # base64 ecnode/decode
 base64 = "0.13.0"
 
+# database connection
+
+# mysql & postres
+sqlx = { version = "0.6", features = [
+  "runtime-tokio-native-tls" , # tls
+  "postgres", "mysql",         # db
+  "chrono", "bigdecimal", "uuid", "json", "ipnetwork", "mac_address", "bit-vec",
+  "offline"
+] }
+
+# microsoft sql server
+#tiberius = { version = "0.11" }
+#oracle = { version = "0.5" }
+
+tokio = { version = "1", features = ["full"] }
+
 [dev-dependencies]
 trycmd = "0.14.0"
 

@@ -2,7 +2,7 @@ ContextMap TicketBooking {
   ReservationCtx <-> UserCtx;
 }
 
-Context ReservationCtx { }
+Context ReservationCtx {}
 
 Context UserCtx {
   Aggregate Ticket, Reservation, User;
@@ -58,10 +58,14 @@ impl UserCreated {
 
 env Local {
   datasource {
-    url: "jdbc:postgresql://localhost:5432/yourdb"
-    driver: "org.postgresql.Driver"
-    user: "youruser"
+    url: "postgresql://localhost:5432/yourdb"
+    // two different types?
+    driver: postgresql
+    host: "localhost"
+    port: 5432
+    username: "youruser"
     password: "yourpassword"
+    database: "yourdb"
   }
   server {
     port: 9090;
