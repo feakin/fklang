@@ -35,6 +35,7 @@ pub enum FklDeclaration {
   Component(ComponentDecl),
   Layered(LayeredDecl),
   SourceSets(SourceSetsDecl),
+  Env(EnvDecl),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -401,4 +402,35 @@ impl Default for ComponentType {
   fn default() -> Self {
     ComponentType::Application
   }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct EnvDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub datasource: Option<DatasourceDecl>,
+  pub message_broker: Option<MessageBrokerDecl>,
+  pub server: Option<ServerDecl>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct DatasourceDecl {
+  pub url: String,
+  pub driver: String,
+  pub user: String,
+  pub password: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct MessageBrokerDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub attributes: Vec<AttributeDefinition>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ServerDecl {
+  pub name: String,
+  pub inline_doc: String,
+  pub attributes: Vec<AttributeDefinition>,
 }

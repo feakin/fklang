@@ -1,9 +1,10 @@
 // use core::panicking::panic;
 use std::collections::HashMap;
+use std::hash::Hash;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DomainEventDecl, EndpointDecl, EntityDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -62,7 +63,10 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         Rule::include_decl => {
           decl = FklDeclaration::Include(consume_include(p));
         }
-        _ => println!("unreachable content rule: {:?}", p.as_rule())
+        Rule::env_decl => {
+          decl = FklDeclaration::Env(consume_env(p));
+        }
+        _ => println!("unreachable declaration rule: {:?}", p.as_rule())
       };
     }
     return decl;
@@ -769,6 +773,44 @@ fn consume_source_set_decl(pair: Pair<Rule>) -> SourceSetDecl {
   }
 
   return source_set;
+}
+
+fn consume_env(pair: Pair<Rule>) -> EnvDecl {
+  let mut env = EnvDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        env.name = p.as_str().to_string();
+      }
+      Rule::datasource_decl => {
+        env.datasource = Some(consume_datasource_decl(p));
+      }
+      _ => println!("unreachable env rule: {:?}", p.as_rule())
+    };
+  }
+
+  return env;
+}
+
+fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
+  let mut attrs: HashMap<String, String> = HashMap::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::attr_decl => {
+        let attr = consume_attribute(p);
+        attrs.insert(attr.key.clone(), attr.value[0].clone());
+      }
+      _ => println!("unreachable datasource rule: {:?}", p.as_rule())
+    };
+  }
+
+  let mut decl = DatasourceDecl::default();
+  decl.driver = attrs.get("driver").unwrap_or(&"".to_string()).clone();
+  decl.url = attrs.get("url").unwrap_or(&"".to_string()).clone();
+  decl.user = attrs.get("user").unwrap_or(&"".to_string()).clone();
+  decl.password = attrs.get("password").unwrap_or(&"".to_string()).clone();
+
+  return decl;
 }
 
 fn parse_ident_or_string(pair: Pair<Rule>) -> String {
@@ -1542,6 +1584,35 @@ imple CinemaCreatedEvent {
         DomainEventDecl { name: "UserCreated".to_string() },
         DomainEventDecl { name: "UserUpdated".to_string() }
       ],
+    }));
+  }
+
+  #[test]
+  fn env_database() {
+    let decls = parse(r#"
+env Local {
+  datasource {
+    url: "jdbc:postgresql://localhost:5432/yourdb"
+    driver: "org.postgresql.Driver"
+    user: "youruser"
+    password: "yourpassword"
+  }
+}"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Env(EnvDecl {
+      name: "Local".to_string(),
+      inline_doc: "".to_string(),
+      datasource: Some(DatasourceDecl {
+        url: "jdbc:postgresql://localhost:5432/yourdb".to_string(),
+        driver: "org.postgresql.Driver".to_string(),
+        user: "youruser".to_string(),
+        password: "yourpassword".to_string(),
+      }),
+      message_broker: None,
+      server: None
     }));
   }
 

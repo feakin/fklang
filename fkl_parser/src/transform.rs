@@ -135,6 +135,9 @@ impl MirTransform {
         FklDeclaration::Include(_include) => {
           // todo: resolve include with DAG
         }
+        FklDeclaration::Env(_) => {
+          // todo: resolve env
+        }
       }
     });
   }
