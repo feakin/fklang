@@ -29,14 +29,15 @@ impl PostgresConnector {
       Ok(p) => p,
       Err(err) => {
         error!("error: {:?}", err);
-        return false
+        return false;
       }
     };
 
-    sqlx::query("select table_name from information_schema.tables where table_schema = 'public'")
+    let sql = format!("SELECT * FROM {}.information_schema.tables where table_schema = 'public'", self.config.database);
+    sqlx::query(&sql)
       .map(|row: sqlx::postgres::PgRow| {
         let table_name: String = row.get("table_name");
-        info!("table_name: {}", table_name);
+        info!("table: {}", table_name);
       })
       .fetch_all(&pool)
       .await

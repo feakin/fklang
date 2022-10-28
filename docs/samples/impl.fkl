@@ -61,7 +61,7 @@ env Local {
     driver: postgresql
     host: "localhost"
     port: 5432
-    database: "postgres"
+    database: "test"
   }
   server {
     port: 9090;
