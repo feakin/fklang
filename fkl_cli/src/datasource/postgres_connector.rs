@@ -2,6 +2,7 @@ use std::time::Duration;
 
 use log::{error, info};
 use sqlx::postgres::PgPoolOptions;
+use sqlx::Row;
 
 use fkl_parser::mir::PostgresDatasource;
 
@@ -21,18 +22,25 @@ impl PostgresConnector {
   pub(crate) async fn test_connection(&self) -> bool {
     let options = PgPoolOptions::new();
 
-    match options
+    let pool = match options
       .max_connections(5)
       .max_lifetime(Duration::from_secs(10 * 60))
       .connect(&self.config.url()).await {
-      Ok(p) => {
-        info!("p: {:?}", p);
-        true
-      }
+      Ok(p) => p,
       Err(err) => {
         error!("error: {:?}", err);
-        false
+        return false
       }
-    }
+    };
+
+    sqlx::query("select table_name from information_schema.tables where table_schema = 'public'")
+      .map(|row: sqlx::postgres::PgRow| {
+        let table_name: String = row.get("table_name");
+        info!("table_name: {}", table_name);
+      })
+      .fetch_all(&pool)
+      .await
+      .map(|_| true)
+      .unwrap_or(false)
   }
 }
