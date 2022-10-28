@@ -1594,7 +1594,7 @@ env Local {
   datasource {
     url: "jdbc:postgresql://localhost:5432/yourdb"
     driver: "org.postgresql.Driver"
-    user: "youruser"
+    username: "youruser"
     password: "yourpassword"
   }
 }"#).or_else(|e| {
