@@ -9,7 +9,7 @@ pub fn do_parse_test(test_name: &str) -> bool {
   let mut input_path = d.clone();
   input_path.push(format!("test_data/parse/{}.fkl", test_name));
 
-  let mut output_path = d.clone();
+  let mut output_path = d;
   output_path.push(format!("test_data/parse/{}.txt", test_name));
 
   let input = fs::read_to_string(input_path).unwrap();

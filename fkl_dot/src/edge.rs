@@ -18,7 +18,7 @@ impl Edge {
 
 impl fmt::Display for Edge {
   fn fmt(&self, out: &mut Formatter<'_>) -> fmt::Result {
-    if self.style.len() > 0 {
+    if !self.style.is_empty() {
       out.write_str(&format!("{} -> {} [{}];", self.from, self.to, self.style.join(",")))
     } else {
       out.write_str(&format!("{} -> {};", self.from, self.to))

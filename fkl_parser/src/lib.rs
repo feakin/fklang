@@ -18,5 +18,5 @@ mod tests;
 mod testing;
 
 pub fn parse(rule_content: &str) -> Result<ContextMap, ParseError> {
-  Ok(MirTransform::mir(rule_content)?)
+  MirTransform::mir(rule_content)
 }
