@@ -416,9 +416,12 @@ pub struct EnvDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct DatasourceDecl {
   pub url: String,
+  pub host: String,
+  pub port: String,
   pub driver: String,
-  pub user: String,
+  pub username: String,
   pub password: String,
+  pub database: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

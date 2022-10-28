@@ -799,9 +799,13 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   }
 
   let mut decl = DatasourceDecl::default();
-  decl.driver = attrs.get("driver").unwrap_or(&"".to_string()).clone();
   decl.url = attrs.get("url").unwrap_or(&"".to_string()).clone();
-  decl.user = attrs.get("user").unwrap_or(&"".to_string()).clone();
+
+  decl.driver = attrs.get("driver").unwrap_or(&"".to_string()).clone();
+  decl.port = attrs.get("port").unwrap_or(&"".to_string()).clone();
+  decl.host = attrs.get("host").unwrap_or(&"".to_string()).clone();
+  decl.database = attrs.get("database").unwrap_or(&"".to_string()).clone();
+  decl.username = attrs.get("user").unwrap_or(&"".to_string()).clone();
   decl.password = attrs.get("password").unwrap_or(&"".to_string()).clone();
 
   decl
@@ -1603,9 +1607,12 @@ env Local {
       inline_doc: "".to_string(),
       datasource: Some(DatasourceDecl {
         url: "jdbc:postgresql://localhost:5432/yourdb".to_string(),
+        host: "".to_string(),
+        port: "".to_string(),
         driver: "org.postgresql.Driver".to_string(),
-        user: "youruser".to_string(),
+        username: "youruser".to_string(),
         password: "yourpassword".to_string(),
+        database: "".to_string()
       }),
       message_broker: None,
       server: None,
