@@ -74,6 +74,15 @@ pub struct PostgresDatasource {
   pub database: String,
 }
 
+impl PostgresDatasource {
+  pub fn url(&self) -> String {
+    format!(
+      "postgresql://{}:{}@{}:{}/{}",
+      self.username, self.password, self.host, self.port, self.database
+    )
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

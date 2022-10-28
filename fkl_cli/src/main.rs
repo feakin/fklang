@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use log::info;
+use fkl_parser::mir::Environment;
 
 use fkl_parser::parse;
 
@@ -69,6 +70,8 @@ struct RunOpt {
   path: Option<PathBuf>,
   #[arg(short, required = false, long = "impl")]
   impl_name: Option<String>,
+  #[arg(short, required = false, long = "env")]
+  env: Option<String>,
   #[arg(short, required = true, long = "func")]
   func_name: RunFuncName,
 }
@@ -117,8 +120,21 @@ async fn main() {
           builtin::guarding_runner(root, &layered);
         }
         RunFuncName::TestConnection => {
-          let env = mir.envs;
-          builtin::test_connection_runner( &env[0]).await;
+          if mir.envs.len() == 0 {
+            panic!("environment is required");
+          }
+
+          let env: &Environment = match &run.env {
+            Some(env_name) => {
+              mir.envs.iter()
+                .filter(|env| &env.name == env_name)
+                .collect::<Vec<&Environment>>()
+                .first()
+                .unwrap_or(&&mir.envs[0])
+            }
+            None => &mir.envs[0],
+          };
+          builtin::test_connection_runner(&env).await;
         }
       }
     }

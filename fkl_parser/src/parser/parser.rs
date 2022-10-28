@@ -805,7 +805,7 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   decl.port = attrs.get("port").unwrap_or(&"".to_string()).clone();
   decl.host = attrs.get("host").unwrap_or(&"".to_string()).clone();
   decl.database = attrs.get("database").unwrap_or(&"".to_string()).clone();
-  decl.username = attrs.get("user").unwrap_or(&"".to_string()).clone();
+  decl.username = attrs.get("username").unwrap_or(&"".to_string()).clone();
   decl.password = attrs.get("password").unwrap_or(&"".to_string()).clone();
 
   decl

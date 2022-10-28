@@ -58,15 +58,18 @@ impl UserCreated {
 
 env Local {
   datasource {
-    url: "mysql://localhost:5432/yourdb"
     driver: postgresql
     host: "localhost"
     port: 5432
-    username: "youruser"
-    password: "yourpassword"
-    database: "yourdb"
+    database: "postgres"
   }
   server {
     port: 9090;
+  }
+}
+
+env Staging {
+  datasource {
+    url: "mysql://localhost:3306/test"
   }
 }

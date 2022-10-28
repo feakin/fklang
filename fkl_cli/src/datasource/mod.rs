@@ -1,5 +1,7 @@
-pub mod mysql_connector;
 use async_trait::async_trait;
+
+pub mod mysql_connector;
+pub mod postgres_connector;
 
 #[async_trait]
 pub trait DatasourceConnector {
