@@ -96,7 +96,7 @@ impl SpringCodeGen {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::{HttpMethod, Message, MethodCall, Step, VariableDefinition};
+  use fkl_parser::mir::HttpMethod;
   use fkl_parser::mir::implementation::{HttpEndpoint, Request, Response};
 
   use crate::spring_gen::spring_code_gen::SpringCodeGen;
