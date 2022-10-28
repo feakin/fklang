@@ -6,25 +6,6 @@ pub enum Datasource {
   Postgres(PostgresDatasource),
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct MySqlDatasource {
-  pub host: String,
-  pub port: u16,
-  pub username: String,
-  pub password: String,
-  pub database: String,
-}
-
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct PostgresDatasource {
-  pub host: String,
-  pub port: u16,
-  pub username: String,
-  pub password: String,
-  pub database: String,
-}
-
 impl Datasource {
   pub fn from(url: &str) -> Result<Datasource, String> {
     let url = url::Url::parse(url).map_err(|e| e.to_string())?;
@@ -54,6 +35,42 @@ impl Datasource {
     }
   }
 
+  fn url(&self) -> String {
+    match self {
+      Datasource::MySql(config) => MySqlDatasource::url(config),
+      Datasource::Postgres(config) => format!(
+        "postgresql://{}:{}@{}:{}/{}",
+        config.username, config.password, config.host, config.port, config.database
+      ),
+    }
+  }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct MySqlDatasource {
+  pub host: String,
+  pub port: u16,
+  pub username: String,
+  pub password: String,
+  pub database: String,
+}
+
+impl MySqlDatasource {
+  pub fn url(&self) -> String {
+    format!(
+      "mysql://{}:{}@{}:{}/{}",
+      self.username, self.password, self.host, self.port, self.database
+    )
+  }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct PostgresDatasource {
+  pub host: String,
+  pub port: u16,
+  pub username: String,
+  pub password: String,
+  pub database: String,
 }
 
 #[cfg(test)]
@@ -90,6 +107,20 @@ mod tests {
         password: "".to_string(),
         database: "yourdb".to_string(),
       })
+    );
+  }
+
+  #[test]
+  fn test_mysql_url_gen() {
+    let datasource = Datasource::MySql(MySqlDatasource {
+      host: "localhost".to_string(),
+      port: 3306,
+      username: "username".to_string(),
+      password: "password".to_string(),
+      database: "database".to_string(),
+    });
+    assert_eq!(datasource.url(),
+      "mysql://username:password@localhost:3306/database"
     );
   }
 }

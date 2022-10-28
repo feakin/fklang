@@ -16,6 +16,7 @@ pub mod exec;
 pub mod builtin;
 pub mod highlighter;
 mod e2e;
+mod datasource;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -115,7 +116,9 @@ async fn main() {
           let layered = mir.layered.expect("layered architecture is required");
           builtin::guarding_runner(root, &layered);
         }
-        RunFuncName::TestConnection => {}
+        RunFuncName::TestConnection => {
+
+        }
       }
     }
   }
