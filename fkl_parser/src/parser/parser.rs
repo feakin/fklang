@@ -135,21 +135,15 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
             }
             Rule::left_rel_defs => {
               for p in p.into_inner() {
-                match p.as_rule() {
-                  Rule::rel_defs => {
-                    source_type = rel_defs(p);
-                  }
-                  _ => {}
+                if p.as_rule() == Rule::rel_defs {
+                  source_type = rel_defs(p);
                 }
               }
             }
             Rule::right_rel_defs => {
               for p in p.into_inner() {
-                match p.as_rule() {
-                  Rule::rel_defs => {
-                    target_type = rel_defs(p);
-                  }
-                  _ => {}
+                if p.as_rule() == Rule::rel_defs {
+                  target_type = rel_defs(p);
                 }
               }
             }
@@ -738,7 +732,7 @@ fn consume_dependency_entry(pair: Pair<Rule>) -> LayerRelationDecl {
     };
   }
 
-  return relation;
+  relation
 }
 
 fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
@@ -755,7 +749,7 @@ fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
     };
   }
 
-  return source_sets;
+  source_sets
 }
 
 fn consume_source_set_decl(pair: Pair<Rule>) -> SourceSetDecl {
@@ -789,7 +783,7 @@ fn consume_env(pair: Pair<Rule>) -> EnvDecl {
     };
   }
 
-  return env;
+  env
 }
 
 fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
@@ -810,7 +804,7 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   decl.user = attrs.get("user").unwrap_or(&"".to_string()).clone();
   decl.password = attrs.get("password").unwrap_or(&"".to_string()).clone();
 
-  return decl;
+  decl
 }
 
 fn parse_ident_or_string(pair: Pair<Rule>) -> String {
@@ -827,19 +821,21 @@ fn parse_ident_or_string(pair: Pair<Rule>) -> String {
     };
   }
 
-  return ident;
+  ident
 }
 
 fn parse_string(str: &str) -> String {
   let mut s = str.to_string();
   s.remove(0);
   s.remove(s.len() - 1);
-  return s;
+
+  s
 }
 
 fn parse_inline_doc(pair: Pair<Rule>) -> String {
   let len = "\"\"\"".len();
-  return pair.as_str().chars().skip(len).take(pair.as_str().len() - len * 2).collect();
+
+  pair.as_str().chars().skip(len).take(pair.as_str().len() - len * 2).collect()
 }
 
 #[cfg(test)]
@@ -1582,7 +1578,7 @@ imple CinemaCreatedEvent {
       value_objects: vec![],
       domain_events: vec![
         DomainEventDecl { name: "UserCreated".to_string() },
-        DomainEventDecl { name: "UserUpdated".to_string() }
+        DomainEventDecl { name: "UserUpdated".to_string() },
       ],
     }));
   }
@@ -1612,7 +1608,7 @@ env Local {
         password: "yourpassword".to_string(),
       }),
       message_broker: None,
-      server: None
+      server: None,
     }));
   }
 
