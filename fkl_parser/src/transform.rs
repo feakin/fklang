@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject, Datasource, MySqlDatasource};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject, Datasource, MySqlDatasource, PostgresDatasource};
 use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -364,6 +364,15 @@ impl MirTransform {
     match driver {
       "mysql" => {
         Datasource::MySql(MySqlDatasource {
+          host: decl.host.clone(),
+          port: decl.port.clone().parse().unwrap(),
+          username: decl.username.clone(),
+          password: decl.password.clone(),
+          database: decl.database.clone(),
+        })
+      }
+      "postgresql" => {
+        Datasource::Postgres(PostgresDatasource {
           host: decl.host.clone(),
           port: decl.port.clone().parse().unwrap(),
           username: decl.username.clone(),
