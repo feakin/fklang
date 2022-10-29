@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use log::{error, info};
+use log::error;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::Row;
 
@@ -33,11 +33,12 @@ impl PostgresConnector {
       }
     };
 
+    print!("tables: ");
     let sql = format!("SELECT * FROM {}.information_schema.tables where table_schema = 'public'", self.config.database);
     sqlx::query(&sql)
       .map(|row: sqlx::postgres::PgRow| {
         let table_name: String = row.get("table_name");
-        info!("table: {}", table_name);
+        print!("{} ", table_name);
       })
       .fetch_all(&pool)
       .await
