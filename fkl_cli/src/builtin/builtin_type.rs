@@ -4,14 +4,15 @@ use rocket::serde::{Deserialize, Serialize};
 pub enum BuiltinType {
   Any,
   String,
-  Int,
+  Integer,
   Float,
-  Bool,
-  List,
+  Boolean,
+  Array,
   Map,
   Object,
   Date,
   DateTime,
+  Timestamp,
 }
 
 
@@ -20,14 +21,15 @@ impl BuiltinType {
     match s {
       "any" => BuiltinType::Any,
       "string" => BuiltinType::String,
-      "int" => BuiltinType::Int,
+      "int" => BuiltinType::Integer,
       "float" => BuiltinType::Float,
-      "bool" => BuiltinType::Bool,
-      "list" => BuiltinType::List,
+      "bool" => BuiltinType::Boolean,
+      "list" => BuiltinType::Array,
       "map" => BuiltinType::Map,
       "object" => BuiltinType::Object,
       "date" => BuiltinType::Date,
       "datetime" => BuiltinType::DateTime,
+      "timestamp" => BuiltinType::Timestamp,
       _ => panic!("unknown builtin type: {}", s),
     }
   }
@@ -37,15 +39,16 @@ impl ToString for BuiltinType {
   fn to_string(&self) -> String {
     match self {
       BuiltinType::String => "string".to_owned(),
-      BuiltinType::Int => "int".to_owned(),
+      BuiltinType::Integer => "int".to_owned(),
       BuiltinType::Float => "float".to_owned(),
-      BuiltinType::Bool => "bool".to_owned(),
-      BuiltinType::List => "list".to_owned(),
+      BuiltinType::Boolean => "bool".to_owned(),
+      BuiltinType::Array => "list".to_owned(),
       BuiltinType::Map => "map".to_owned(),
       BuiltinType::Object => "object".to_owned(),
       BuiltinType::Any => "any".to_owned(),
       BuiltinType::Date => "date".to_owned(),
       BuiltinType::DateTime => "datetime".to_owned(),
+      BuiltinType::Timestamp => "timestamp".to_owned(),
     }
   }
 }

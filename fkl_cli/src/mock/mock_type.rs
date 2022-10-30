@@ -3,10 +3,11 @@ use std::collections::HashMap;
 use crate::builtin::builtin_type::BuiltinType;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum MockType {
+pub enum FakeValue {
   Null,
-  Optional(Box<MockType>),
+  // Optional(Box<MockType>),
   /// basic type
+  Unknown(String),
   String(String),
   Integer(i64),
   Float(f64),
@@ -23,59 +24,59 @@ pub enum MockType {
 }
 
 #[allow(dead_code)]
-impl MockType {
+impl FakeValue {
   pub fn integer(&self) -> i64 {
     match self {
-      MockType::Integer(i) => *i,
+      FakeValue::Integer(i) => *i,
       _ => panic!("cannot convert to integer"),
     }
   }
 
   pub fn float(&self) -> f64 {
     match self {
-      MockType::Float(f) => *f,
+      FakeValue::Float(f) => *f,
       _ => panic!("cannot convert to float"),
     }
   }
 
   pub fn string(&self) -> String {
     match self {
-      MockType::String(s) => s.clone(),
+      FakeValue::String(s) => s.clone(),
       _ => panic!("cannot convert to string"),
     }
   }
 
   pub(crate) fn boolean(&self) -> bool {
     match self {
-      MockType::Boolean(b) => *b,
+      FakeValue::Boolean(b) => *b,
       _ => panic!("cannot convert to boolean"),
     }
   }
 
   pub(crate) fn datetime(&self) -> chrono::DateTime<chrono::Utc> {
     match self {
-      MockType::DateTime(dt) => dt.clone(),
+      FakeValue::DateTime(dt) => dt.clone(),
       _ => panic!("cannot convert to datetime"),
     }
   }
 
   pub(crate) fn date(&self) -> chrono::Date<chrono::Utc> {
     match self {
-      MockType::Date(d) => d.clone(),
+      FakeValue::Date(d) => d.clone(),
       _ => panic!("cannot convert to date"),
     }
   }
 
   pub(crate) fn timestamp(&self) -> i64 {
     match self {
-      MockType::Timestamp(t) => *t,
+      FakeValue::Timestamp(t) => *t,
       _ => panic!("cannot convert to timestamp"),
     }
   }
 
   pub(crate) fn uuid(&self) -> String {
     match self {
-      MockType::Uuid(u) => u.clone(),
+      FakeValue::Uuid(u) => u.clone(),
       _ => panic!("cannot convert to uuid"),
     }
   }

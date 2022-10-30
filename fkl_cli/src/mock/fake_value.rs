@@ -4,7 +4,7 @@ use sqlx::types::uuid;
 
 use fkl_parser::mir::Field;
 
-use crate::mock::mock_type::MockType;
+use crate::mock::mock_type::FakeValue;
 
 ///
 /// # Faker.js Style
@@ -22,23 +22,31 @@ use crate::mock::mock_type::MockType;
 ///   };
 /// }
 /// ```
-pub fn mock_value(_fields: Vec<Field>) {}
-
-pub fn mock_by_type(type_type: MockType) {
-
+pub fn mock_values(fields: &Vec<Field>) -> Vec<FakeValue> {
+  fields.iter().map(|field| match field.type_type.as_str() {
+    "int" => RandomValue::number(),
+    "float" => RandomValue::float(),
+    "string" => RandomValue::string(),
+    "boolean" => RandomValue::boolean(),
+    "date" => RandomValue::date(),
+    "datetime" => RandomValue::datetime(),
+    "timestamp" => RandomValue::timestamp(),
+    "uuid" => RandomValue::uuid(),
+    &_ => FakeValue::Unknown("".to_string()),
+  }).collect()
 }
 
 pub struct RandomValue {}
 
 impl RandomValue {
-  pub fn number() -> MockType {
+  pub fn number() -> FakeValue {
     let mut rng = rand::thread_rng();
     let n: u32 = rng.gen();
 
-    MockType::Integer(n as i64)
+    FakeValue::Integer(n as i64)
   }
 
-  pub fn range_number(min: i64, max: i64) -> MockType {
+  pub fn range_number(min: i64, max: i64) -> FakeValue {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -47,17 +55,17 @@ impl RandomValue {
 
     let n: i64 = rng.gen_range(min..max);
 
-    MockType::Integer(n)
+    FakeValue::Integer(n)
   }
 
-  pub fn float() -> MockType {
+  pub fn float() -> FakeValue {
     let mut rng = rand::thread_rng();
     let n: f64 = rng.gen();
 
-    MockType::Float(n)
+    FakeValue::Float(n)
   }
 
-  pub fn range_float(min: f64, max: f64) -> MockType {
+  pub fn range_float(min: f64, max: f64) -> FakeValue {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -66,10 +74,17 @@ impl RandomValue {
 
     let n: f64 = rng.gen_range(min..max);
 
-    MockType::Float(n)
+    FakeValue::Float(n)
   }
 
-  pub fn range_string(min: i64, max: i64) -> MockType {
+  pub fn string() -> FakeValue {
+    let mut rng = rand::thread_rng();
+    let n: u32 = rng.gen();
+
+    FakeValue::String(n.to_string())
+  }
+
+  pub fn range_string(min: i64, max: i64) -> FakeValue {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -83,18 +98,18 @@ impl RandomValue {
       s.push(rng.gen_range(97..122) as u8 as char);
     }
 
-    MockType::String(s)
+    FakeValue::String(s)
   }
 
-  pub fn boolean() -> MockType {
+  pub fn boolean() -> FakeValue {
     let mut rng = rand::thread_rng();
     let n: bool = rng.gen();
 
-    MockType::Boolean(n)
+    FakeValue::Boolean(n)
   }
 
-  pub fn datetime() -> MockType {
-    MockType::DateTime(Self::gen_time())
+  pub fn datetime() -> FakeValue {
+    FakeValue::DateTime(Self::gen_time())
   }
 
   fn gen_time() -> DateTime<Utc> {
@@ -110,22 +125,22 @@ impl RandomValue {
     time
   }
 
-  pub fn date() -> MockType {
+  pub fn date() -> FakeValue {
     let mut rng = rand::thread_rng();
     let year: i32 = rng.gen_range(1970..2100);
     let day: u32 = rng.gen_range(1..365);
 
     let date = NaiveDate::from_yo(year, day);
     let time: chrono::Date<Utc> = chrono::Date::from_utc(date, Utc);
-    MockType::Date(time)
+    FakeValue::Date(time)
   }
 
-  pub fn timestamp() -> MockType {
-    MockType::Timestamp(Self::gen_time().timestamp())
+  pub fn timestamp() -> FakeValue {
+    FakeValue::Timestamp(Self::gen_time().timestamp())
   }
 
-  pub fn uuid() -> MockType {
-    MockType::Uuid(uuid::Uuid::new_v4().to_string())
+  pub fn uuid() -> FakeValue {
+    FakeValue::Uuid(uuid::Uuid::new_v4().to_string())
   }
 }
 
@@ -188,5 +203,18 @@ mod tests {
     let n = RandomValue::uuid();
     let uuid_validate_regex = regex::Regex::new(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap();
     assert!(uuid_validate_regex.is_match(&*n.uuid()));
+  }
+
+  #[test]
+  fn test_mock_value() {
+    let fields = vec![
+      Field {
+        name: "id".to_string(),
+        initializer: None,
+        type_type: "int".to_string(),
+      }];
+
+    let mock_values = mock_values(&fields);
+    println!("{:?}", mock_values);
   }
 }
