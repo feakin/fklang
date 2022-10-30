@@ -85,38 +85,24 @@ static BORWSER_WEIGHTED: phf::Map<&'static str, f32> = phf_map! {
 };
 
 pub struct UserAgent {
-  pub os: String,
-  pub os_version: String,
-  pub browser: String,
-  pub browser_version: String,
-  pub device: String,
-  pub device_version: String,
-  pub engine: String,
-  pub engine_version: String,
+  // pub os: String,
+  // pub browser: String,
+  // pub version: String,
 }
 
 impl UserAgent {
-  // pub fn new() -> Self {
-  //   let os = Self::browser();
-  //   let os_version = Self::os_version(&os);
-  //   let browser = Self::browser();
-  //   let browser_version = Self::browser_version(&browser);
-  //   let device = Self::device();
-  //   let device_version = Self::device_version(&device);
-  //   let engine = Self::engine();
-  //   let engine_version = Self::engine_version(&engine);
-  //
-  //   Self {
-  //     os,
-  //     os_version,
-  //     browser,
-  //     browser_version,
-  //     device,
-  //     device_version,
-  //     engine,
-  //     engine_version,
-  //   }
-  // }
+  pub fn random() -> String {
+    let browser = UserAgent::browser();
+    let os = UserAgent::os(&browser);
+
+    match &*browser {
+      "chrome" => UserAgent::chrome(&os),
+      "firefox" => UserAgent::firefox(&os),
+      "opera" => UserAgent::opera(&os),
+      "safari" => UserAgent::safari(&os),
+      _ => UserAgent::chrome(&os),
+    }
+  }
 
   pub fn weighted_key_from_object(obj: &phf::Map<&str, f32>) -> String {
     let mut rng = rand::thread_rng();
@@ -140,7 +126,7 @@ impl UserAgent {
     browser
   }
 
-  pub fn os_version(browser: &str) -> String {
+  pub fn os(browser: &str) -> String {
     let os_version = match browser {
       "chrome" => Self::weighted_key_from_object(&CHROME_OS_WEIGHTED),
       "firefox" => Self::weighted_key_from_object(&FIREFOX_OS_WEIGHTED),
@@ -211,7 +197,7 @@ impl UserAgent {
     )
   }
 
-  pub fn  safari(os: &str) -> String {
+  pub fn safari(os: &str) -> String {
     let safari = VersionString::safari();
     let ver = format!(
       "{}.{}.{}",
@@ -426,7 +412,7 @@ mod tests {
 
   #[test]
   fn test_os_version() {
-    let os_version = UserAgent::os_version("chrome");
+    let os_version = UserAgent::os("chrome");
     assert!(os_version == "win" || os_version == "mac" || os_version == "lin");
   }
 
@@ -458,5 +444,12 @@ mod tests {
   fn test_opera() {
     let opera = UserAgent::opera("win");
     assert!(opera.contains("Opera"));
+  }
+
+  #[test]
+  fn test_random() {
+    let random_agent = UserAgent::random();
+    println!("{}", random_agent);
+    assert!(random_agent.contains("Mozilla/5.0 "));
   }
 }
