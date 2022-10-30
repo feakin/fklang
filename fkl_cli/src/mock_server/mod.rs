@@ -4,8 +4,11 @@ use rocket::figment::Figment;
 use rocket::figment::providers::Serialized;
 use rocket::get;
 use rocket::serde::{Deserialize, Serialize};
-use fkl_parser::mir::ContextMap;
 use rocket::serde::json::Json;
+
+use fkl_parser::mir::ContextMap;
+
+pub mod aggregate_api;
 
 #[get("/")]
 pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
@@ -18,6 +21,12 @@ pub struct MockServerConfig {
   pub port: u32,
   pub context_map: ContextMap,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApiError {
+  pub msg: String,
+}
+
 
 pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
   let server_config = MockServerConfig {
@@ -36,5 +45,36 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
     .mount("/", routes![
       index
     ])
+    .mount("/api", routes![
+      aggregate_api::get_aggregate_by_id,
+    ])
     .attach(AdHoc::config::<MockServerConfig>())
+}
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod test {
+  use rocket::http::Status;
+  use rocket::local::blocking::Client;
+  use fkl_parser::mir::ContextMap;
+
+  use crate::mock_server::feakin_rocket;
+
+  #[test]
+  fn hello_world() {
+    let context_map = ContextMap::default();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+  }
+
+  #[test]
+  fn movie_api() {
+    let context_map = ContextMap::default();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/api/movie/1").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+  }
 }
