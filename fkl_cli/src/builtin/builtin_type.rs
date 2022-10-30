@@ -2,6 +2,7 @@ use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum BuiltinType {
+  Any,
   String,
   Int,
   Float,
@@ -9,13 +10,15 @@ pub enum BuiltinType {
   List,
   Map,
   Object,
-  Any,
+  Date,
+  DateTime,
 }
 
 
 impl BuiltinType {
   pub fn from_string(s: &str) -> Self {
     match s {
+      "any" => BuiltinType::Any,
       "string" => BuiltinType::String,
       "int" => BuiltinType::Int,
       "float" => BuiltinType::Float,
@@ -23,8 +26,9 @@ impl BuiltinType {
       "list" => BuiltinType::List,
       "map" => BuiltinType::Map,
       "object" => BuiltinType::Object,
-      "any" => BuiltinType::Any,
-      _ => panic!("unknown builtin type {}", s),
+      "date" => BuiltinType::Date,
+      "datetime" => BuiltinType::DateTime,
+      _ => panic!("unknown builtin type: {}", s),
     }
   }
 }
@@ -40,6 +44,8 @@ impl ToString for BuiltinType {
       BuiltinType::Map => "map".to_owned(),
       BuiltinType::Object => "object".to_owned(),
       BuiltinType::Any => "any".to_owned(),
+      BuiltinType::Date => "date".to_owned(),
+      BuiltinType::DateTime => "datetime".to_owned(),
     }
   }
 }
