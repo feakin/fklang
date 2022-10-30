@@ -2,6 +2,7 @@ use indexmap::IndexMap;
 use rocket::{get, State};
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+use fkl_parser::mir::{ContextMap, Entity};
 
 use crate::mock::fake_value::mock_struct;
 use crate::mock::mock_type::FakeValue;
@@ -15,22 +16,32 @@ pub async fn get_aggregate_by_id(
   id: usize,
   config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, FakeValue>>>, NotFound<Json<ApiError>>> {
-  for bc in &config.context_map.contexts {
+  let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
+  if let None = opt_entity {
+    return Err(NotFound(Json(ApiError {
+      msg: format!("Entity {} not found", entity_name),
+    })));
+  }
+
+  let entity = opt_entity.unwrap();
+  let map = mock_struct(&entity.fields);
+  return Ok(Json(vec![map]));
+}
+
+fn filter_entity(aggregate_name: &str, entity_name: &str, context_map: &ContextMap) -> Option<Entity> {
+  for bc in &context_map.contexts {
     for aggregate in &bc.aggregates {
       if aggregate.name.to_lowercase() == aggregate_name.to_lowercase() {
         for entity in &aggregate.entities {
           if entity.name.to_lowercase() == entity_name.to_lowercase() {
-            let map = mock_struct(&entity.fields);
-            return Ok(Json(vec![map]));
+            return Some(entity.clone());
           }
         }
       }
     }
   }
 
-  return Err(NotFound(ApiError {
-    msg: format!("Could not find aggregate with name {}", aggregate_name)
-  }.into()));
+  None
 }
 
 
@@ -40,24 +51,18 @@ pub async fn get_entities(
   entity_name: &str,
   config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, FakeValue>>>, NotFound<Json<ApiError>>> {
-  for bc in &config.context_map.contexts {
-    for aggregate in &bc.aggregates {
-      if aggregate.name.to_lowercase() == aggregate_name.to_lowercase() {
-        for entity in &aggregate.entities {
-          if entity.name.to_lowercase() == entity_name.to_lowercase() {
-            let mut vec = vec![];
-            for _ in 0..20 {
-              vec.push(mock_struct(&entity.fields));
-            }
-            return Ok(Json(vec));
-          }
-        }
-      }
-    }
+  let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
+  if let None = opt_entity {
+    return Err(NotFound(Json(ApiError {
+      msg: format!("Entity {} not found", entity_name),
+    })));
   }
 
-  return Err(NotFound(ApiError {
-    msg: format!("Could not find aggregate with name {}", aggregate_name)
-  }.into()));
+  let entity = opt_entity.unwrap();
+  let mut vec = vec![];
+  for _ in 0..20 {
+    vec.push(mock_struct(&entity.fields));
+  }
+  return Ok(Json(vec));
 }
 
