@@ -131,7 +131,7 @@ impl RandomValue {
   }
 
   pub fn datetime() -> FakeValue {
-    FakeValue::DateTime(Self::gen_time())
+    FakeValue::DateTime(Self::gen_time().to_string())
   }
 
   fn gen_time() -> DateTime<Utc> {
@@ -154,7 +154,7 @@ impl RandomValue {
 
     let date = NaiveDate::from_yo(year, day);
     let time: chrono::Date<Utc> = chrono::Date::from_utc(date, Utc);
-    FakeValue::Date(time)
+    FakeValue::Date(time.to_string())
   }
 
   pub fn timestamp() -> FakeValue {
@@ -169,7 +169,6 @@ impl RandomValue {
 #[cfg(test)]
 mod tests {
   use chrono::Datelike;
-
   use super::*;
 
   #[test]
@@ -204,14 +203,18 @@ mod tests {
 
   #[test]
   fn test_datetime() {
-    let n = RandomValue::datetime();
-    assert!(n.datetime().year() >= 1970);
+    let n = RandomValue::datetime().datetime();
+    let datetime_format = "%Y-%m-%d %H:%M:%S UTC";
+    let dt = NaiveDate::parse_from_str(&*n, datetime_format).unwrap();
+    assert!(dt.year() >= 1970);
   }
 
   #[test]
   fn test_date() {
-    let n = RandomValue::date();
-    assert!(n.date().year() >= 1970);
+    let n = RandomValue::date().date();
+    let date_format = "%Y-%m-%dUTC";
+    let dt = NaiveDate::parse_from_str(&*n, date_format).unwrap();
+    assert!(dt.year() >= 1970);
   }
 
   #[test]

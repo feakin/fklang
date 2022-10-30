@@ -1,6 +1,8 @@
 use indexmap::IndexMap;
+use serde::Deserialize;
+use serde::Serialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum FakeValue {
   Null,
   // Optional(Box<MockType>),
@@ -14,8 +16,8 @@ pub enum FakeValue {
   Array(Vec<FakeValue>),
   Map(IndexMap<String, FakeValue>),
   // additional type
-  Date(chrono::Date<chrono::Utc>),
-  DateTime(chrono::DateTime<chrono::Utc>),
+  Date(String),
+  DateTime(String),
   Timestamp(i64),
   Uuid(String),
 }
@@ -50,16 +52,16 @@ impl FakeValue {
     }
   }
 
-  pub(crate) fn datetime(&self) -> chrono::DateTime<chrono::Utc> {
+  pub(crate) fn datetime(&self) -> String {
     match self {
-      FakeValue::DateTime(dt) => dt.clone(),
+      FakeValue::DateTime(dt) => dt.to_string(),
       _ => panic!("cannot convert to datetime"),
     }
   }
 
-  pub(crate) fn date(&self) -> chrono::Date<chrono::Utc> {
+  pub(crate) fn date(&self) -> String {
     match self {
-      FakeValue::Date(d) => d.clone(),
+      FakeValue::Date(d) => d.to_string(),
       _ => panic!("cannot convert to date"),
     }
   }
@@ -76,5 +78,22 @@ impl FakeValue {
       FakeValue::Uuid(u) => u.clone(),
       _ => panic!("cannot convert to uuid"),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use std::collections::HashMap;
+  use crate::mock::mock_type::FakeValue;
+
+  #[test]
+  fn test_serde_json() {
+    let mut map: HashMap<String, FakeValue> = HashMap::new();
+    map.insert("a".to_string(), FakeValue::String("b".to_string()));
+    map.insert("c".to_string(), FakeValue::Integer(1));
+
+    let s = serde_json::to_string(&map).unwrap();
+
+    assert_eq!(s, r#"{"a":{"String":"b"},"c":{"Integer":1}}"#);
   }
 }
