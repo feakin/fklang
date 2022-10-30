@@ -211,6 +211,75 @@ impl UserAgent {
     )
   }
 
+  pub fn  safari(os: &str) -> String {
+    let safari = VersionString::safari();
+    let ver = format!(
+      "{}.{}.{}",
+      rand::thread_rng().gen_range(4..7),
+      rand::thread_rng().gen_range(0..1),
+      rand::thread_rng().gen_range(0..10),
+    );
+    let os_ver = match os {
+      "mac" => format!(
+        "(Macintosh; {} Mac OS X {} rv:{}; {})",
+        Self::random_proc("mac"),
+        VersionString::osx(),
+        rand::thread_rng().gen_range(2..6),
+        random_lang()
+      ),
+      "win" => format!(
+        "(Windows; U; Windows NT {})",
+        VersionString::nt()
+      ),
+      _ => String::new(),
+    };
+
+    format!(
+      "Mozilla/5.0 {} AppleWebKit/{} (KHTML, like Gecko) Version/{} Safari/{}",
+      os_ver,
+      safari,
+      ver,
+      safari
+    )
+  }
+
+  pub fn opera(os: &str) -> String {
+    let presto_ver = format!(
+      " Presto/{} Version/{}",
+      VersionString::presto(),
+      VersionString::presto2()
+    );
+    let os_ver = match os {
+      "win" => format!(
+        "(Windows NT {}; U; {}{})",
+        VersionString::nt(),
+        random_lang(),
+        presto_ver
+      ),
+      "lin" => format!(
+        "(X11; Linux {}; U; {}{})",
+        Self::random_proc(os),
+        random_lang(),
+        presto_ver
+      ),
+      "mac" => format!(
+        "(Macintosh; Intel Mac OS X {}; U; {} Presto/{} Version/{})",
+        VersionString::osx(),
+        random_lang(),
+        VersionString::presto(),
+        VersionString::presto2()
+      ),
+      _ => String::new(),
+    };
+
+    format!(
+      "Opera/{}.{} {}",
+      rand::thread_rng().gen_range(9..14),
+      rand::thread_rng().gen_range(0..99),
+      os_ver
+    )
+  }
+
   fn random_revision(dots: i32) -> String {
     let mut return_val = String::new();
     for _ in 0..dots {
@@ -230,6 +299,24 @@ impl UserAgent {
     let proc = procs[rand::thread_rng().gen_range(0..procs.len())];
     proc.to_string()
   }
+}
+
+pub fn random_lang() -> String {
+  let langs = vec![
+    "en-US",
+    "en-GB",
+    "de-DE",
+    "fr-FR",
+    "es-ES",
+    "it-IT",
+    "ja-JP",
+    "ko-KR",
+    "zh-CN",
+    "zh-TW",
+  ];
+
+  let lang = langs[rand::thread_rng().gen_range(0..langs.len())];
+  lang.to_string()
 }
 
 pub struct VersionString {}
@@ -357,5 +444,19 @@ mod tests {
     println!("{}", firefox);
     assert!(firefox.contains("Mozilla/5.0 (Windows NT"));
     assert!(firefox.contains("Firefox"));
+  }
+
+  #[test]
+  fn test_safari() {
+    let safari = UserAgent::safari("win");
+    println!("{}", safari);
+    assert!(safari.contains("Mozilla/5.0 (Windows;"));
+    assert!(safari.contains("Safari"));
+  }
+
+  #[test]
+  fn test_opera() {
+    let opera = UserAgent::opera("win");
+    assert!(opera.contains("Opera"));
   }
 }
