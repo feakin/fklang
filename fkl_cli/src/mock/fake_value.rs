@@ -23,7 +23,11 @@ use crate::mock::mock_type::FakeValue;
 /// }
 /// ```
 pub fn mock_values(fields: &Vec<Field>) -> Vec<FakeValue> {
-  fields.iter().map(|field| match field.type_type.as_str() {
+  fields.iter().map(|field| mock_value(field)).collect()
+}
+
+fn mock_value(field: &Field) -> FakeValue {
+  match field.type_type.as_str() {
     "int" => RandomValue::number(),
     "float" => RandomValue::float(),
     "string" => RandomValue::string(),
@@ -33,7 +37,7 @@ pub fn mock_values(fields: &Vec<Field>) -> Vec<FakeValue> {
     "timestamp" => RandomValue::timestamp(),
     "uuid" => RandomValue::uuid(),
     &_ => FakeValue::Unknown("".to_string()),
-  }).collect()
+  }
 }
 
 pub struct RandomValue {}
@@ -205,6 +209,10 @@ mod tests {
     assert!(uuid_validate_regex.is_match(&*n.uuid()));
   }
 
+  fn type_of<T>(_: &T) -> String {
+    format!("{}", std::any::type_name::<T>())
+  }
+
   #[test]
   fn test_mock_value() {
     let fields = vec![
@@ -212,9 +220,29 @@ mod tests {
         name: "id".to_string(),
         initializer: None,
         type_type: "int".to_string(),
-      }];
+      },
+      Field {
+        name: "name".to_string(),
+        initializer: None,
+        type_type: "string".to_string(),
+      },
+      Field {
+        name: "age".to_string(),
+        initializer: None,
+        type_type: "int".to_string(),
+      },
+      Field {
+        name: "created_at".to_string(),
+        initializer: None,
+        type_type: "datetime".to_string(),
+      },
+    ];
 
     let mock_values = mock_values(&fields);
-    println!("{:?}", mock_values);
+    assert_eq!(mock_values.len(), 4);
+    assert_eq!(type_of(&mock_values[0]), "fkl::mock::mock_type::FakeValue");
+    assert_eq!(type_of(&mock_values[1]), "fkl::mock::mock_type::FakeValue");
+    assert_eq!(type_of(&mock_values[2]), "fkl::mock::mock_type::FakeValue");
+    assert_eq!(type_of(&mock_values[3]), "fkl::mock::mock_type::FakeValue");
   }
 }
