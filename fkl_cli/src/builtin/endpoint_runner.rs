@@ -9,6 +9,7 @@ use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Impleme
 use fkl_parser::mir::authorization::HttpAuthorization;
 
 use crate::highlighter::Highlighter;
+use crate::mock::fake_user_agent::UserAgent;
 use crate::RunFuncName;
 
 pub struct EndpointRunner {
@@ -48,7 +49,10 @@ impl EndpointRunner {
   }
 
   pub fn send_request(&self) -> Result<(), ()> {
-    let headers = self.headers();
+    let mut headers = self.headers();
+
+    // add user agent
+    headers.insert(header::USER_AGENT, UserAgent::random().parse().unwrap());
 
     let body = self.request_to_hashmap();
     let resp = self.do_request(headers, body);

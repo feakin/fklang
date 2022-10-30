@@ -419,7 +419,6 @@ mod tests {
   #[test]
   fn test_chrome() {
     let chrome = UserAgent::chrome("win");
-    println!("{}", chrome);
     assert!(chrome.contains("Mozilla/5.0 (Windows; U; Windows NT"));
     assert!(chrome.contains("Chrome"));
   }
@@ -427,7 +426,6 @@ mod tests {
   #[test]
   fn test_firefox() {
     let firefox = UserAgent::firefox("win");
-    println!("{}", firefox);
     assert!(firefox.contains("Mozilla/5.0 (Windows NT"));
     assert!(firefox.contains("Firefox"));
   }
@@ -435,7 +433,6 @@ mod tests {
   #[test]
   fn test_safari() {
     let safari = UserAgent::safari("win");
-    println!("{}", safari);
     assert!(safari.contains("Mozilla/5.0 (Windows;"));
     assert!(safari.contains("Safari"));
   }
@@ -449,7 +446,6 @@ mod tests {
   #[test]
   fn test_random() {
     let random_agent = UserAgent::random();
-    println!("{}", random_agent);
     assert!(random_agent.contains("Mozilla/5.0 "));
   }
 }
