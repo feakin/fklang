@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub enum Datasource {
   MySql(MySqlDatasource),
   Postgres(PostgresDatasource),
+  Sqlite(SqliteDatasource),
 }
 
 impl Datasource {
@@ -34,16 +35,16 @@ impl Datasource {
       _ => Err(format!("unsupported scheme: {}", scheme)),
     }
   }
+}
 
-  #[allow(dead_code)]
-  fn url(&self) -> String {
-    match self {
-      Datasource::MySql(config) => MySqlDatasource::url(config),
-      Datasource::Postgres(config) => format!(
-        "postgresql://{}:{}@{}:{}/{}",
-        config.username, config.password, config.host, config.port, config.database
-      ),
-    }
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SqliteDatasource {
+  pub database: String,
+}
+
+impl SqliteDatasource {
+  pub fn url(&self) -> String {
+    format!("sqlite://{}", self.database)
   }
 }
 
@@ -122,15 +123,14 @@ mod tests {
 
   #[test]
   fn test_mysql_url_gen() {
-    let datasource = Datasource::MySql(MySqlDatasource {
+    let datasource = MySqlDatasource {
       host: "localhost".to_string(),
       port: 3306,
       username: "username".to_string(),
       password: "password".to_string(),
       database: "database".to_string(),
-    });
-    assert_eq!(datasource.url(),
-      "mysql://username:password@localhost:3306/database"
+    };
+    assert_eq!(datasource.url(), "mysql://username:password@localhost:3306/database"
     );
   }
 }

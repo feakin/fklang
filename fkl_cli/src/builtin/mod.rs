@@ -7,6 +7,7 @@ use fkl_parser::mir::{Datasource, Environment, LayeredArchitecture};
 
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;
+use crate::datasource::sqlite_connector::SqliteConnector;
 use crate::exec::LayeredGuardingExec;
 
 pub mod endpoint_runner;
@@ -32,6 +33,9 @@ pub(crate) async fn test_connection_runner(env: &Environment) {
 
     Datasource::Postgres(pgsql) => {
       PostgresConnector::new(pgsql.clone()).test_connection().await;
+    }
+    Datasource::Sqlite(sql) => {
+      SqliteConnector::new(sql.clone()).test_connection().await;
     }
   }
 }

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject, Datasource, MySqlDatasource, PostgresDatasource};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, SqliteDatasource, Step, ValueObject};
 use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
@@ -371,6 +371,11 @@ impl MirTransform {
           database: decl.database.clone(),
         })
       }
+      "sqlite" => {
+        Datasource::Sqlite(SqliteDatasource {
+          database: decl.database.clone(),
+        })
+      }
       "postgresql" => {
         Datasource::Postgres(PostgresDatasource {
           host: decl.host.clone(),
@@ -398,9 +403,11 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, LayerRelation, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
+  use crate::mir;
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, PostgresDatasource, SourceSet, SourceSets, Step, VariableDefinition};
   use crate::mir::authorization::HttpAuthorization;
   use crate::mir::ConnectionDirection::PositiveDirected;
+  use crate::mir::Datasource::Postgres;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
   use crate::mir::tactic::block::Field;
@@ -727,5 +734,32 @@ impl CinemaCreatedEvent {
         ],
       }
     ));
+  }
+
+  #[test]
+  fn mir_database() {
+    let str = r#"env Local {
+  datasource {
+    driver: postgresql
+    host: "localhost"
+    port: 5432
+    database: "test"
+  }
+  server {
+    port: 9090;
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.envs[0], Environment {
+      name: "Local".to_string(),
+      datasources: vec![Postgres(PostgresDatasource {
+        host: "localhost".to_string(),
+        port: 5432,
+        username: "".to_string(),
+        password: "".to_string(),
+        database: "test".to_string(),
+      })],
+    });
   }
 }
