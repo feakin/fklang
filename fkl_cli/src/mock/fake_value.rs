@@ -34,9 +34,33 @@ impl RandomValue {
 
   pub fn range_number(min: i64, max: i64) -> MockType {
     let mut rng = rand::thread_rng();
+
+    if min > max {
+      panic!("min must be less than max")
+    }
+
     let n: i64 = rng.gen_range(min..max);
 
     MockType::Integer(n)
+  }
+
+  pub fn float() -> MockType {
+    let mut rng = rand::thread_rng();
+    let n: f64 = rng.gen();
+
+    MockType::Float(n)
+  }
+
+  pub fn range_float(min: f64, max: f64) -> MockType {
+    let mut rng = rand::thread_rng();
+
+    if min > max {
+      panic!("min must be less than max")
+    }
+
+    let n: f64 = rng.gen_range(min..max);
+
+    MockType::Float(n)
   }
 }
 
@@ -54,5 +78,12 @@ mod tests {
   fn test_range_number() {
     let n = RandomValue::range_number(1, 10);
     assert!(n.integer() >= 1);
+  }
+
+  #[test]
+  fn test_range_float() {
+    let n = RandomValue::range_float(1.0, 10.0);
+    println!("{:?}", n);
+    assert!(n.float() >= 1.0);
   }
 }

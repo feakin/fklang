@@ -25,4 +25,11 @@ impl MockType {
       _ => panic!("cannot convert to integer"),
     }
   }
+
+  pub fn float(&self) -> f64 {
+    match self {
+      MockType::Float(f) => *f,
+      _ => panic!("cannot convert to float"),
+    }
+  }
 }
