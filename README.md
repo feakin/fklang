@@ -19,8 +19,13 @@ Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 3. Code gen
     - [ ] with Spring
 4. contract base testing
+    - [ ] mock server
     - [ ] with HTTP API
 5. database integration: JPA, JDBC, etc.
+    - [ ] database integration
+      - [ ] MySQL
+      - [ ] PostgresSQL
+      - [ ] SQLite
     - [ ] database schema generation
     - [ ] database migration
 6. module support
