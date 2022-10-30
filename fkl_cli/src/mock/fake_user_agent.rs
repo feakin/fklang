@@ -151,6 +151,167 @@ impl UserAgent {
 
     os_version
   }
+
+  pub fn firefox(os: &str) -> String {
+    let firefox_ver = format!(
+      "{}{}",
+      rand::thread_rng().gen_range(5..15),
+      Self::random_revision(2)
+    );
+    let gecko_ver = format!("Gecko/20100101 Firefox/{}", firefox_ver);
+    let proc = Self::random_proc(os);
+    let os_ver = match os {
+      "win" => format!(
+        "(Windows NT {}; {})",
+        VersionString::nt(),
+        proc
+      ),
+      "mac" => format!(
+        "(Macintosh; {} Mac OS X {}",
+        proc,
+        VersionString::osx()
+      ),
+      "lin" => format!("(X11; Linux {})", proc),
+      _ => String::new(),
+    };
+
+    format!(
+      "Mozilla/5.0 {} rv:{} {}",
+      os_ver,
+      firefox_ver.trim_end_matches("2"),
+      gecko_ver
+    )
+  }
+
+  pub fn chrome(os: &str) -> String {
+    let safari = VersionString::safari();
+    let os_ver = match os {
+      "mac" => format!(
+        "(Macintosh; {} Mac OS X {})",
+        Self::random_proc("mac"),
+        VersionString::osx()
+      ),
+      "win" => format!(
+        "(Windows; U; Windows NT {})",
+        VersionString::nt()
+      ),
+      "lin" => format!(
+        "(X11; Linux {})",
+        Self::random_proc(os)
+      ),
+      _ => String::new(),
+    };
+
+    format!(
+      "Mozilla/5.0 {} AppleWebKit/{} (KHTML, like Gecko) Chrome/{} Safari/{}",
+      os_ver,
+      safari,
+      VersionString::chrome(),
+      safari
+    )
+  }
+
+  fn random_revision(dots: i32) -> String {
+    let mut return_val = String::new();
+    for _ in 0..dots {
+      return_val.push_str(&format!(".{}", rand::thread_rng().gen_range(0..9)));
+    }
+    return_val
+  }
+
+  fn random_proc(arch: &str) -> String {
+    let procs = match arch {
+      "lin" => vec!["i686", "x86_64"],
+      "mac" => vec!["Intel", "PPC", "U; Intel", "U; PPC"],
+      "win" => vec!["", "WOW64", "Win64; x64"],
+      _ => vec![],
+    };
+
+    let proc = procs[rand::thread_rng().gen_range(0..procs.len())];
+    proc.to_string()
+  }
+}
+
+pub struct VersionString {}
+
+impl VersionString {
+  pub fn net() -> String {
+    let mut rng = rand::thread_rng();
+    let net = format!(
+      "{}.{}.{}.{}",
+      rng.gen_range(1..=4),
+      rng.gen_range(0..=9),
+      rng.gen_range(10000..=99999),
+      rng.gen_range(0..=9)
+    );
+
+    net
+  }
+
+  pub fn nt() -> String {
+    let mut rng = rand::thread_rng();
+    let nt = format!("{}.{}", rng.gen_range(5..=6), rng.gen_range(0..=3));
+
+    nt
+  }
+
+  pub fn ie() -> String {
+    let mut rng = rand::thread_rng();
+    let ie = format!("{}", rng.gen_range(7..=11));
+
+    ie
+  }
+
+  pub fn trident() -> String {
+    let mut rng = rand::thread_rng();
+    let trident = format!("{}.{}", rng.gen_range(3..=7), rng.gen_range(0..=1));
+
+    trident
+  }
+
+  pub fn osx() -> String {
+    let mut rng = rand::thread_rng();
+    let osx = format!("10.{}.{}", rng.gen_range(5..=10), rng.gen_range(0..=9));
+
+    osx
+  }
+
+  pub fn chrome() -> String {
+    let mut rng = rand::thread_rng();
+    let chrome = format!(
+      "{}.0.{}.0",
+      rng.gen_range(13..=39),
+      rng.gen_range(800..=899)
+    );
+
+    chrome
+  }
+
+  pub fn presto() -> String {
+    let mut rng = rand::thread_rng();
+    let presto = format!("2.9.{}", rng.gen_range(160..=190));
+
+    presto
+  }
+
+  pub fn presto2() -> String {
+    let mut rng = rand::thread_rng();
+    let presto2 = format!("{}.00", rng.gen_range(10..=12));
+
+    presto2
+  }
+
+  pub fn safari() -> String {
+    let mut rng = rand::thread_rng();
+    let safari = format!(
+      "{}.{}.{}",
+      rng.gen_range(531..=538),
+      rng.gen_range(0..=2),
+      rng.gen_range(0..=2)
+    );
+
+    safari
+  }
 }
 
 #[cfg(test)]
@@ -180,5 +341,21 @@ mod tests {
   fn test_os_version() {
     let os_version = UserAgent::os_version("chrome");
     assert!(os_version == "win" || os_version == "mac" || os_version == "lin");
+  }
+
+  #[test]
+  fn test_chrome() {
+    let chrome = UserAgent::chrome("win");
+    println!("{}", chrome);
+    assert!(chrome.contains("Mozilla/5.0 (Windows; U; Windows NT"));
+    assert!(chrome.contains("Chrome"));
+  }
+
+  #[test]
+  fn test_firefox() {
+    let firefox = UserAgent::firefox("win");
+    println!("{}", firefox);
+    assert!(firefox.contains("Mozilla/5.0 (Windows NT"));
+    assert!(firefox.contains("Firefox"));
   }
 }
