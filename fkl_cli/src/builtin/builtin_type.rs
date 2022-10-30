@@ -11,21 +11,20 @@ pub enum BuiltinType {
   Date,
   DateTime,
   Timestamp,
-
   Array(Vec<BuiltinType>),
   Map(HashMap<String, BuiltinType>),
 }
 
 
 impl BuiltinType {
-  pub fn from_string(s: &str) -> Self {
+  pub fn from(s: &str) -> Self {
     let lower = s.to_lowercase();
     let s = lower.as_str();
 
     let is_array = s.starts_with("list<") && s.ends_with('>');
     if is_array {
       let inner = s[5..s.len() - 1].to_string();
-      let inner_type = BuiltinType::from_string(&inner);
+      let inner_type = BuiltinType::from(&inner);
       return BuiltinType::Array(vec![inner_type]);
     }
 
@@ -33,8 +32,8 @@ impl BuiltinType {
     if is_map {
       let inner = s[4..s.len() - 1].to_string();
       let inner_types: Vec<&str> = inner.split(',').collect();
-      let key_type = BuiltinType::from_string(inner_types[0].trim());
-      let value_type = BuiltinType::from_string(inner_types[1].trim());
+      let key_type = BuiltinType::from(inner_types[0].trim());
+      let value_type = BuiltinType::from(inner_types[1].trim());
 
       let mut map = HashMap::new();
       map.insert(key_type.to_string(), value_type);
@@ -50,7 +49,7 @@ impl BuiltinType {
       "date" => BuiltinType::Date,
       "datetime" => BuiltinType::DateTime,
       "timestamp" => BuiltinType::Timestamp,
-      _ => panic!("unknown builtin type: {}", s),
+      _ => BuiltinType::String,
     }
   }
 }
@@ -105,7 +104,7 @@ mod tests {
   #[test]
   fn test_builtin_type() {
     let s = "string";
-    let t = BuiltinType::from_string(s);
+    let t = BuiltinType::from(s);
     assert_eq!(t, BuiltinType::String);
     assert_eq!(t.to_string(), s);
   }
@@ -113,7 +112,7 @@ mod tests {
   #[test]
   fn test_builtin_type_array() {
     let s = "list<string>";
-    let t = BuiltinType::from_string(s);
+    let t = BuiltinType::from(s);
     assert_eq!(t, BuiltinType::Array(vec![BuiltinType::String]));
     assert_eq!(t.to_string(), s);
   }
@@ -121,7 +120,7 @@ mod tests {
   #[test]
   fn test_builtin_type_map() {
     let s = "map<string, string>";
-    let t = BuiltinType::from_string(s);
+    let t = BuiltinType::from(s);
     assert_eq!(t.to_string(), s);
   }
 }

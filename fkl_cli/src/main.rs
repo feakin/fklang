@@ -4,8 +4,8 @@ use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 use log::info;
-use fkl_parser::mir::Environment;
 
+use fkl_parser::mir::Environment;
 use fkl_parser::parse;
 
 use crate::exec::{code_gen_exec, mir_from_file};
@@ -171,12 +171,15 @@ fn parse_to_ast(path: &PathBuf) {
 
 #[cfg(test)]
 mod tests {
+  use std::collections::HashMap;
   use fkl_codegen_java::gen_http_api;
-  use fkl_parser::mir::ContextMap;
+  use fkl_parser::mir::{BoundedContext, ContextMap};
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
 
   use crate::{builtin, RunFuncName};
+  use crate::builtin::builtin_type::BuiltinType;
+  use crate::mock::fake_value::struct_to_builtin_type;
 
   #[test]
   fn convert_for_cli() {
@@ -231,5 +234,47 @@ mod tests {
     let context_map: ContextMap = parse(source).unwrap();
 
     builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
+  }
+
+  #[test]
+  fn test_mir_struct() {
+    let source = r#"ContextMap TicketBooking {
+  TicketContext <-> ReservationContext;
+}
+
+Context TicketContext {
+  Aggregate Ticket, Reservation;
+}
+
+Aggregate Ticket {
+  Entity Ticket;
+}
+
+Entity Ticket {
+  Struct {
+    id: UUID;
+    seat: String;
+    price: Int;
+  }
+}
+"#;
+
+    let context_map: ContextMap = parse(source).unwrap();
+
+    let contexts: Vec<BoundedContext> = context_map.contexts.iter()
+      .filter(|context| context.name == "TicketContext")
+      .map(|ctx| ctx.clone())
+      .collect::<Vec<BoundedContext>>();
+
+    let entity = contexts[0].aggregates[0].entities[0].clone();
+
+    let types = struct_to_builtin_type(&entity.fields);
+
+    assert_eq!(types.len(), 3);
+    assert_eq!(types, HashMap::from([
+      ("id".to_string(), BuiltinType::String),
+      ("seat".to_string(), BuiltinType::String),
+      ("price".to_string(), BuiltinType::Integer),
+    ]));
   }
 }

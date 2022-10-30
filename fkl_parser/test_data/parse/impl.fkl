@@ -6,9 +6,15 @@ Context TicketContext {
   Aggregate Ticket, Reservation;
 }
 
+Aggregate Ticket {
+  Entity Ticket;
+}
+
 Entity Ticket {
   Struct {
+    id: UUID;
     seat: String;
+    price: Int;
   }
 }
 
