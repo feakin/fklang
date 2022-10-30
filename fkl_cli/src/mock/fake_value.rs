@@ -1,6 +1,8 @@
-use chrono::{Date, NaiveDate};
+use chrono::NaiveDate;
 use rand::Rng;
+
 use fkl_parser::mir::Field;
+
 use crate::mock::mock_type::MockType;
 
 ///
@@ -19,9 +21,9 @@ use crate::mock::mock_type::MockType;
 ///   };
 /// }
 /// ```
-pub fn mock_value(fields: Vec<Field>) {}
+pub fn mock_value(_fields: Vec<Field>) {}
 
-pub fn mock_by_type(type_type: String) {}
+pub fn mock_by_type(_type_type: String) {}
 
 pub struct RandomValue {}
 
@@ -100,11 +102,22 @@ impl RandomValue {
     let time: chrono::DateTime<chrono::Utc> = chrono::DateTime::from_utc(date, chrono::Utc);
     MockType::DateTime(time)
   }
+
+  pub fn date() -> MockType {
+    let mut rng = rand::thread_rng();
+    let year: i32 = rng.gen_range(1970..2100);
+    let day: u32 = rng.gen_range(1..365);
+
+    let date = NaiveDate::from_yo(year, day);
+    let time: chrono::Date<chrono::Utc> = chrono::Date::from_utc(date, chrono::Utc);
+    MockType::Date(time)
+  }
 }
 
 #[cfg(test)]
 mod tests {
-  use chrono::Datelike;
+  use chrono::{Datelike, Timelike};
+
   use super::*;
 
   #[test]
@@ -122,14 +135,12 @@ mod tests {
   #[test]
   fn test_range_float() {
     let n = RandomValue::range_float(1.0, 10.0);
-    println!("{:?}", n);
     assert!(n.float() >= 1.0);
   }
 
   #[test]
   fn test_range_string() {
     let n = RandomValue::range_string(1, 10);
-    println!("{:?}", n);
     assert!(n.string().len() >= 1);
   }
 
@@ -137,13 +148,17 @@ mod tests {
   fn test_boolean() {
     let n = RandomValue::boolean();
     println!("{:?}", n);
-    assert!(n.boolean());
   }
 
   #[test]
   fn test_datetime() {
     let n = RandomValue::datetime();
-    println!("{:?}", n);
     assert!(n.datetime().year() >= 1970);
+  }
+
+  #[test]
+  fn test_date() {
+    let n = RandomValue::date();
+    assert!(n.date().year() >= 1970);
   }
 }

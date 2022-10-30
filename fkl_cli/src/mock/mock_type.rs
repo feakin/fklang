@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use chrono::DateTime;
 
-use rocket::serde::{Deserialize, Serialize};
-
 use crate::builtin::builtin_type::BuiltinType;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -25,6 +23,7 @@ pub enum MockType {
   Uuid(String),
 }
 
+#[allow(dead_code)]
 impl MockType {
   pub fn integer(&self) -> i64 {
     match self {
@@ -47,7 +46,6 @@ impl MockType {
     }
   }
 
-
   pub(crate) fn boolean(&self) -> bool {
     match self {
       MockType::Boolean(b) => *b,
@@ -55,11 +53,17 @@ impl MockType {
     }
   }
 
-
   pub(crate) fn datetime(&self) -> DateTime<chrono::Utc> {
     match self {
       MockType::DateTime(dt) => dt.clone(),
       _ => panic!("cannot convert to datetime"),
+    }
+  }
+
+  pub(crate) fn date(&self) -> chrono::Date<chrono::Utc> {
+    match self {
+      MockType::Date(d) => d.clone(),
+      _ => panic!("cannot convert to date"),
     }
   }
 }
