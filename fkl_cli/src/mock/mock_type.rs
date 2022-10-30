@@ -32,4 +32,11 @@ impl MockType {
       _ => panic!("cannot convert to float"),
     }
   }
+
+  pub fn string(&self) -> String {
+    match self {
+      MockType::String(s) => s.clone(),
+      _ => panic!("cannot convert to string"),
+    }
+  }
 }

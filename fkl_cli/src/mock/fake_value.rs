@@ -62,6 +62,23 @@ impl RandomValue {
 
     MockType::Float(n)
   }
+
+  pub fn range_string(min: i64, max: i64) -> MockType {
+    let mut rng = rand::thread_rng();
+
+    if min > max {
+      panic!("min must be less than max")
+    }
+
+    let n: i64 = rng.gen_range(min..max);
+    let mut s = String::new();
+
+    for _ in 0..n {
+      s.push(rng.gen_range(97..122) as u8 as char);
+    }
+
+    MockType::String(s)
+  }
 }
 
 #[cfg(test)]
@@ -85,5 +102,12 @@ mod tests {
     let n = RandomValue::range_float(1.0, 10.0);
     println!("{:?}", n);
     assert!(n.float() >= 1.0);
+  }
+
+  #[test]
+  fn test_range_string() {
+    let n = RandomValue::range_string(1, 10);
+    println!("{:?}", n);
+    assert!(n.string().len() >= 1);
   }
 }
