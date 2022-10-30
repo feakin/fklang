@@ -113,11 +113,12 @@ impl RandomValue {
     }
 
     let n: i64 = rng.gen_range(min..max);
-    let mut s = String::new();
 
-    for _ in 0..n {
-      s.push(rng.gen_range(97..122) as u8 as char);
-    }
+    let s: String = rand::thread_rng()
+      .sample_iter(&Alphanumeric)
+      .take(n as usize)
+      .map(char::from)
+      .collect();
 
     FakeValue::String(s)
   }
