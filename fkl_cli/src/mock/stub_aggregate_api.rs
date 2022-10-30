@@ -32,3 +32,32 @@ pub async fn get_aggregate_by_id(
     msg: format!("Could not find aggregate with name {}", aggregate_name)
   }.into()));
 }
+
+
+#[get("/<aggregate_name>/<entity_name>")]
+pub async fn get_entities(
+  aggregate_name: &str,
+  entity_name: &str,
+  config: &State<MockServerConfig>,
+) -> Result<Json<Vec<IndexMap<String, FakeValue>>>, NotFound<Json<ApiError>>> {
+  for bc in &config.context_map.contexts {
+    for aggregate in &bc.aggregates {
+      if aggregate.name.to_lowercase() == aggregate_name.to_lowercase() {
+        for entity in &aggregate.entities {
+          if entity.name.to_lowercase() == entity_name.to_lowercase() {
+            let mut vec = vec![];
+            for _ in 0..20 {
+              vec.push(mock_struct(&entity.fields));
+            }
+            return Ok(Json(vec));
+          }
+        }
+      }
+    }
+  }
+
+  return Err(NotFound(ApiError {
+    msg: format!("Could not find aggregate with name {}", aggregate_name)
+  }.into()));
+}
+

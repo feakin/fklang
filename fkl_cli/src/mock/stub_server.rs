@@ -45,6 +45,7 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
     ])
     .mount("/api", routes![
       stub_aggregate_api::get_aggregate_by_id,
+      stub_aggregate_api::get_entities,
     ])
     .attach(AdHoc::config::<MockServerConfig>())
 }
