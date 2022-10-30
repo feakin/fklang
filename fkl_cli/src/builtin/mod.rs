@@ -5,14 +5,13 @@ use futures::executor::block_on;
 use log::{error, info};
 
 use fkl_parser::mir::{ContextMap, Datasource, Environment, LayeredArchitecture};
-use crate::builtin::mock_server::feakin_rocket;
 
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;
 use crate::exec::LayeredGuardingExec;
+use crate::mock_server::feakin_rocket;
 
 pub mod endpoint_runner;
-pub mod mock_server;
 
 pub fn guarding_runner(root: PathBuf, layered: &LayeredArchitecture) {
   let errors = LayeredGuardingExec::guarding(root, layered);
