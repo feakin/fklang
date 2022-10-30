@@ -17,3 +17,12 @@ pub enum MockType {
   Object(HashMap<String, BuiltinType>),
   Null,
 }
+
+impl MockType {
+  pub fn integer(&self) -> i64 {
+    match self {
+      MockType::Integer(i) => *i,
+      _ => panic!("cannot convert to integer"),
+    }
+  }
+}
