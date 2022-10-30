@@ -13,6 +13,7 @@ pub enum BuiltinType {
   Timestamp,
   Array(Vec<BuiltinType>),
   Map(HashMap<String, BuiltinType>),
+  Special(String),
 }
 
 
@@ -49,7 +50,7 @@ impl BuiltinType {
       "date" => BuiltinType::Date,
       "datetime" => BuiltinType::DateTime,
       "timestamp" => BuiltinType::Timestamp,
-      _ => BuiltinType::String,
+      _ => BuiltinType::Special(s.to_owned()),
     }
   }
 }
@@ -87,6 +88,9 @@ impl ToString for BuiltinType {
         s.push('>');
         s
       }
+      BuiltinType::Special(str) => {
+        str.to_owned()
+      }
     }
   }
 }
@@ -122,5 +126,13 @@ mod tests {
     let s = "map<string, string>";
     let t = BuiltinType::from(s);
     assert_eq!(t.to_string(), s);
+  }
+
+  #[test]
+  fn test_uuid() {
+    let s = "uuid";
+    let t = BuiltinType::from(s);
+    assert_eq!(t, BuiltinType::Special("uuid".to_owned()));
+    assert_eq!(t.to_string(), "uuid");
   }
 }

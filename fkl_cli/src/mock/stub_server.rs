@@ -26,7 +26,6 @@ pub struct ApiError {
   pub msg: String,
 }
 
-
 pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
   let server_config = MockServerConfig {
     port: 8080,
@@ -72,8 +71,8 @@ mod test {
   fn movie_api() {
     let context_map = ContextMap::default();
     let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
-    let response = client.get("/api/movie/1").dispatch();
+    let response = client.get("/api/movie/movie/1").dispatch();
 
-    assert_eq!(response.status(), Status::Ok);
+    assert_eq!(response.status(), Status::NotFound);
   }
 }

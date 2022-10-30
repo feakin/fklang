@@ -9,7 +9,11 @@ use fkl_parser::mir::Field;
 use crate::builtin::builtin_type::BuiltinType;
 use crate::mock::mock_type::FakeValue;
 
-pub fn mock_struct(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
+pub fn mock_struct(fields: &Vec<Field>) -> IndexMap<String, FakeValue> {
+  mock_values(&struct_to_builtin(fields))
+}
+
+pub fn struct_to_builtin(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
   let mut map = IndexMap::new();
   for field in fields {
     map.insert(field.name.clone(), BuiltinType::from(&field.type_type));
@@ -50,6 +54,12 @@ fn mock_value(field: &BuiltinType) -> FakeValue {
         result.insert(key.clone(), mock_value(&value));
       }
       FakeValue::Map(result)
+    }
+    BuiltinType::Special(sp) => {
+      match sp.as_str() {
+        "uuid" => RandomValue::uuid(),
+        _ => FakeValue::Unknown("any".to_owned())
+      }
     }
   }
 }
@@ -255,7 +265,7 @@ mod tests {
       },
     ];
 
-    let ds = mock_struct(&fields);
+    let ds = struct_to_builtin(&fields);
     assert_eq!(ds.len(), 4);
     assert_eq!(ds, IndexMap::from([
       ("id".to_string(), BuiltinType::Integer),

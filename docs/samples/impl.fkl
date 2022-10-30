@@ -12,6 +12,18 @@ Aggregate User {
   DomainEvent UserCreated;
 }
 
+Aggregate Ticket {
+  Entity Ticket;
+}
+
+Entity Ticket {
+  Struct {
+    id: UUID;
+    seat: String;
+    price: Int;
+  }
+}
+
 layered DDD {
   dependency {
     interface -> application
