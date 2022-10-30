@@ -24,5 +24,4 @@ pub fn mock_by_type(type_type: String) {
 
 }
 
-// mock strategy
 
