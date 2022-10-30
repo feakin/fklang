@@ -1,14 +1,13 @@
-use rocket::{Build, info, Rocket, routes, State};
+use figment::Figment;
+use figment::providers::Serialized;
+use rocket::{Build, get, info, Rocket, routes, State};
 use rocket::fairing::AdHoc;
-use rocket::figment::Figment;
-use rocket::figment::providers::Serialized;
-use rocket::get;
-use rocket::serde::{Deserialize, Serialize};
 use rocket::serde::json::Json;
+use serde::{Deserialize, Serialize};
 
 use fkl_parser::mir::ContextMap;
 
-pub mod aggregate_api;
+pub use super::aggregate_api;
 
 #[get("/")]
 pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
@@ -52,13 +51,13 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod test {
   use rocket::http::Status;
   use rocket::local::blocking::Client;
+
   use fkl_parser::mir::ContextMap;
 
-  use crate::mock_server::feakin_rocket;
+  use crate::mock::mock_server::feakin_rocket;
 
   #[test]
   fn hello_world() {
