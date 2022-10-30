@@ -1,5 +1,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
+use sqlx::types::uuid;
 
 use fkl_parser::mir::Field;
 
@@ -120,6 +121,10 @@ impl RandomValue {
   pub fn timestamp() -> MockType {
     MockType::Timestamp(Self::gen_time().timestamp())
   }
+
+  pub fn uuid() -> MockType {
+    MockType::Uuid(uuid::Uuid::new_v4().to_string())
+  }
 }
 
 #[cfg(test)]
@@ -168,5 +173,18 @@ mod tests {
   fn test_date() {
     let n = RandomValue::date();
     assert!(n.date().year() >= 1970);
+  }
+
+  #[test]
+  fn test_timestamp() {
+    let n = RandomValue::timestamp();
+    assert!(n.timestamp() >= 0);
+  }
+
+  #[test]
+  fn test_uuid() {
+    let n = RandomValue::uuid();
+    let uuid_validate_regex = regex::Regex::new(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap();
+    assert!(uuid_validate_regex.is_match(&*n.uuid()));
   }
 }

@@ -65,4 +65,18 @@ impl MockType {
       _ => panic!("cannot convert to date"),
     }
   }
+
+  pub(crate) fn timestamp(&self) -> i64 {
+    match self {
+      MockType::Timestamp(t) => *t,
+      _ => panic!("cannot convert to timestamp"),
+    }
+  }
+
+  pub(crate) fn uuid(&self) -> String {
+    match self {
+      MockType::Uuid(u) => u.clone(),
+      _ => panic!("cannot convert to uuid"),
+    }
+  }
 }
