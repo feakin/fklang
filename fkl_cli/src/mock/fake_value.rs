@@ -1,5 +1,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use indexmap::IndexMap;
+use rand::distributions::Alphanumeric;
 use rand::Rng;
 use sqlx::types::uuid;
 
@@ -95,8 +96,11 @@ impl RandomValue {
   }
 
   pub fn string() -> FakeValue {
-    let mut rng = rand::thread_rng();
-    let n: u32 = rng.gen();
+    let n: String = rand::thread_rng()
+      .sample_iter(&Alphanumeric)
+      .take(10)
+      .map(char::from)
+      .collect();
 
     FakeValue::String(n.to_string())
   }
