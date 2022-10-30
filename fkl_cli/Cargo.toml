@@ -55,8 +55,8 @@ base64 = "0.13.0"
 
 # mysql & postres
 sqlx = { version = "0.6", features = [
-  "runtime-tokio-native-tls" , # tls
-  "postgres", "mysql",         # db
+  "runtime-tokio-native-tls", # tls
+  "postgres", "mysql", # db
   "chrono", "bigdecimal", "uuid", "json", "ipnetwork", "mac_address", "bit-vec",
   "offline"
 ] }
@@ -68,6 +68,10 @@ futures = "0.3"
 tokio = { version = "1", features = ["full"] }
 
 async-trait = "0.1.58"
+
+# http server
+rocket = { version = "0.5.0-rc.2", features = ["json"] }
+figment = { version = "0.10" }
 
 [dev-dependencies]
 trycmd = "0.14.0"

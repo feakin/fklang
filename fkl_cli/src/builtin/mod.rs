@@ -1,15 +1,18 @@
 use std::path::PathBuf;
 use std::process;
 
+use futures::executor::block_on;
 use log::{error, info};
 
-use fkl_parser::mir::{Datasource, Environment, LayeredArchitecture};
+use fkl_parser::mir::{ContextMap, Datasource, Environment, LayeredArchitecture};
+use crate::builtin::mock_server::feakin_rocket;
 
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;
 use crate::exec::LayeredGuardingExec;
 
 pub mod endpoint_runner;
+pub mod mock_server;
 
 pub fn guarding_runner(root: PathBuf, layered: &LayeredArchitecture) {
   let errors = LayeredGuardingExec::guarding(root, layered);
@@ -34,4 +37,8 @@ pub(crate) async fn test_connection_runner(env: &Environment) {
       PostgresConnector::new(pgsql.clone()).test_connection().await;
     }
   }
+}
+
+pub(crate) async fn mock_server_runner(mir: &ContextMap) {
+  let _ = block_on(async { feakin_rocket(mir).launch() }).await;
 }

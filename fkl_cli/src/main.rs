@@ -81,6 +81,7 @@ pub enum RunFuncName {
   HttpRequest,
   Guarding,
   TestConnection,
+  MockServer,
 }
 
 // todo: add app context for save highlighter
@@ -135,6 +136,9 @@ async fn main() {
             None => &mir.envs[0],
           };
           builtin::test_connection_runner(&env).await;
+        }
+        RunFuncName::MockServer => {
+          builtin::mock_server_runner(&mir).await;
         }
       }
     }
