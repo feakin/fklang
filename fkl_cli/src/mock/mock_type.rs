@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-
-use crate::builtin::builtin_type::BuiltinType;
+use indexmap::IndexMap;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum FakeValue {
@@ -13,9 +11,8 @@ pub enum FakeValue {
   Float(f64),
   Boolean(bool),
   /// structural type
-  Array(Vec<BuiltinType>),
-  Map(Vec<(BuiltinType, BuiltinType)>),
-  Object(HashMap<String, BuiltinType>),
+  Array(Vec<FakeValue>),
+  Map(IndexMap<String, FakeValue>),
   // additional type
   Date(chrono::Date<chrono::Utc>),
   DateTime(chrono::DateTime<chrono::Utc>),

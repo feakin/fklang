@@ -171,7 +171,8 @@ fn parse_to_ast(path: &PathBuf) {
 
 #[cfg(test)]
 mod tests {
-  use std::collections::HashMap;
+  use indexmap::IndexMap;
+
   use fkl_codegen_java::gen_http_api;
   use fkl_parser::mir::{BoundedContext, ContextMap};
   use fkl_parser::mir::implementation::Implementation;
@@ -179,7 +180,7 @@ mod tests {
 
   use crate::{builtin, RunFuncName};
   use crate::builtin::builtin_type::BuiltinType;
-  use crate::mock::fake_value::struct_to_builtin_type;
+  use crate::mock::fake_value::mock_struct;
 
   #[test]
   fn convert_for_cli() {
@@ -268,10 +269,10 @@ Entity Ticket {
 
     let entity = contexts[0].aggregates[0].entities[0].clone();
 
-    let types = struct_to_builtin_type(&entity.fields);
+    let types = mock_struct(&entity.fields);
 
     assert_eq!(types.len(), 3);
-    assert_eq!(types, HashMap::from([
+    assert_eq!(types, IndexMap::from([
       ("id".to_string(), BuiltinType::String),
       ("seat".to_string(), BuiltinType::String),
       ("price".to_string(), BuiltinType::Integer),

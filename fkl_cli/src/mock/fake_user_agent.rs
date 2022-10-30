@@ -444,6 +444,7 @@ mod tests {
   }
 
   #[test]
+  #[ignore]
   fn test_random() {
     let random_agent = UserAgent::random();
     assert!(random_agent.contains("Mozilla/5.0 "));

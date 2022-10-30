@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use chrono::{DateTime, NaiveDate, Utc};
+use indexmap::IndexMap;
 use rand::Rng;
 use sqlx::types::uuid;
 
@@ -9,8 +8,8 @@ use fkl_parser::mir::Field;
 use crate::builtin::builtin_type::BuiltinType;
 use crate::mock::mock_type::FakeValue;
 
-pub fn struct_to_builtin_type(fields: &Vec<Field>) -> HashMap<String, BuiltinType> {
-  let mut map = HashMap::new();
+pub fn mock_struct(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
+  let mut map = IndexMap::new();
   for field in fields {
     map.insert(field.name.clone(), BuiltinType::from(&field.type_type));
   }
@@ -18,30 +17,46 @@ pub fn struct_to_builtin_type(fields: &Vec<Field>) -> HashMap<String, BuiltinTyp
   map
 }
 
-pub fn mock_values(fields: &Vec<Field>) -> Vec<FakeValue> {
-  fields.iter()
-    .map(|field| mock_value(field))
-    .collect()
+pub fn mock_values(map: &IndexMap<String, BuiltinType>) -> IndexMap<String, FakeValue> {
+  let mut result = IndexMap::new();
+  for (key, value) in map {
+    result.insert(key.clone(), mock_value(&value));
+  }
+
+  result
 }
 
-fn mock_value(field: &Field) -> FakeValue {
-  match field.type_type.as_str() {
-    "int" => RandomValue::number(),
-    "float" => RandomValue::float(),
-    "string" => RandomValue::string(),
-    "boolean" => RandomValue::boolean(),
-    "date" => RandomValue::date(),
-    "datetime" => RandomValue::datetime(),
-    "timestamp" => RandomValue::timestamp(),
-    "uuid" => RandomValue::uuid(),
-    &_ => FakeValue::Unknown("".to_string()),
+fn mock_value(field: &BuiltinType) -> FakeValue {
+  match field {
+    BuiltinType::Any => FakeValue::Unknown("any".to_owned()),
+    BuiltinType::String => RandomValue::string(),
+    BuiltinType::Integer => RandomValue::integer(),
+    BuiltinType::Float => RandomValue::float(),
+    BuiltinType::Boolean => RandomValue::boolean(),
+    BuiltinType::Date => RandomValue::date(),
+    BuiltinType::DateTime => RandomValue::datetime(),
+    BuiltinType::Timestamp => RandomValue::timestamp(),
+    BuiltinType::Array(array) => {
+      let mut vec = Vec::new();
+      for item in array {
+        vec.push(mock_value(item));
+      }
+      FakeValue::Array(vec)
+    }
+    BuiltinType::Map(map) => {
+      let mut result: IndexMap<String, FakeValue> = IndexMap::new();
+      for (key, value) in map {
+        result.insert(key.clone(), mock_value(&value));
+      }
+      FakeValue::Map(result)
+    }
   }
 }
 
 pub struct RandomValue {}
 
 impl RandomValue {
-  pub fn number() -> FakeValue {
+  pub fn integer() -> FakeValue {
     let mut rng = rand::thread_rng();
     let n: u32 = rng.gen();
 
@@ -154,7 +169,7 @@ mod tests {
 
   #[test]
   fn test_random_value() {
-    let n = RandomValue::number();
+    let n = RandomValue::integer();
     println!("{:?}", n);
   }
 
@@ -207,10 +222,6 @@ mod tests {
     assert!(uuid_validate_regex.is_match(&*n.uuid()));
   }
 
-  fn type_of<T>(_: &T) -> String {
-    format!("{}", std::any::type_name::<T>())
-  }
-
   #[test]
   fn test_mock_value() {
     let fields = vec![
@@ -236,11 +247,17 @@ mod tests {
       },
     ];
 
-    let mock_values = mock_values(&fields);
-    assert_eq!(mock_values.len(), 4);
-    assert_eq!(type_of(&mock_values[0]), "fkl::mock::mock_type::FakeValue");
-    assert_eq!(type_of(&mock_values[1]), "fkl::mock::mock_type::FakeValue");
-    assert_eq!(type_of(&mock_values[2]), "fkl::mock::mock_type::FakeValue");
-    assert_eq!(type_of(&mock_values[3]), "fkl::mock::mock_type::FakeValue");
+    let ds = mock_struct(&fields);
+    assert_eq!(ds.len(), 4);
+    assert_eq!(ds, IndexMap::from([
+      ("id".to_string(), BuiltinType::Integer),
+      ("name".to_string(), BuiltinType::String),
+      ("age".to_string(), BuiltinType::Integer),
+      ("created_at".to_string(), BuiltinType::DateTime),
+    ]));
+
+    let values = mock_values(&ds);
+    assert_eq!(values.len(), 4);
+    println!("{:?}", values);
   }
 }
