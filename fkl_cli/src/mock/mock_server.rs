@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use fkl_parser::mir::ContextMap;
 
-pub use super::aggregate_api;
+pub use super::mock_aggregate_api;
 
 #[get("/")]
 pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
@@ -45,7 +45,7 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
       index
     ])
     .mount("/api", routes![
-      aggregate_api::get_aggregate_by_id,
+      mock_aggregate_api::get_aggregate_by_id,
     ])
     .attach(AdHoc::config::<MockServerConfig>())
 }

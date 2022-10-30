@@ -12,6 +12,7 @@ use crate::exec::LayeredGuardingExec;
 use crate::mock::mock_server::feakin_rocket;
 
 pub mod endpoint_runner;
+pub mod builtin_type;
 
 pub fn guarding_runner(root: PathBuf, layered: &LayeredArchitecture) {
   let errors = LayeredGuardingExec::guarding(root, layered);
