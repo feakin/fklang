@@ -24,7 +24,9 @@ use crate::mock::mock_type::MockType;
 /// ```
 pub fn mock_value(_fields: Vec<Field>) {}
 
-pub fn mock_by_type(_type_type: String) {}
+pub fn mock_by_type(type_type: MockType) {
+
+}
 
 pub struct RandomValue {}
 

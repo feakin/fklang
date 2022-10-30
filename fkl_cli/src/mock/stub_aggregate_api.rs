@@ -1,7 +1,7 @@
 use rocket::{get, State};
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
-use crate::mock::mock_server::{ApiError, MockServerConfig};
+use crate::mock::stub_server::{ApiError, MockServerConfig};
 
 #[allow(unused_variables)]
 #[get("/<entry_type>/<id>")]

@@ -1,5 +1,5 @@
-pub mod mock_aggregate_api;
-pub mod mock_server;
+pub mod stub_aggregate_api;
+pub mod stub_server;
 pub mod mock_type;
 pub mod fake_composite_type;
 pub mod mock_strategy;

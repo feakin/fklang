@@ -9,7 +9,7 @@ use fkl_parser::mir::{ContextMap, Datasource, Environment, LayeredArchitecture};
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;
 use crate::exec::LayeredGuardingExec;
-use crate::mock::mock_server::feakin_rocket;
+use crate::mock::stub_server::feakin_rocket;
 
 pub mod endpoint_runner;
 pub mod builtin_type;

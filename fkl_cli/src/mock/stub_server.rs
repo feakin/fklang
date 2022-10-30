@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use fkl_parser::mir::ContextMap;
 
-pub use super::mock_aggregate_api;
+pub use super::stub_aggregate_api;
 
 #[get("/")]
 pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
@@ -45,7 +45,7 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
       index
     ])
     .mount("/api", routes![
-      mock_aggregate_api::get_aggregate_by_id,
+      stub_aggregate_api::get_aggregate_by_id,
     ])
     .attach(AdHoc::config::<MockServerConfig>())
 }
@@ -57,7 +57,7 @@ mod test {
 
   use fkl_parser::mir::ContextMap;
 
-  use crate::mock::mock_server::feakin_rocket;
+  use crate::mock::stub_server::feakin_rocket;
 
   #[test]
   fn hello_world() {
