@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use chrono::DateTime;
 
 use crate::builtin::builtin_type::BuiltinType;
 
@@ -19,7 +18,7 @@ pub enum MockType {
   // additional type
   Date(chrono::Date<chrono::Utc>),
   DateTime(chrono::DateTime<chrono::Utc>),
-  Timestamp(String),
+  Timestamp(i64),
   Uuid(String),
 }
 
@@ -53,7 +52,7 @@ impl MockType {
     }
   }
 
-  pub(crate) fn datetime(&self) -> DateTime<chrono::Utc> {
+  pub(crate) fn datetime(&self) -> chrono::DateTime<chrono::Utc> {
     match self {
       MockType::DateTime(dt) => dt.clone(),
       _ => panic!("cannot convert to datetime"),

@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
 
 use fkl_parser::mir::Field;
@@ -91,6 +91,10 @@ impl RandomValue {
   }
 
   pub fn datetime() -> MockType {
+    MockType::DateTime(Self::gen_time())
+  }
+
+  fn gen_time() -> DateTime<Utc> {
     let mut rng = rand::thread_rng();
     let year: i32 = rng.gen_range(1970..2100);
     let day: u32 = rng.gen_range(1..365);
@@ -99,8 +103,8 @@ impl RandomValue {
     let second: u32 = rng.gen_range(0..59);
 
     let date = NaiveDate::from_yo(year, day).and_hms(hour, minute, second);
-    let time: chrono::DateTime<chrono::Utc> = chrono::DateTime::from_utc(date, chrono::Utc);
-    MockType::DateTime(time)
+    let time: DateTime<Utc> = DateTime::from_utc(date, Utc);
+    time
   }
 
   pub fn date() -> MockType {
@@ -109,14 +113,18 @@ impl RandomValue {
     let day: u32 = rng.gen_range(1..365);
 
     let date = NaiveDate::from_yo(year, day);
-    let time: chrono::Date<chrono::Utc> = chrono::Date::from_utc(date, chrono::Utc);
+    let time: chrono::Date<Utc> = chrono::Date::from_utc(date, Utc);
     MockType::Date(time)
+  }
+
+  pub fn timestamp() -> MockType {
+    MockType::Timestamp(Self::gen_time().timestamp())
   }
 }
 
 #[cfg(test)]
 mod tests {
-  use chrono::{Datelike, Timelike};
+  use chrono::Datelike;
 
   use super::*;
 
