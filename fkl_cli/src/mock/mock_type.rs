@@ -6,16 +6,23 @@ use crate::builtin::builtin_type::BuiltinType;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum MockType {
+  Null,
+  Optional(Box<MockType>),
+  /// basic type
   String(String),
   Integer(i64),
   Float(f64),
   Boolean(bool),
   Char(char),
-  // also custom
+  /// structural type
   Array(Vec<BuiltinType>),
   Map(Vec<(BuiltinType, BuiltinType)>),
   Object(HashMap<String, BuiltinType>),
-  Null,
+  // additional type
+  Date(String),
+  DateTime(String),
+  Timestamp(String),
+  Uuid(String),
 }
 
 impl MockType {
