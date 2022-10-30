@@ -1,3 +1,4 @@
+use chrono::{Date, NaiveDate};
 use rand::Rng;
 use fkl_parser::mir::Field;
 use crate::mock::mock_type::MockType;
@@ -79,10 +80,31 @@ impl RandomValue {
 
     MockType::String(s)
   }
+
+  pub fn boolean() -> MockType {
+    let mut rng = rand::thread_rng();
+    let n: bool = rng.gen();
+
+    MockType::Boolean(n)
+  }
+
+  pub fn datetime() -> MockType {
+    let mut rng = rand::thread_rng();
+    let year: i32 = rng.gen_range(1970..2100);
+    let day: u32 = rng.gen_range(1..365);
+    let hour: u32 = rng.gen_range(0..23);
+    let minute: u32 = rng.gen_range(0..59);
+    let second: u32 = rng.gen_range(0..59);
+
+    let date = NaiveDate::from_yo(year, day).and_hms(hour, minute, second);
+    let time: chrono::DateTime<chrono::Utc> = chrono::DateTime::from_utc(date, chrono::Utc);
+    MockType::DateTime(time)
+  }
 }
 
 #[cfg(test)]
 mod tests {
+  use chrono::Datelike;
   use super::*;
 
   #[test]
@@ -109,5 +131,19 @@ mod tests {
     let n = RandomValue::range_string(1, 10);
     println!("{:?}", n);
     assert!(n.string().len() >= 1);
+  }
+
+  #[test]
+  fn test_boolean() {
+    let n = RandomValue::boolean();
+    println!("{:?}", n);
+    assert!(n.boolean());
+  }
+
+  #[test]
+  fn test_datetime() {
+    let n = RandomValue::datetime();
+    println!("{:?}", n);
+    assert!(n.datetime().year() >= 1970);
   }
 }

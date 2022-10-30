@@ -72,6 +72,9 @@ async-trait = "0.1.58"
 # http server
 rocket = { version = "0.5.0-rc.2", features = ["json"] }
 figment = { version = "0.10" }
+# type for uuid
+# uuid = { version = "1.2.1", features = [ "v4"] }
+chrono = "0.4"
 rand = "0.8.5"
 
 [dev-dependencies]

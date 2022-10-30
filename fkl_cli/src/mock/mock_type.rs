@@ -1,10 +1,11 @@
 use std::collections::HashMap;
+use chrono::DateTime;
 
 use rocket::serde::{Deserialize, Serialize};
 
 use crate::builtin::builtin_type::BuiltinType;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MockType {
   Null,
   Optional(Box<MockType>),
@@ -13,14 +14,13 @@ pub enum MockType {
   Integer(i64),
   Float(f64),
   Boolean(bool),
-  Char(char),
   /// structural type
   Array(Vec<BuiltinType>),
   Map(Vec<(BuiltinType, BuiltinType)>),
   Object(HashMap<String, BuiltinType>),
   // additional type
-  Date(String),
-  DateTime(String),
+  Date(chrono::Date<chrono::Utc>),
+  DateTime(chrono::DateTime<chrono::Utc>),
   Timestamp(String),
   Uuid(String),
 }
@@ -44,6 +44,22 @@ impl MockType {
     match self {
       MockType::String(s) => s.clone(),
       _ => panic!("cannot convert to string"),
+    }
+  }
+
+
+  pub(crate) fn boolean(&self) -> bool {
+    match self {
+      MockType::Boolean(b) => *b,
+      _ => panic!("cannot convert to boolean"),
+    }
+  }
+
+
+  pub(crate) fn datetime(&self) -> DateTime<chrono::Utc> {
+    match self {
+      MockType::DateTime(dt) => dt.clone(),
+      _ => panic!("cannot convert to datetime"),
     }
   }
 }
