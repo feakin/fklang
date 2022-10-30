@@ -6,24 +6,10 @@ use fkl_parser::mir::Field;
 
 use crate::mock::mock_type::FakeValue;
 
-///
-/// # Faker.js Style
-///
-/// ```javascript
-/// export function createRandomUser(): User {
-///   return {
-///     userId: faker.datatype.uuid(),
-///     username: faker.internet.userName(),
-///     email: faker.internet.email(),
-///     avatar: faker.image.avatar(),
-///     password: faker.internet.password(),
-///     birthdate: faker.date.birthdate(),
-///     registeredAt: faker.date.past(),
-///   };
-/// }
-/// ```
 pub fn mock_values(fields: &Vec<Field>) -> Vec<FakeValue> {
-  fields.iter().map(|field| mock_value(field)).collect()
+  fields.iter()
+    .map(|field| mock_value(field))
+    .collect()
 }
 
 fn mock_value(field: &Field) -> FakeValue {
