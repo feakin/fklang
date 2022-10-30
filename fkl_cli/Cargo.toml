@@ -74,6 +74,7 @@ rocket = { version = "0.5.0-rc.2", features = ["json"] }
 figment = { version = "0.10" }
 # type for uuid
 uuid = { version = "1.2.1", features = ["v4"] }
+phf = { version = "0.11", features = ["macros"] }
 chrono = "0.4"
 rand = "0.8.5"
 
