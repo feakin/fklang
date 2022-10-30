@@ -50,9 +50,9 @@ impl EndpointRunner {
 
   pub fn send_request(&self) -> Result<(), ()> {
     let mut headers = self.headers();
-
-    // add user agent
     headers.insert(header::USER_AGENT, UserAgent::random().parse().unwrap());
+
+    info!("headers: {:?}", headers.clone());
 
     let body = self.request_to_hashmap();
     let resp = self.do_request(headers, body);
@@ -145,7 +145,6 @@ impl EndpointRunner {
       }
     }
 
-    info!("headers: {:?}", headers.clone());
     headers
   }
 
