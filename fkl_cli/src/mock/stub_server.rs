@@ -28,7 +28,7 @@ pub struct ApiError {
 
 pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
   let server_config = MockServerConfig {
-    port: 8080,
+    port: 8899,
     context_map: context_map.clone()
   };
 

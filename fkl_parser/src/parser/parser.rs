@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use pest::iterators::{Pair, Pairs};
+use crate::default_config;
 
 use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
@@ -827,7 +828,11 @@ fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
   }
 
   let mut decl = ServerDecl::default();
-  decl.port = attrs.get("port").unwrap_or(&"8899".to_string()).parse().unwrap_or(8899).clone();
+  decl.port = attrs.get("port")
+    .unwrap_or(&default_config::SERVER_PORT.to_string())
+    .parse()
+    .unwrap_or(default_config::SERVER_PORT)
+    .clone();
   decl
 }
 

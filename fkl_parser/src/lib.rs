@@ -12,6 +12,7 @@ use crate::transform::MirTransform;
 pub mod parser;
 pub mod mir;
 pub mod resolve;
+pub mod default_config;
 
 mod transform;
 mod tests;

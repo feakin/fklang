@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::default_config;
 use crate::mir::datasource::Datasource;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -15,6 +16,6 @@ pub struct ServerConfig {
 
 impl Default for ServerConfig {
   fn default() -> Self {
-    ServerConfig { port: 8899 }
+    ServerConfig { port: default_config::SERVER_PORT }
   }
 }
