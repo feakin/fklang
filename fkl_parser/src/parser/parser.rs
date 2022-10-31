@@ -4,7 +4,7 @@ use std::hash::Hash;
 
 use pest::iterators::{Pair, Pairs};
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -779,6 +779,9 @@ fn consume_env(pair: Pair<Rule>) -> EnvDecl {
       Rule::datasource_decl => {
         env.datasource = Some(consume_datasource_decl(p));
       }
+      Rule::server_decl => {
+        env.server = Some(consume_server_decl(p));
+      }
       _ => println!("unreachable env rule: {:?}", p.as_rule())
     };
   }
@@ -808,6 +811,23 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   decl.username = attrs.get("username").unwrap_or(&"".to_string()).clone();
   decl.password = attrs.get("password").unwrap_or(&"".to_string()).clone();
 
+  decl
+}
+
+fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
+  let mut attrs: HashMap<String, String> = HashMap::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::attr_decl => {
+        let attr = consume_attribute(p);
+        attrs.insert(attr.key.clone(), attr.value[0].clone());
+      }
+      _ => println!("unreachable server rule: {:?}", p.as_rule())
+    };
+  }
+
+  let mut decl = ServerDecl::default();
+  decl.port = attrs.get("port").unwrap_or(&"8899".to_string()).parse().unwrap_or(8899).clone();
   decl
 }
 
@@ -1612,10 +1632,31 @@ env Local {
         driver: "org.postgresql.Driver".to_string(),
         username: "youruser".to_string(),
         password: "yourpassword".to_string(),
-        database: "".to_string()
+        database: "".to_string(),
       }),
       message_broker: None,
       server: None,
+    }));
+  }
+
+  #[test]
+  fn env_server() {
+    let decls = parse(r#"
+env Local {
+  server {
+    port: 8899
+  }
+}"#).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Env(EnvDecl {
+      name: "Local".to_string(),
+      inline_doc: "".to_string(),
+      datasource: None,
+      message_broker: None,
+      server: Some(ServerDecl {
+        port: 8899,
+        attributes: vec![]
+      }),
     }));
   }
 

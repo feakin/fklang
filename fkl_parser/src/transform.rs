@@ -9,7 +9,7 @@ use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, SourceSetsDecl, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -352,6 +352,10 @@ impl MirTransform {
       environment.datasources.push(self.transform_datasource(&ds));
     }
 
+    if let Some(orm) = &decl.server {
+      environment.server = self.transform_server_config(&orm);
+    }
+
     environment
   }
 
@@ -385,6 +389,13 @@ impl MirTransform {
       }
     }
   }
+
+  fn transform_server_config(&self, decl: &ServerDecl) -> mir::ServerConfig {
+    let mut server = mir::ServerConfig::default();
+    server.port = decl.port.clone();
+
+    server
+  }
 }
 
 fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
@@ -398,9 +409,10 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, LayerRelation, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, LayerRelation, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition, Environment, PostgresDatasource, ServerConfig};
   use crate::mir::authorization::HttpAuthorization;
   use crate::mir::ConnectionDirection::PositiveDirected;
+  use crate::mir::Datasource::Postgres;
   use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
   use crate::mir::implementation::http_api_impl::HttpApiImpl;
   use crate::mir::tactic::block::Field;
@@ -727,5 +739,37 @@ impl CinemaCreatedEvent {
         ],
       }
     ));
+  }
+
+  #[test]
+  fn env_database_server() {
+    let str = r#"env Local {
+  datasource {
+    driver: postgresql
+    host: "localhost"
+    port: 5432
+    database: "test"
+  }
+  server {
+    port: 9090;
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.envs, vec![
+      Environment {
+        name: "Local".to_string(),
+        datasources: vec![Postgres(PostgresDatasource {
+          host: "localhost".to_string(),
+          port: 5432,
+          username: "".to_string(),
+          password: "".to_string(),
+          database: "test".to_string(),
+        })],
+        server: ServerConfig {
+          port: 9090,
+        },
+      }
+    ]);
   }
 }

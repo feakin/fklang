@@ -433,7 +433,6 @@ pub struct MessageBrokerDecl {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ServerDecl {
-  pub name: String,
-  pub inline_doc: String,
+  pub port: u16,
   pub attributes: Vec<AttributeDefinition>,
 }
