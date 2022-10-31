@@ -3,8 +3,7 @@ use rocket::{get, State};
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
 use fkl_parser::mir::{ContextMap, Entity};
-
-use crate::mock::fake_value::fake_struct;
+use crate::mock::fake_value::FakeValue;
 use crate::mock::mock_type::MockType;
 use crate::mock::stub_server::{ApiError, MockServerConfig};
 
@@ -24,7 +23,8 @@ pub async fn get_aggregate_by_id(
   }
 
   let entity = opt_entity.unwrap();
-  let map = fake_struct(&entity.fields);
+  let fields = &entity.fields;
+  let map = FakeValue::fields(fields);
   return Ok(Json(vec![map]));
 }
 
@@ -61,7 +61,8 @@ pub async fn get_entities(
   let entity = opt_entity.unwrap();
   let mut vec = vec![];
   for _ in 0..20 {
-    vec.push(fake_struct(&entity.fields));
+    let fields = &entity.fields;
+    vec.push(FakeValue::fields(fields));
   }
   return Ok(Json(vec));
 }

@@ -9,56 +9,60 @@ use fkl_parser::mir::Field;
 use crate::builtin::builtin_type::BuiltinType;
 use crate::mock::mock_type::MockType;
 
-pub fn fake_struct(fields: &Vec<Field>) -> IndexMap<String, MockType> {
-  fake_values(&struct_to_builtin(fields))
-}
+pub struct FakeValue {}
 
-pub fn struct_to_builtin(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
-  let mut map = IndexMap::new();
-  for field in fields {
-    map.insert(field.name.clone(), BuiltinType::from(&field.type_type));
+impl FakeValue {
+  pub fn fake_values(map: &IndexMap<String, BuiltinType>) -> IndexMap<String, MockType> {
+    let mut result = IndexMap::new();
+    for (key, value) in map {
+      result.insert(key.clone(), FakeValue::convert_type(&value));
+    }
+
+    result
   }
 
-  map
-}
+  pub fn builtin_type(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
+    let mut map = IndexMap::new();
+    for field in fields {
+      map.insert(field.name.clone(), BuiltinType::from(&field.type_type));
+    }
 
-pub fn fake_values(map: &IndexMap<String, BuiltinType>) -> IndexMap<String, MockType> {
-  let mut result = IndexMap::new();
-  for (key, value) in map {
-    result.insert(key.clone(), fake_by_type(&value));
+    map
   }
 
-  result
-}
+  pub fn fields(fields: &Vec<Field>) -> IndexMap<String, MockType> {
+    FakeValue::fake_values(&FakeValue::builtin_type(fields))
+  }
 
-fn fake_by_type(field: &BuiltinType) -> MockType {
-  match field {
-    BuiltinType::Any => MockType::Unknown("any".to_owned()),
-    BuiltinType::String => RandomValue::string(),
-    BuiltinType::Integer => RandomValue::integer(),
-    BuiltinType::Float => RandomValue::float(),
-    BuiltinType::Boolean => RandomValue::boolean(),
-    BuiltinType::Date => RandomValue::date(),
-    BuiltinType::DateTime => RandomValue::datetime(),
-    BuiltinType::Timestamp => RandomValue::timestamp(),
-    BuiltinType::Array(array) => {
-      let mut vec = Vec::new();
-      for item in array {
-        vec.push(fake_by_type(item));
+  fn convert_type(field: &BuiltinType) -> MockType {
+    match field {
+      BuiltinType::Any => MockType::Unknown("any".to_owned()),
+      BuiltinType::String => RandomValue::string(),
+      BuiltinType::Integer => RandomValue::integer(),
+      BuiltinType::Float => RandomValue::float(),
+      BuiltinType::Boolean => RandomValue::boolean(),
+      BuiltinType::Date => RandomValue::date(),
+      BuiltinType::DateTime => RandomValue::datetime(),
+      BuiltinType::Timestamp => RandomValue::timestamp(),
+      BuiltinType::Array(array) => {
+        let mut vec = Vec::new();
+        for item in array {
+          vec.push(FakeValue::convert_type(item));
+        }
+        MockType::Array(vec)
       }
-      MockType::Array(vec)
-    }
-    BuiltinType::Map(map) => {
-      let mut result: IndexMap<String, MockType> = IndexMap::new();
-      for (key, value) in map {
-        result.insert(key.clone(), fake_by_type(&value));
+      BuiltinType::Map(map) => {
+        let mut result: IndexMap<String, MockType> = IndexMap::new();
+        for (key, value) in map {
+          result.insert(key.clone(), FakeValue::convert_type(&value));
+        }
+        MockType::Map(result)
       }
-      MockType::Map(result)
-    }
-    BuiltinType::Special(sp) => {
-      match sp.as_str() {
-        "uuid" => RandomValue::uuid(),
-        _ => MockType::Unknown("any".to_owned())
+      BuiltinType::Special(sp) => {
+        match sp.as_str() {
+          "uuid" => RandomValue::uuid(),
+          _ => MockType::Unknown("any".to_owned())
+        }
       }
     }
   }
@@ -266,7 +270,7 @@ mod tests {
       },
     ];
 
-    let ds = struct_to_builtin(&fields);
+    let ds = FakeValue::builtin_type(&fields);
     assert_eq!(ds.len(), 4);
     assert_eq!(ds, IndexMap::from([
       ("id".to_string(), BuiltinType::Integer),
@@ -275,8 +279,7 @@ mod tests {
       ("created_at".to_string(), BuiltinType::DateTime),
     ]));
 
-    let values = fake_values(&ds);
+    let values = FakeValue::fake_values(&ds);
     assert_eq!(values.len(), 4);
-    println!("{:?}", values);
   }
 }

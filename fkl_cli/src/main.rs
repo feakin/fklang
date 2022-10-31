@@ -180,7 +180,7 @@ mod tests {
 
   use crate::{builtin, RunFuncName};
   use crate::builtin::builtin_type::BuiltinType;
-  use crate::mock::fake_value::struct_to_builtin;
+  use crate::mock::fake_value::FakeValue;
 
   #[test]
   fn convert_for_cli() {
@@ -269,7 +269,8 @@ Entity Ticket {
 
     let entity = contexts[0].aggregates[0].entities[0].clone();
 
-    let types = struct_to_builtin(&entity.fields);
+    let fields = &entity.fields;
+    let types = FakeValue::builtin_type(fields);
 
     assert_eq!(types.len(), 3);
     assert_eq!(types, IndexMap::from([
