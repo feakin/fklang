@@ -28,16 +28,7 @@ pub struct ApiError {
 }
 
 pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
-  let port: u32 = if context_map.envs.len() > 0 {
-    context_map.envs[0].server.port
-  } else {
-    default_config::SERVER_PORT
-  } as u32;
-
-  let server_config = MockServerConfig {
-    port,
-    context_map: context_map.clone()
-  };
+  let server_config = merge_config(context_map);
 
   let figment = Figment::from(rocket::Config::default())
     .merge(Serialized::from(server_config, "default"));
@@ -45,6 +36,8 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
   let port: usize = figment.extract_inner("port").unwrap();
   let url = format!("http://localhost:{}", port);
   info!("Feakin mock server is running at {}", url);
+
+  // todo: add log for contextmap entity apis
 
   rocket::custom(figment)
     .mount("/", routes![
@@ -55,6 +48,20 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
       stub_aggregate_api::get_entities,
     ])
     .attach(AdHoc::config::<MockServerConfig>())
+}
+
+fn merge_config(context_map: &ContextMap) -> MockServerConfig {
+  let port: u32 = if context_map.envs.len() > 0 {
+    context_map.envs[0].server.port
+  } else {
+    default_config::SERVER_PORT
+  } as u32;
+
+  let server_config = MockServerConfig {
+    port,
+    context_map: context_map.clone()
+  };
+  server_config
 }
 
 #[cfg(test)]
