@@ -4,6 +4,7 @@ use rocket::{Build, get, info, Rocket, routes, State};
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
+use fkl_parser::default_config;
 
 use fkl_parser::mir::ContextMap;
 
@@ -27,8 +28,14 @@ pub struct ApiError {
 }
 
 pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
+  let port: u32 = if context_map.envs.len() > 0 {
+    context_map.envs[0].server.port
+  } else {
+    default_config::SERVER_PORT
+  } as u32;
+
   let server_config = MockServerConfig {
-    port: 8899,
+    port,
     context_map: context_map.clone()
   };
 

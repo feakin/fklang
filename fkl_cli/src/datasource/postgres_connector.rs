@@ -34,6 +34,7 @@ impl PostgresConnector {
   }
 }
 
+#[allow(dead_code)]
 impl PostgresConnector {
   pub(crate) async fn test_connection(&self) -> bool {
     let connector: PostgresConnector = match PostgresConnector::new(self.config.clone()).await {
