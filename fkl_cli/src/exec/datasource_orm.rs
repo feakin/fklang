@@ -1,5 +1,7 @@
-use fkl_parser::mir::{Datasource, Environment};
 use log::info;
+
+use fkl_parser::mir::{Datasource, Environment};
+
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;
 
@@ -11,7 +13,10 @@ pub(crate) async fn test_connection_runner(env: &Environment) {
     }
 
     Datasource::Postgres(pgsql) => {
-      PostgresConnector::new(pgsql.clone()).test_connection().await;
+      PostgresConnector::from(pgsql.clone())
+        .await
+        .unwrap_or_else(|| panic!("cannot create connector"))
+        .test_connection().await;
     }
   }
 }
