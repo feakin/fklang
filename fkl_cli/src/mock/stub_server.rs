@@ -37,7 +37,10 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
   let url = format!("http://localhost:{}", port);
   info!("Feakin mock server is running at {}", url);
 
-  // todo: add log for contextmap entity apis
+  info!("api lists: ");
+  gen_api_list(context_map).iter().for_each(|api| {
+    info!("{}{}", &url, api);
+  });
 
   rocket::custom(figment)
     .mount("/", routes![
@@ -59,9 +62,27 @@ fn merge_config(context_map: &ContextMap) -> MockServerConfig {
 
   let server_config = MockServerConfig {
     port,
-    context_map: context_map.clone()
+    context_map: context_map.clone(),
   };
   server_config
+}
+
+pub fn gen_api_list(context_map: &ContextMap) -> Vec<String> {
+  let mut api_list = vec![];
+  for bc in &context_map.contexts {
+    for aggregate in &bc.aggregates {
+      for entity in &aggregate.entities {
+        // list
+        let api = format!("/api/{}/{}", aggregate.name.to_lowercase(), entity.name.to_lowercase());
+        api_list.push(api);
+        // get by id
+        let api = format!("/api/{}/{}/1", aggregate.name.to_lowercase(), entity.name.to_lowercase());
+        api_list.push(api);
+      }
+    }
+  }
+
+  api_list
 }
 
 #[cfg(test)]
@@ -72,7 +93,7 @@ mod test {
   use fkl_parser::mir::ContextMap;
   use fkl_parser::parse;
 
-  use crate::mock::stub_server::feakin_rocket;
+  use crate::mock::stub_server::{feakin_rocket, gen_api_list};
 
   #[test]
   fn sample() {
@@ -120,5 +141,47 @@ Entity Ticket {
     let response = client.get("/api/ticket/ticket/1").dispatch();
 
     assert_eq!(response.status(), Status::Ok);
+  }
+
+  #[test]
+  fn api_list() {
+    let source = r#"ContextMap TicketBooking {
+  TicketContext <-> ReservationContext;
+}
+
+Context TicketContext {
+  Aggregate Ticket, Reservation;
+}
+
+Aggregate Ticket {
+  Entity Ticket, Seat;
+}
+
+Entity Ticket {
+  Struct {
+    id: UUID;
+    seat: String;
+    price: Int;
+  }
+}
+
+Entity Seat {
+  Struct {
+    id: UUID;
+    row: Int;
+    number: Int;
+  }
+}
+"#;
+
+    let context_map: ContextMap = parse(source).unwrap();
+    let api_list = gen_api_list(&context_map);
+
+    assert_eq!(api_list, vec![
+      "/api/ticket/ticket".to_string(),
+      "/api/ticket/ticket/1".to_string(),
+      "/api/ticket/seat".to_string(),
+      "/api/ticket/seat/1".to_string(),
+    ]);
   }
 }

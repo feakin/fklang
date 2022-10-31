@@ -13,7 +13,7 @@ Aggregate User {
 }
 
 Aggregate Ticket {
-  Entity Ticket;
+  Entity Ticket, Seat;
 }
 
 Entity Ticket {
@@ -21,6 +21,14 @@ Entity Ticket {
     id: UUID;
     seat: String;
     price: Int;
+  }
+}
+
+Entity Seat {
+  Struct {
+    id: UUID;
+    row: Int;
+    number: Int;
   }
 }
 
