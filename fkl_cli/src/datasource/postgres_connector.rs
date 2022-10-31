@@ -1,10 +1,11 @@
 use std::time::Duration;
 
 use log::error;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::postgres::{PgPoolOptions, PgRow};
 use sqlx::Row;
 
 use fkl_parser::mir::PostgresDatasource;
+
 use crate::builtin::builtin_type::BuiltinType;
 
 pub struct PostgresConnector {
@@ -69,26 +70,21 @@ impl PostgresConnector {
   }
 
   // select column_name, data_type from information_schema.columns  where table_name = 'employee'
-  // return Vec<TableInfo>
   pub async fn get_table_info(&self, table_name: &str) -> Vec<TableInfo> {
     let sql = format!("select column_name, data_type from {}.information_schema.columns  where table_name = '{}'", self.config.database, table_name);
-    let mut table_info = Vec::new();
 
-    let rows = sqlx::query(&sql)
+    let rows: Vec<PgRow> = sqlx::query(&sql)
       .fetch_all(&self.pool)
       .await
       .unwrap();
 
-    for row in rows {
-      let column_name: String = row.get("column_name");
-      let data_type: String = row.get("data_type");
-      table_info.push(TableInfo {
-        column_name,
-        data_type,
-      });
-    }
-
-    table_info
+    rows.iter()
+      .map(|row| {
+        let column_name: String = row.get("column_name");
+        let data_type: String = row.get("data_type");
+        TableInfo { column_name, data_type }
+      })
+      .collect()
   }
 
   /// postgres data_type to builtin type
