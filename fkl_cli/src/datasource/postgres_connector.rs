@@ -5,7 +5,6 @@ use sqlx::postgres::{PgPoolOptions, PgRow};
 use sqlx::Row;
 
 use fkl_parser::mir::PostgresDatasource;
-
 use crate::builtin::builtin_type::BuiltinType;
 
 pub struct PostgresConnector {
@@ -14,7 +13,7 @@ pub struct PostgresConnector {
 }
 
 impl PostgresConnector {
-  pub async fn from(config: PostgresDatasource) -> Option<Self> {
+  pub async fn new(config: PostgresDatasource) -> Option<Self> {
     let options = PgPoolOptions::new();
 
     let pool = match options
@@ -37,7 +36,7 @@ impl PostgresConnector {
 
 impl PostgresConnector {
   pub(crate) async fn test_connection(&self) -> bool {
-    let connector: PostgresConnector = match PostgresConnector::from(self.config.clone()).await {
+    let connector: PostgresConnector = match PostgresConnector::new(self.config.clone()).await {
       None => {
         panic!("cannot create connector");
       }
@@ -60,7 +59,7 @@ impl PostgresConnector {
   pub(crate) async fn get_tables(&self) -> Vec<String> {
     let sql = format!("SELECT * FROM {}.information_schema.tables where table_schema = 'public'", self.config.database);
     sqlx::query(&sql)
-      .map(|row: sqlx::postgres::PgRow| {
+      .map(|row: PgRow| {
         let table_name: String = row.get("table_name");
         table_name
       })
@@ -207,7 +206,7 @@ mod tests {
       database: "test".to_string(),
     };
 
-    let connector = PostgresConnector::from(config).await.unwrap();
+    let connector = PostgresConnector::new(config).await.unwrap();
     assert!(connector.test_connection().await);
   }
 
@@ -222,7 +221,7 @@ mod tests {
       database: "test".to_string(),
     };
 
-    let connector = PostgresConnector::from(config).await.unwrap();
+    let connector = PostgresConnector::new(config).await.unwrap();
     let tables = connector.get_tables().await;
     assert_eq!(tables.len(), 2);
   }
@@ -238,7 +237,7 @@ mod tests {
       database: "test".to_string(),
     };
 
-    let connector = PostgresConnector::from(config).await.unwrap();
+    let connector = PostgresConnector::new(config).await.unwrap();
     let table_info = connector.get_table_info("employee").await;
     assert_eq!(table_info.len(), 6);
     println!("{:?}", table_info);
