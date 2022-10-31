@@ -70,12 +70,6 @@ static SAFARI_OS_WEIGHTED: phf::Map<&'static str, f32> = phf_map! {
     "lin" => 0.00
 };
 
-// bowser weighted
-//  chrome: 0.45132810566,
-//  iexplorer: 0.27477061836,
-//  firefox: 0.19384170608,
-//  safari: 0.06186781118,
-//  opera: 0.01574236955,
 static BORWSER_WEIGHTED: phf::Map<&'static str, f32> = phf_map! {
     "chrome" => 0.45132810566,
     "iexplorer" => 0.27477061836,
@@ -84,11 +78,7 @@ static BORWSER_WEIGHTED: phf::Map<&'static str, f32> = phf_map! {
     "opera" => 0.01574236955,
 };
 
-pub struct UserAgent {
-  // pub os: String,
-  // pub browser: String,
-  // pub version: String,
-}
+pub struct UserAgent {}
 
 impl UserAgent {
   pub fn random() -> String {

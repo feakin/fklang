@@ -4,7 +4,7 @@ use serde::ser::{SerializeMap, SerializeSeq};
 use serde::Serialize;
 
 #[derive(Deserialize, Debug, Clone, PartialEq)]
-pub enum FakeValue {
+pub enum MockType {
   Null,
   // Optional(Box<MockType>),
   /// basic type
@@ -14,8 +14,8 @@ pub enum FakeValue {
   Float(f64),
   Boolean(bool),
   /// structural type
-  Array(Vec<FakeValue>),
-  Map(IndexMap<String, FakeValue>),
+  Array(Vec<MockType>),
+  Map(IndexMap<String, MockType>),
   // additional type
   Date(String),
   DateTime(String),
@@ -24,91 +24,91 @@ pub enum FakeValue {
 }
 
 #[allow(dead_code)]
-impl FakeValue {
+impl MockType {
   pub fn integer(&self) -> i64 {
     match self {
-      FakeValue::Integer(i) => *i,
+      MockType::Integer(i) => *i,
       _ => panic!("cannot convert to integer"),
     }
   }
 
   pub fn float(&self) -> f64 {
     match self {
-      FakeValue::Float(f) => *f,
+      MockType::Float(f) => *f,
       _ => panic!("cannot convert to float"),
     }
   }
 
   pub fn string(&self) -> String {
     match self {
-      FakeValue::String(s) => s.clone(),
+      MockType::String(s) => s.clone(),
       _ => panic!("cannot convert to string"),
     }
   }
 
   pub(crate) fn boolean(&self) -> bool {
     match self {
-      FakeValue::Boolean(b) => *b,
+      MockType::Boolean(b) => *b,
       _ => panic!("cannot convert to boolean"),
     }
   }
 
   pub(crate) fn datetime(&self) -> String {
     match self {
-      FakeValue::DateTime(dt) => dt.to_string(),
+      MockType::DateTime(dt) => dt.to_string(),
       _ => panic!("cannot convert to datetime"),
     }
   }
 
   pub(crate) fn date(&self) -> String {
     match self {
-      FakeValue::Date(d) => d.to_string(),
+      MockType::Date(d) => d.to_string(),
       _ => panic!("cannot convert to date"),
     }
   }
 
   pub(crate) fn timestamp(&self) -> i64 {
     match self {
-      FakeValue::Timestamp(t) => *t,
+      MockType::Timestamp(t) => *t,
       _ => panic!("cannot convert to timestamp"),
     }
   }
 
   pub(crate) fn uuid(&self) -> String {
     match self {
-      FakeValue::Uuid(u) => u.clone(),
+      MockType::Uuid(u) => u.clone(),
       _ => panic!("cannot convert to uuid"),
     }
   }
 }
 
-impl Serialize for FakeValue {
+impl Serialize for MockType {
   fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error> where S: Serializer {
     match self {
-      FakeValue::Null => s.serialize_none(),
-      FakeValue::Unknown(str) => s.serialize_str(str),
-      FakeValue::String(str) => s.serialize_str(str),
-      FakeValue::Integer(i) => s.serialize_i64(*i),
-      FakeValue::Float(f) => s.serialize_f64(*f),
-      FakeValue::Boolean(b) => s.serialize_bool(*b),
-      FakeValue::Array(a) => {
+      MockType::Null => s.serialize_none(),
+      MockType::Unknown(str) => s.serialize_str(str),
+      MockType::String(str) => s.serialize_str(str),
+      MockType::Integer(i) => s.serialize_i64(*i),
+      MockType::Float(f) => s.serialize_f64(*f),
+      MockType::Boolean(b) => s.serialize_bool(*b),
+      MockType::Array(a) => {
         let mut seq = s.serialize_seq(Some(a.len()))?;
         for item in a {
           seq.serialize_element(item)?;
         }
         seq.end()
-      },
-      FakeValue::Map(m) => {
+      }
+      MockType::Map(m) => {
         let mut map = s.serialize_map(Some(m.len()))?;
         for (key, value) in m {
           map.serialize_entry(key, value)?;
         }
         map.end()
-      },
-      FakeValue::Date(d) => s.serialize_str(d),
-      FakeValue::DateTime(dt) => s.serialize_str(dt),
-      FakeValue::Timestamp(t) => s.serialize_i64(*t),
-      FakeValue::Uuid(u) => s.serialize_str(u),
+      }
+      MockType::Date(d) => s.serialize_str(d),
+      MockType::DateTime(dt) => s.serialize_str(dt),
+      MockType::Timestamp(t) => s.serialize_i64(*t),
+      MockType::Uuid(u) => s.serialize_str(u),
     }
   }
 }
@@ -116,13 +116,13 @@ impl Serialize for FakeValue {
 #[cfg(test)]
 mod tests {
   use indexmap::IndexMap;
-  use crate::mock::mock_type::FakeValue;
+  use crate::mock::mock_type::MockType;
 
   #[test]
   fn test_serde_json() {
-    let mut map: IndexMap<String, FakeValue> = IndexMap::new();
-    map.insert("a".to_string(), FakeValue::String("b".to_string()));
-    map.insert("c".to_string(), FakeValue::Integer(1));
+    let mut map: IndexMap<String, MockType> = IndexMap::new();
+    map.insert("a".to_string(), MockType::String("b".to_string()));
+    map.insert("c".to_string(), MockType::Integer(1));
 
     let s = serde_json::to_string(&map).unwrap();
 
@@ -131,14 +131,14 @@ mod tests {
 
   #[test]
   fn nested_fake_value() {
-    let mut map: IndexMap<String, FakeValue> = IndexMap::new();
-    map.insert("a".to_string(), FakeValue::String("b".to_string()));
-    map.insert("c".to_string(), FakeValue::Integer(1));
+    let mut map: IndexMap<String, MockType> = IndexMap::new();
+    map.insert("a".to_string(), MockType::String("b".to_string()));
+    map.insert("c".to_string(), MockType::Integer(1));
 
-    let mut map2: IndexMap<String, FakeValue> = IndexMap::new();
-    map2.insert("d".to_string(), FakeValue::String("e".to_string()));
-    map2.insert("f".to_string(), FakeValue::Integer(2));
-    map2.insert("g".to_string(), FakeValue::Map(map));
+    let mut map2: IndexMap<String, MockType> = IndexMap::new();
+    map2.insert("d".to_string(), MockType::String("e".to_string()));
+    map2.insert("f".to_string(), MockType::Integer(2));
+    map2.insert("g".to_string(), MockType::Map(map));
 
     let s = serde_json::to_string(&map2).unwrap();
 

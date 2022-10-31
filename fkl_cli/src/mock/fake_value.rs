@@ -7,10 +7,10 @@ use sqlx::types::uuid;
 use fkl_parser::mir::Field;
 
 use crate::builtin::builtin_type::BuiltinType;
-use crate::mock::mock_type::FakeValue;
+use crate::mock::mock_type::MockType;
 
-pub fn mock_struct(fields: &Vec<Field>) -> IndexMap<String, FakeValue> {
-  mock_values(&struct_to_builtin(fields))
+pub fn fake_struct(fields: &Vec<Field>) -> IndexMap<String, MockType> {
+  fake_values(&struct_to_builtin(fields))
 }
 
 pub fn struct_to_builtin(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
@@ -22,18 +22,18 @@ pub fn struct_to_builtin(fields: &Vec<Field>) -> IndexMap<String, BuiltinType> {
   map
 }
 
-pub fn mock_values(map: &IndexMap<String, BuiltinType>) -> IndexMap<String, FakeValue> {
+pub fn fake_values(map: &IndexMap<String, BuiltinType>) -> IndexMap<String, MockType> {
   let mut result = IndexMap::new();
   for (key, value) in map {
-    result.insert(key.clone(), mock_value(&value));
+    result.insert(key.clone(), fake_by_type(&value));
   }
 
   result
 }
 
-fn mock_value(field: &BuiltinType) -> FakeValue {
+fn fake_by_type(field: &BuiltinType) -> MockType {
   match field {
-    BuiltinType::Any => FakeValue::Unknown("any".to_owned()),
+    BuiltinType::Any => MockType::Unknown("any".to_owned()),
     BuiltinType::String => RandomValue::string(),
     BuiltinType::Integer => RandomValue::integer(),
     BuiltinType::Float => RandomValue::float(),
@@ -44,21 +44,21 @@ fn mock_value(field: &BuiltinType) -> FakeValue {
     BuiltinType::Array(array) => {
       let mut vec = Vec::new();
       for item in array {
-        vec.push(mock_value(item));
+        vec.push(fake_by_type(item));
       }
-      FakeValue::Array(vec)
+      MockType::Array(vec)
     }
     BuiltinType::Map(map) => {
-      let mut result: IndexMap<String, FakeValue> = IndexMap::new();
+      let mut result: IndexMap<String, MockType> = IndexMap::new();
       for (key, value) in map {
-        result.insert(key.clone(), mock_value(&value));
+        result.insert(key.clone(), fake_by_type(&value));
       }
-      FakeValue::Map(result)
+      MockType::Map(result)
     }
     BuiltinType::Special(sp) => {
       match sp.as_str() {
         "uuid" => RandomValue::uuid(),
-        _ => FakeValue::Unknown("any".to_owned())
+        _ => MockType::Unknown("any".to_owned())
       }
     }
   }
@@ -67,14 +67,14 @@ fn mock_value(field: &BuiltinType) -> FakeValue {
 pub struct RandomValue {}
 
 impl RandomValue {
-  pub fn integer() -> FakeValue {
+  pub fn integer() -> MockType {
     let mut rng = rand::thread_rng();
     let n: u32 = rng.gen();
 
-    FakeValue::Integer(n as i64)
+    MockType::Integer(n as i64)
   }
 
-  pub fn range_number(min: i64, max: i64) -> FakeValue {
+  pub fn range_number(min: i64, max: i64) -> MockType {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -83,17 +83,17 @@ impl RandomValue {
 
     let n: i64 = rng.gen_range(min..max);
 
-    FakeValue::Integer(n)
+    MockType::Integer(n)
   }
 
-  pub fn float() -> FakeValue {
+  pub fn float() -> MockType {
     let mut rng = rand::thread_rng();
     let n: f64 = rng.gen();
 
-    FakeValue::Float(n)
+    MockType::Float(n)
   }
 
-  pub fn range_float(min: f64, max: f64) -> FakeValue {
+  pub fn range_float(min: f64, max: f64) -> MockType {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -102,20 +102,20 @@ impl RandomValue {
 
     let n: f64 = rng.gen_range(min..max);
 
-    FakeValue::Float(n)
+    MockType::Float(n)
   }
 
-  pub fn string() -> FakeValue {
+  pub fn string() -> MockType {
     let n: String = rand::thread_rng()
       .sample_iter(&Alphanumeric)
       .take(10)
       .map(char::from)
       .collect();
 
-    FakeValue::String(n.to_string())
+    MockType::String(n.to_string())
   }
 
-  pub fn range_string(min: i64, max: i64) -> FakeValue {
+  pub fn range_string(min: i64, max: i64) -> MockType {
     let mut rng = rand::thread_rng();
 
     if min > max {
@@ -130,18 +130,18 @@ impl RandomValue {
       .map(char::from)
       .collect();
 
-    FakeValue::String(s)
+    MockType::String(s)
   }
 
-  pub fn boolean() -> FakeValue {
+  pub fn boolean() -> MockType {
     let mut rng = rand::thread_rng();
     let n: bool = rng.gen();
 
-    FakeValue::Boolean(n)
+    MockType::Boolean(n)
   }
 
-  pub fn datetime() -> FakeValue {
-    FakeValue::DateTime(Self::gen_time().to_string())
+  pub fn datetime() -> MockType {
+    MockType::DateTime(Self::gen_time().to_string())
   }
 
   fn gen_time() -> DateTime<Utc> {
@@ -157,28 +157,29 @@ impl RandomValue {
     time
   }
 
-  pub fn date() -> FakeValue {
+  pub fn date() -> MockType {
     let mut rng = rand::thread_rng();
     let year: i32 = rng.gen_range(1970..2100);
     let day: u32 = rng.gen_range(1..365);
 
     let date = NaiveDate::from_yo(year, day);
     let time: chrono::Date<Utc> = chrono::Date::from_utc(date, Utc);
-    FakeValue::Date(time.to_string())
+    MockType::Date(time.to_string())
   }
 
-  pub fn timestamp() -> FakeValue {
-    FakeValue::Timestamp(Self::gen_time().timestamp())
+  pub fn timestamp() -> MockType {
+    MockType::Timestamp(Self::gen_time().timestamp())
   }
 
-  pub fn uuid() -> FakeValue {
-    FakeValue::Uuid(uuid::Uuid::new_v4().to_string())
+  pub fn uuid() -> MockType {
+    MockType::Uuid(uuid::Uuid::new_v4().to_string())
   }
 }
 
 #[cfg(test)]
 mod tests {
   use chrono::Datelike;
+
   use super::*;
 
   #[test]
@@ -274,7 +275,7 @@ mod tests {
       ("created_at".to_string(), BuiltinType::DateTime),
     ]));
 
-    let values = mock_values(&ds);
+    let values = fake_values(&ds);
     assert_eq!(values.len(), 4);
     println!("{:?}", values);
   }

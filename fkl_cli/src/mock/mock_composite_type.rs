@@ -1,13 +1,13 @@
 use rand::Rng;
 use crate::mock::fake_value::RandomValue;
 
-pub struct FakeCompositeType {}
-
 #[allow(dead_code)]
 const SPECIAL_CHARS: [char; 20] = ['.', '!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'];
 const EMAIL_PROVIDERS: [&str; 10] = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com", "aol.com", "icloud.com", "mail.com", "msn.com", "live.com", "ymail.com"];
 
-impl FakeCompositeType {
+pub struct MockCompositeType {}
+
+impl MockCompositeType {
   pub fn email() -> String {
     let mut rng = rand::thread_rng();
     let n: i64 = rng.gen_range(1..20);
@@ -29,7 +29,7 @@ mod tests {
   #[test]
   #[ignore]
   fn test_email() {
-    let email = FakeCompositeType::email();
+    let email = MockCompositeType::email();
 
     assert_eq!(email.contains("@"), true);
     let email_regex = regex::Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").unwrap();

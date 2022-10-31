@@ -4,8 +4,8 @@ use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
 use fkl_parser::mir::{ContextMap, Entity};
 
-use crate::mock::fake_value::mock_struct;
-use crate::mock::mock_type::FakeValue;
+use crate::mock::fake_value::fake_struct;
+use crate::mock::mock_type::MockType;
 use crate::mock::stub_server::{ApiError, MockServerConfig};
 
 #[allow(unused_variables)]
@@ -15,7 +15,7 @@ pub async fn get_aggregate_by_id(
   entity_name: &str,
   id: usize,
   config: &State<MockServerConfig>,
-) -> Result<Json<Vec<IndexMap<String, FakeValue>>>, NotFound<Json<ApiError>>> {
+) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
     return Err(NotFound(Json(ApiError {
@@ -24,7 +24,7 @@ pub async fn get_aggregate_by_id(
   }
 
   let entity = opt_entity.unwrap();
-  let map = mock_struct(&entity.fields);
+  let map = fake_struct(&entity.fields);
   return Ok(Json(vec![map]));
 }
 
@@ -50,7 +50,7 @@ pub async fn get_entities(
   aggregate_name: &str,
   entity_name: &str,
   config: &State<MockServerConfig>,
-) -> Result<Json<Vec<IndexMap<String, FakeValue>>>, NotFound<Json<ApiError>>> {
+) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
     return Err(NotFound(Json(ApiError {
@@ -61,7 +61,7 @@ pub async fn get_entities(
   let entity = opt_entity.unwrap();
   let mut vec = vec![];
   for _ in 0..20 {
-    vec.push(mock_struct(&entity.fields));
+    vec.push(fake_struct(&entity.fields));
   }
   return Ok(Json(vec));
 }
