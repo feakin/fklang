@@ -273,7 +273,7 @@ Entity Ticket {
 
     assert_eq!(types.len(), 3);
     assert_eq!(types, IndexMap::from([
-      ("id".to_string(), BuiltinType::String),
+      ("id".to_string(), BuiltinType::Special("uuid".to_string())),
       ("seat".to_string(), BuiltinType::String),
       ("price".to_string(), BuiltinType::Integer),
     ]));
