@@ -56,11 +56,12 @@ mod test {
   use rocket::local::blocking::Client;
 
   use fkl_parser::mir::ContextMap;
+  use fkl_parser::parse;
 
   use crate::mock::stub_server::feakin_rocket;
 
   #[test]
-  fn hello_world() {
+  fn sample() {
     let context_map = ContextMap::default();
     let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
     let response = client.get("/").dispatch();
@@ -69,11 +70,41 @@ mod test {
   }
 
   #[test]
-  fn movie_api() {
+  fn return_404_for_no_exist_struct() {
     let context_map = ContextMap::default();
     let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
     let response = client.get("/api/movie/movie/1").dispatch();
 
     assert_eq!(response.status(), Status::NotFound);
+  }
+
+  #[test]
+  fn return_ok_for_exist_aggregate_struct() {
+    let source = r#"ContextMap TicketBooking {
+  TicketContext <-> ReservationContext;
+}
+
+Context TicketContext {
+  Aggregate Ticket, Reservation;
+}
+
+Aggregate Ticket {
+  Entity Ticket;
+}
+
+Entity Ticket {
+  Struct {
+    id: UUID;
+    seat: String;
+    price: Int;
+  }
+}
+"#;
+
+    let context_map: ContextMap = parse(source).unwrap();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/api/ticket/ticket/1").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
   }
 }
