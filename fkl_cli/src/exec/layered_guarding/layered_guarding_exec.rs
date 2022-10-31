@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use fkl_parser::mir::LayeredArchitecture;
 
 use crate::construct::file_resolver::{FileResolver, ResolvedFile};
-use crate::exec::layered_guarding_exec::package_guarding::PackageGuarding;
+use crate::exec::layered_guarding::package_guarding::PackageGuarding;
 
 #[derive(Debug, Clone)]
 pub struct LayeredGuardingExec<'p> {
@@ -44,7 +44,7 @@ impl LayeredGuardingExec<'_> {
 mod tests {
   use std::path::PathBuf;
 
-  use crate::exec::layered_guarding_exec::layered_guarding_exec::LayeredGuardingExec;
+  use crate::exec::layered_guarding::layered_guarding_exec::LayeredGuardingExec;
   use crate::exec::mir_from_file;
 
   #[test]

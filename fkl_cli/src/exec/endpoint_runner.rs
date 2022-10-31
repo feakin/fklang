@@ -16,7 +16,7 @@ pub struct EndpointRunner {
   endpoint: HttpEndpoint,
 }
 
-pub(crate) fn execute(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str) {
+pub(crate) fn endpoint_runner(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str) {
   let mut apis: Vec<HttpApiImpl> = vec![];
   context_map.implementations.iter().for_each(|implementation| {
     if let Implementation::PublishHttpApi(api) = implementation {

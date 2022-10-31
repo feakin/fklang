@@ -5,10 +5,9 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use log::info;
 
+use exec::{datasource_connect, guarding_runner, mock_server_runner};
 use fkl_parser::mir::Environment;
 use fkl_parser::parse;
-
-use crate::exec::{code_gen_exec, mir_from_file};
 
 pub mod construct;
 pub mod code_meta;
@@ -101,7 +100,7 @@ async fn main() {
     }
     Commands::Gen(opt) => {
       let parent = &opt.main.parent().unwrap().to_path_buf();
-      code_gen_exec::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
+      exec::code_gen_exec::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
       let root = match &run.path {
@@ -109,17 +108,17 @@ async fn main() {
         None => run.main.parent().unwrap().to_path_buf(),
       };
 
-      let mir = mir_from_file(&run.main);
+      let mir = exec::mir_from_file(&run.main);
 
       info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
           let impl_name = run.impl_name.as_ref().unwrap();
-          builtin::endpoint_runner::execute(&mir, &run.func_name, &impl_name);
+          exec::endpoint_runner(&mir, &run.func_name, &impl_name);
         }
         RunFuncName::Guarding => {
           let layered = mir.layered.expect("layered architecture is required");
-          builtin::guarding_runner(root, &layered);
+          exec::guarding_runner(root, &layered);
         }
         RunFuncName::TestConnection => {
           if mir.envs.len() == 0 {
@@ -136,10 +135,10 @@ async fn main() {
             }
             None => &mir.envs[0],
           };
-          builtin::test_connection_runner(&env).await;
+          exec::test_connection_runner(&env).await;
         }
         RunFuncName::MockServer => {
-          builtin::mock_server_runner(&mir).await;
+          exec::mock_server_runner(&mir).await;
         }
       }
     }
@@ -147,7 +146,6 @@ async fn main() {
 }
 
 fn gen_to_dot(path: &PathBuf) {
-  // read path to string
   let contents = fs::read_to_string(path).expect("Something went wrong reading the file");
   let context_map = parse(&*contents).expect("TODO: panic message");
 
@@ -159,7 +157,6 @@ fn gen_to_dot(path: &PathBuf) {
 
 
 fn parse_to_ast(path: &PathBuf) {
-  // read path to string
   let contents = fs::read_to_string(path).expect("Something went wrong reading the file");
   let context_map = parse(&*contents).expect("TODO: panic message");
 
@@ -180,6 +177,7 @@ mod tests {
 
   use crate::{builtin, RunFuncName};
   use crate::builtin::builtin_type::BuiltinType;
+  use crate::exec::endpoint_runner;
   use crate::mock::fake_value::FakeValue;
 
   #[test]
@@ -219,7 +217,7 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
+    endpoint_runner(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
   }
 
   #[test]
@@ -234,7 +232,7 @@ mod tests {
 
     let context_map: ContextMap = parse(source).unwrap();
 
-    builtin::endpoint_runner::execute(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
+    endpoint_runner(&context_map, &RunFuncName::HttpRequest, "CinemaCreated");
   }
 
   #[test]

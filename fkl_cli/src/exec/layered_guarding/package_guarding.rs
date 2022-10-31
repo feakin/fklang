@@ -104,7 +104,7 @@ mod tests {
   use crate::construct::java_construct::JavaConstruct;
 
   use crate::exec::{mir_from_str};
-  use crate::exec::layered_guarding_exec::package_guarding::{PackageGuarding, package_name};
+  use crate::exec::layered_guarding::package_guarding::{PackageGuarding, package_name};
 
   #[test]
   fn pure_package_name() {

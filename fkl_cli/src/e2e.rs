@@ -2,7 +2,7 @@
 mod tests {
   use std::fs;
   use std::path::PathBuf;
-  use crate::code_gen_exec;
+  use crate::exec::code_gen_exec;
 
   #[test]
   #[ignore]
