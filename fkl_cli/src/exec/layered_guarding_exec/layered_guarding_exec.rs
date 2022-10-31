@@ -1,5 +1,7 @@
 use std::path::PathBuf;
+
 use fkl_parser::mir::LayeredArchitecture;
+
 use crate::construct::file_resolver::{FileResolver, ResolvedFile};
 use crate::exec::layered_guarding_exec::package_guarding::PackageGuarding;
 
@@ -41,8 +43,9 @@ impl LayeredGuardingExec<'_> {
 #[cfg(test)]
 mod tests {
   use std::path::PathBuf;
-  use crate::exec::mir_from_file;
+
   use crate::exec::layered_guarding_exec::layered_guarding_exec::LayeredGuardingExec;
+  use crate::exec::mir_from_file;
 
   #[test]
   #[cfg(not(target_os = "windows"))]

@@ -27,6 +27,7 @@ mod tests {
   use super::*;
 
   #[test]
+  #[ignore]
   fn test_email() {
     let email = FakeCompositeType::email();
 
