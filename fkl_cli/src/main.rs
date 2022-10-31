@@ -99,7 +99,7 @@ async fn main() {
     }
     Commands::Gen(opt) => {
       let parent = &opt.main.parent().unwrap().to_path_buf();
-      exec::code_gen_runner::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
+      exec::code_gen::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
       let root = match &run.path {
