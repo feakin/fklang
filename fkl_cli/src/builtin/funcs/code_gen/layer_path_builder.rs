@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::exec::LayerMap;
+use crate::builtin::funcs::LayerMap;
 
 pub struct LayerPathBuilder {}
 

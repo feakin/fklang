@@ -8,9 +8,9 @@ use fkl_parser::mir::{ContextMap, Implementation};
 
 use crate::construct::code_construct::CodeConstruct;
 use crate::construct::java_construct::JavaConstruct;
-use crate::exec;
-use crate::exec::LayerMap;
-use crate::exec::LayerPathBuilder;
+use crate::builtin::funcs;
+use crate::builtin::funcs::LayerMap;
+use crate::builtin::funcs::LayerPathBuilder;
 use crate::inserter::inserter::Inserter;
 use crate::inserter::java_inserter::JavaInserter;
 
@@ -32,7 +32,7 @@ pub enum DddLayer {
 }
 
 pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<String>, base_path: &PathBuf) {
-  let mir = exec::mir_from_file(input_path);
+  let mir = funcs::mir_from_file(input_path);
   code_gen_by_mir(&mir, filter_impl, base_path);
 }
 

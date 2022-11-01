@@ -11,7 +11,6 @@ use fkl_parser::parse;
 pub mod construct;
 pub mod code_meta;
 pub mod inserter;
-pub mod exec;
 pub mod builtin;
 pub mod highlighter;
 mod e2e;
@@ -99,7 +98,7 @@ async fn main() {
     }
     Commands::Gen(opt) => {
       let parent = &opt.main.parent().unwrap().to_path_buf();
-      exec::code_gen::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
+      builtin::funcs::code_gen::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
     }
     Commands::Run(run) => {
       let root = match &run.path {
@@ -107,17 +106,17 @@ async fn main() {
         None => run.main.parent().unwrap().to_path_buf(),
       };
 
-      let mir = exec::mir_from_file(&run.main);
+      let mir = builtin::funcs::mir_from_file(&run.main);
 
       info!("runOpt: {:?}", run);
       match run.func_name {
         RunFuncName::HttpRequest => {
           let impl_name = run.impl_name.as_ref().unwrap();
-          exec::endpoint_runner(&mir, &run.func_name, &impl_name);
+          builtin::funcs::endpoint_runner(&mir, &run.func_name, &impl_name);
         }
         RunFuncName::Guarding => {
           let layered = mir.layered.expect("layered architecture is required");
-          exec::guarding_runner(root, &layered);
+          builtin::funcs::guarding_runner(root, &layered);
         }
         RunFuncName::TestConnection => {
           if mir.envs.len() == 0 {
@@ -134,10 +133,10 @@ async fn main() {
             }
             None => &mir.envs[0],
           };
-          exec::test_connection_runner(&env).await;
+          builtin::funcs::test_connection_runner(&env).await;
         }
         RunFuncName::MockServer => {
-          exec::mock_server_runner(&mir).await;
+          builtin::funcs::mock_server_runner(&mir).await;
         }
       }
     }
@@ -175,7 +174,7 @@ mod tests {
   use fkl_parser::parse;
 
   use crate::builtin::builtin_type::BuiltinType;
-  use crate::exec::endpoint_runner;
+  use crate::builtin::funcs::endpoint_runner;
   use crate::mock::fake_value::FakeValue;
   use crate::RunFuncName;
 
