@@ -51,6 +51,9 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
     .mount("/api", routes![
       stub_aggregate_api::get_aggregate_by_id,
       stub_aggregate_api::get_entities,
+      stub_aggregate_api::create_entity,
+      stub_aggregate_api::update_entity,
+      stub_aggregate_api::delete_entity,
     ])
     .attach(AdHoc::config::<MockServerConfig>())
 }
@@ -97,57 +100,8 @@ mod test {
 
   use crate::mock::stub_server::{feakin_rocket, gen_api_list};
 
-  #[test]
-  fn sample() {
-    let context_map = ContextMap::default();
-    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
-    let response = client.get("/").dispatch();
-
-    assert_eq!(response.status(), Status::Ok);
-  }
-
-  #[test]
-  fn return_404_for_no_exist_struct() {
-    let context_map = ContextMap::default();
-    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
-    let response = client.get("/api/movie/movie/1").dispatch();
-
-    assert_eq!(response.status(), Status::NotFound);
-  }
-
-  #[test]
-  fn return_ok_for_exist_aggregate_struct() {
-    let source = r#"ContextMap TicketBooking {
-  TicketContext <-> ReservationContext;
-}
-
-Context TicketContext {
-  Aggregate Ticket, Reservation;
-}
-
-Aggregate Ticket {
-  Entity Ticket;
-}
-
-Entity Ticket {
-  Struct {
-    id: UUID;
-    seat: String;
-    price: Int;
-  }
-}
-"#;
-
-    let context_map: ContextMap = parse(source).unwrap();
-    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
-    let response = client.get("/api/ticket/ticket/1").dispatch();
-
-    assert_eq!(response.status(), Status::Ok);
-  }
-
-  #[test]
-  fn api_list() {
-    let source = r#"ContextMap TicketBooking {
+  fn source_code() -> &'static str {
+    r#"ContextMap TicketBooking {
   TicketContext <-> ReservationContext;
 }
 
@@ -174,9 +128,39 @@ Entity Seat {
     number: Int;
   }
 }
-"#;
+"#
+  }
 
-    let context_map: ContextMap = parse(source).unwrap();
+  #[test]
+  fn sample() {
+    let context_map = ContextMap::default();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+  }
+
+  #[test]
+  fn return_404_for_no_exist_struct() {
+    let context_map = ContextMap::default();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/api/movie/movie/1").dispatch();
+
+    assert_eq!(response.status(), Status::NotFound);
+  }
+
+  #[test]
+  fn return_ok_for_exist_aggregate_struct() {
+    let context_map: ContextMap = parse(source_code()).unwrap();
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/api/ticket/ticket/1").dispatch();
+
+    assert_eq!(response.status(), Status::Ok);
+  }
+
+  #[test]
+  fn api_list() {
+    let context_map: ContextMap = parse(source_code()).unwrap();
     let api_list = gen_api_list(&context_map);
 
     assert_eq!(api_list, vec![
@@ -185,5 +169,23 @@ Entity Seat {
       "/api/ticket/seat".to_string(),
       "/api/ticket/seat/1".to_string(),
     ]);
+  }
+
+  #[test]
+  fn crud_for_api() {
+    let context_map: ContextMap = parse(source_code()).unwrap();
+
+    let client = Client::tracked(feakin_rocket(&context_map)).expect("valid rocket instance");
+    let response = client.get("/api/ticket/ticket/1").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+
+    let response = client.put("/api/ticket/seat").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+
+    let response = client.post("/api/ticket/seat/1").dispatch();
+    assert_eq!(response.status(), Status::Ok);
+
+    let response = client.delete("/api/ticket/seat/1").dispatch();
+    assert_eq!(response.status(), Status::Ok);
   }
 }
