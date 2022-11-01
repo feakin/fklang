@@ -77,12 +77,15 @@ pub fn gen_api_list(context_map: &ContextMap) -> Vec<String> {
   for bc in &context_map.contexts {
     for aggregate in &bc.aggregates {
       for entity in &aggregate.entities {
-        // list
-        let api = format!("/api/{}/{}", aggregate.name.to_lowercase(), entity.name.to_lowercase());
-        api_list.push(api);
-        // get by id
-        let api = format!("/api/{}/{}/1", aggregate.name.to_lowercase(), entity.name.to_lowercase());
-        api_list.push(api);
+        let aggregate_name = aggregate.name.to_lowercase();
+        let entity_name = entity.name.to_lowercase();
+
+        vec![
+          format!("/api/{}/{}", aggregate_name, entity_name),
+          format!("/api/{}/{}/1", aggregate_name, entity_name),
+        ].iter().for_each(|api| {
+          api_list.push(api.to_string());
+        });
       }
     }
   }
