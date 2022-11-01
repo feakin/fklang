@@ -129,7 +129,7 @@ async fn main() {
                 .filter(|env| &env.name == env_name)
                 .collect::<Vec<&Environment>>()
                 .first()
-                .unwrap_or(&&mir.envs[0])
+                .unwrap_or_else(|| panic!("cannot find environment: {}", env_name))
             }
             None => &mir.envs[0],
           };
