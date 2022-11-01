@@ -73,24 +73,19 @@ fn merge_config(context_map: &ContextMap) -> MockServerConfig {
 }
 
 pub fn gen_api_list(context_map: &ContextMap) -> Vec<String> {
-  let mut api_list = vec![];
-  for bc in &context_map.contexts {
-    for aggregate in &bc.aggregates {
-      for entity in &aggregate.entities {
+  context_map.contexts.iter().flat_map(|env| {
+    env.aggregates.iter().flat_map(|aggregate| {
+      aggregate.entities.iter().flat_map(|entity| {
         let aggregate_name = aggregate.name.to_lowercase();
         let entity_name = entity.name.to_lowercase();
 
         vec![
           format!("/api/{}/{}", aggregate_name, entity_name),
           format!("/api/{}/{}/1", aggregate_name, entity_name),
-        ].iter().for_each(|api| {
-          api_list.push(api.to_string());
-        });
-      }
-    }
-  }
-
-  api_list
+        ]
+      })
+    })
+  }).collect()
 }
 
 #[cfg(test)]
