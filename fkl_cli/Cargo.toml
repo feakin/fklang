@@ -48,12 +48,14 @@ colored = "2.0.0"
 
 regex = "1.6.0"
 
+#------------------- Http Verify -------------------
+
 # http for mock and verify api
 reqwest = { version = "0.11", features = ["blocking", "json"] }
 # base64 ecnode/decode
 base64 = "0.13.0"
 
-# database connection
+#------------------- Database Connection -------------------
 
 # mysql & postres
 sqlx = { version = "0.6", features = [
@@ -71,6 +73,8 @@ tokio = { version = "1", features = ["full"] }
 
 async-trait = "0.1.58"
 
+#------------------- Mock Server -------------------
+
 # http server
 rocket = { version = "0.5.0-rc.2", features = ["json"] }
 figment = { version = "0.10" }
@@ -80,6 +84,10 @@ phf = { version = "0.11", features = ["macros"] }
 indexmap = "1.9.1"
 chrono = "0.4"
 rand = "0.8.5"
+
+
+#------------------- Message Queue -------------------
+kafka = "0.9"
 
 [dev-dependencies]
 trycmd = "0.14.0"
