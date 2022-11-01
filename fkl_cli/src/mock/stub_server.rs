@@ -1,11 +1,12 @@
+use colored::Colorize;
 use figment::Figment;
 use figment::providers::Serialized;
-use rocket::{Build, get, info, Rocket, routes, State};
+use rocket::{Build, get, Rocket, routes, State};
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
-use fkl_parser::default_config;
 
+use fkl_parser::default_config;
 use fkl_parser::mir::ContextMap;
 
 pub use super::stub_aggregate_api;
@@ -35,11 +36,12 @@ pub fn feakin_rocket(context_map: &ContextMap) -> Rocket<Build> {
 
   let port: usize = figment.extract_inner("port").unwrap();
   let url = format!("http://localhost:{}", port);
-  info!("Feakin mock server is running at {}", url);
+  println!("Running at {} !", url.blue());
 
-  info!("api lists: ");
+
+  println!("{}: ", "Routes".red());
   gen_api_list(context_map).iter().for_each(|api| {
-    info!("{}{}", &url, api);
+    println!("{}{}", &url.green(), api.green());
   });
 
   rocket::custom(figment)
