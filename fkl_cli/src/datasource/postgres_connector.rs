@@ -5,7 +5,7 @@ use sqlx::postgres::{PgPoolOptions, PgRow};
 use sqlx::Row;
 
 use fkl_parser::mir::PostgresDatasource;
-use crate::builtin::builtin_type::BuiltinType;
+use crate::builtin::types::BuiltinType;
 
 pub struct PostgresConnector {
   pool: sqlx::Pool<sqlx::Postgres>,

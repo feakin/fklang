@@ -173,7 +173,7 @@ mod tests {
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
 
-  use crate::builtin::builtin_type::BuiltinType;
+  use crate::builtin::types::BuiltinType;
   use crate::builtin::funcs::endpoint_runner;
   use crate::mock::fake_value::FakeValue;
   use crate::RunFuncName;

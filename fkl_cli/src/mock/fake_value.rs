@@ -6,7 +6,7 @@ use sqlx::types::uuid;
 
 use fkl_parser::mir::Field;
 
-use crate::builtin::builtin_type::BuiltinType;
+use crate::builtin::types::BuiltinType;
 use crate::mock::mock_type::MockType;
 
 pub struct FakeValue {}
