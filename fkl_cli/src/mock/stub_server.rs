@@ -7,7 +7,7 @@ use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 
 use fkl_parser::default_config;
-use fkl_parser::mir::ContextMap;
+use fkl_parser::mir::{Aggregate, ContextMap, Entity};
 
 pub use super::stub_aggregate_api;
 
@@ -76,16 +76,20 @@ pub fn gen_api_list(context_map: &ContextMap) -> Vec<String> {
   context_map.contexts.iter().flat_map(|env| {
     env.aggregates.iter().flat_map(|aggregate| {
       aggregate.entities.iter().flat_map(|entity| {
-        let aggregate_name = aggregate.name.to_lowercase();
-        let entity_name = entity.name.to_lowercase();
-
-        vec![
-          format!("/api/{}/{}", aggregate_name, entity_name),
-          format!("/api/{}/{}/1", aggregate_name, entity_name),
-        ]
+        collect_apis(aggregate, entity)
       })
     })
   }).collect()
+}
+
+fn collect_apis(aggregate: &Aggregate, entity: &Entity) -> Vec<String> {
+  let aggregate_name = aggregate.name.to_lowercase();
+  let entity_name = entity.name.to_lowercase();
+
+  vec![
+    format!("/api/{}/{}", aggregate_name, entity_name),
+    format!("/api/{}/{}/1", aggregate_name, entity_name),
+  ]
 }
 
 #[cfg(test)]
