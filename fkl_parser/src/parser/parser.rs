@@ -5,7 +5,7 @@ use std::hash::Hash;
 use pest::iterators::{Pair, Pairs};
 use crate::default_config;
 
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -783,6 +783,9 @@ fn consume_env(pair: Pair<Rule>) -> EnvDecl {
       Rule::server_decl => {
         env.server = Some(consume_server_decl(p));
       }
+      Rule::custom_decl => {
+        env.customs.push(consume_custom_decl(p));
+      }
       _ => println!("unreachable env rule: {:?}", p.as_rule())
     };
   }
@@ -833,6 +836,23 @@ fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
     .parse()
     .unwrap_or(default_config::SERVER_PORT)
     .clone();
+  decl
+}
+
+fn consume_custom_decl(pair: Pair<Rule>) -> CustomDecl {
+  let mut decl = CustomDecl::default();
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        decl.name = p.as_str().to_string();
+      }
+      Rule::attr_decl => {
+        decl.attributes.push(consume_attribute(p));
+      }
+      _ => println!("unreachable server rule: {:?}", p.as_rule())
+    };
+  }
+
   decl
 }
 
@@ -1641,7 +1661,7 @@ env Local {
       }),
       message_broker: None,
       server: None,
-      customs: vec![]
+      customs: vec![],
     }));
   }
 
@@ -1661,9 +1681,9 @@ env Local {
       message_broker: None,
       server: Some(ServerDecl {
         port: 8899,
-        attributes: vec![]
+        attributes: vec![],
       }),
-      customs: vec![]
+      customs: vec![],
     }));
   }
 
@@ -1683,9 +1703,22 @@ env Local {
       datasource: None,
       message_broker: None,
       server: None,
-      customs: vec![]
+      customs: vec![
+        CustomDecl {
+          name: "kafka".to_string(),
+          inline_doc: "".to_string(),
+          attributes: vec![
+            AttributeDefinition {
+              key: "host".to_string(),
+              value: vec!["localhost".to_string()],
+            },
+            AttributeDefinition {
+              key: "port".to_string(),
+              value: vec!["9092".to_string()],
+            }],
+        }
+      ],
     }));
-
   }
 
   #[test]
