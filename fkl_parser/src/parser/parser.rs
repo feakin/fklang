@@ -1641,6 +1641,7 @@ env Local {
       }),
       message_broker: None,
       server: None,
+      customs: vec![]
     }));
   }
 
@@ -1662,7 +1663,29 @@ env Local {
         port: 8899,
         attributes: vec![]
       }),
+      customs: vec![]
     }));
+  }
+
+  #[test]
+  fn custom_env() {
+    let decls = parse(r#"
+env Local {
+  kafka {
+    host: "localhost"
+    port: 9092
+  }
+}"#).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::Env(EnvDecl {
+      name: "Local".to_string(),
+      inline_doc: "".to_string(),
+      datasource: None,
+      message_broker: None,
+      server: None,
+      customs: vec![]
+    }));
+
   }
 
   #[test]

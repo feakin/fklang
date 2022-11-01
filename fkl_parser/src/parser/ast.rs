@@ -411,6 +411,7 @@ pub struct EnvDecl {
   pub datasource: Option<DatasourceDecl>,
   pub message_broker: Option<MessageBrokerDecl>,
   pub server: Option<ServerDecl>,
+  pub customs: Vec<CustomDecl>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -434,5 +435,12 @@ pub struct MessageBrokerDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ServerDecl {
   pub port: u16,
+  pub attributes: Vec<AttributeDefinition>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct CustomDecl {
+  pub name: String,
+  pub inline_doc: String,
   pub attributes: Vec<AttributeDefinition>,
 }

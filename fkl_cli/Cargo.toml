@@ -87,7 +87,7 @@ rand = "0.8.5"
 
 
 #------------------- Message Queue -------------------
-kafka = "0.9"
+#kafka = "0.9"
 
 [dev-dependencies]
 trycmd = "0.14.0"
