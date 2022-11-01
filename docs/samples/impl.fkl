@@ -83,8 +83,14 @@ env Local {
     port: 5432
     database: "test"
   }
+
   server {
     port: 9090;
+  }
+
+  kafka {
+    host: "localhost"
+    port: 9092
   }
 }
 

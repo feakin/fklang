@@ -242,7 +242,7 @@ source_set_decl = {
 }
 
 env_decl = {
-  "env" ~ identifier ~ "{" ~ inline_doc? ~ (datasource_decl | server_decl )* ~ "}"
+  "env" ~ identifier ~ "{" ~ inline_doc? ~ (datasource_decl | server_decl | custom_decl )* ~ "}"
 }
 
 datasource_decl = {
@@ -251,6 +251,10 @@ datasource_decl = {
 
 server_decl = {
   "server" ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
+}
+
+custom_decl = {
+  identifier ~ "{" ~ (attr_decl | inline_doc)* ~ "}"
 }
 
 // ----------------------------- Attr -----------------------------
