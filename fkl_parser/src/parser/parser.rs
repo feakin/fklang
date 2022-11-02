@@ -100,6 +100,10 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
         identify.name = p.as_str().to_string();
         identify.loc = Loc::from_pair(p.as_span());
       }
+      Rule::context_decl => {
+        let context_decl = consume_context(p);
+        context_decl_map.insert(context_decl.name.clone(), context_decl);
+      }
       Rule::context_node_rel => {
         let mut names: Vec<String> = vec![];
         let mut direction: RelationDirection = RelationDirection::Undirected;
@@ -229,6 +233,18 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
       }
       Rule::used_domain_event_decl => {
         aggregate.domain_events = consume_use_domain_events(p);
+      }
+      Rule::struct_decl => {
+        let default_struct = consume_struct(p);
+        let fields = default_struct.fields;
+        aggregate.entities.push(EntityDecl {
+          name: aggregate.name.to_string(),
+          is_aggregate_root: false,
+          identify: Default::default(),
+          inline_doc: "".to_string(),
+          fields,
+          value_objects: vec![],
+        });
       }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
     };
@@ -1718,6 +1734,87 @@ env Local {
             }],
         }
       ],
+    }));
+  }
+
+  #[test]
+  fn syntax_sugar() {
+    let decls = parse(r#"ContextMap architecture {
+    Context analyze {
+        Aggregate ArchSystem {
+            Struct {
+                id: String;
+                name: String;
+            }
+
+            Entity ArchComponent {
+                Struct {
+                    name: String;
+                    type: ArchComponentType
+                }
+            }
+        }
+    }
+}
+"#).or_else(|e| {
+      println!("{}", e);
+      Err(e)
+    }).unwrap();
+
+    assert_eq!(decls[0], FklDeclaration::ContextMap(ContextMapDecl {
+      name: Identifier {
+        name: "architecture".to_string(),
+        loc: Loc(11, 23),
+      },
+      contexts: vec![
+        BoundedContextDecl {
+          name: "analyze".to_string(),
+          aggregates: vec![
+            AggregateDecl {
+              name: "ArchSystem".to_string(),
+              inline_doc: "".to_string(),
+              used_domain_objects: vec![],
+              entities: vec![
+                EntityDecl {
+                  name: "ArchSystem".to_string(),
+                  is_aggregate_root: false,
+                  identify: Default::default(),
+                  inline_doc: "".to_string(),
+                  fields: vec![
+                    VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
+                    VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
+                  ],
+                  value_objects: vec![],
+                },
+                EntityDecl {
+                  name: "ArchComponent".to_string(),
+                  is_aggregate_root: false,
+                  identify: Default::default(),
+                  inline_doc: "".to_string(),
+                  fields: vec![
+                    VariableDefinition {
+                      name: "name".to_string(),
+                      type_type: "String".to_string(),
+                      initializer: None,
+                    },
+                    VariableDefinition {
+                      name: "type".to_string(),
+                      type_type: "ArchComponentType".to_string(),
+                      initializer: None,
+                    },
+                  ],
+                  value_objects: vec![],
+                },
+              ],
+              value_objects: vec![],
+              domain_events: vec![],
+            },
+          ],
+          domain_events: vec![],
+          used_domain_objects: vec![],
+        },
+      ],
+      relations: vec![],
     }));
   }
 

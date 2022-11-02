@@ -22,7 +22,7 @@ declaration = {
 include_decl = { "include" ~ string }
 
 context_map_decl = {
-  "ContextMap" ~ identifier? ~ "{" ~ (used_context_node | context_node_rel | inline_doc)* ~ "}"
+  "ContextMap" ~ identifier? ~ "{" ~ (context_decl | used_context_node | context_node_rel | inline_doc)* ~ "}"
 }
 
 context_decl = {
@@ -82,7 +82,7 @@ ext_module_decl = {
 }
 
 aggregate_decl = {
-  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | inline_doc | used_domain_event_decl | used_domain_objects_decl )* ~ "}"
+  "Aggregate" ~ identifier ~ "{" ~ (entity_decl | struct_decl | inline_doc | used_domain_event_decl | used_domain_objects_decl )* ~ "}"
 }
 
 used_domain_objects_decl = {
