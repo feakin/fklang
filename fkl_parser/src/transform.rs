@@ -128,7 +128,6 @@ impl MirTransform {
           self.implementations.push(api_impl);
         }
         FklDeclaration::Struct(_) => {}
-        FklDeclaration::Binding(_) => {}
         FklDeclaration::Layered(decl) => {
           self.layered = Some(self.transform_layered(&decl));
         }

@@ -31,7 +31,6 @@ pub enum FklDeclaration {
   Implementation(ImplementationDecl),
   Struct(StructDecl),
   // Domain(DomainDecl),
-  Binding(BindingDecl),
   Component(ComponentDecl),
   Layered(LayeredDecl),
   SourceSets(SourceSetsDecl),
@@ -311,27 +310,6 @@ pub struct SourceSet {
   pub source_type: String,
   pub src_dirs: Vec<String>,
   pub filter: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct BindingDecl {
-  pub name: String,
-  pub domain_object_type: String,
-  pub events: Vec<String>,
-  pub source_set: Option<SourceSet>,
-  pub extra_config: Option<BindingExtraConfig>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct BindingExtraConfig {
-  pub base_url: Option<String>,
-  pub language: Option<String>,
-  /// sometimes, people dont' like to use root dir in the source code, like `project/build.gradle`
-  /// or `project/src/main/java`. And not build.gradle in the root of project.
-  pub directory: Option<String>,
-  /// in modular DDD, we need to know which module is the domain module.
-  pub module: Option<String>,
-  pub package: Option<String>,
 }
 
 // Layered Block
