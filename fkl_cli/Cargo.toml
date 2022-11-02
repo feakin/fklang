@@ -87,7 +87,7 @@ rand = "0.8.5"
 
 
 #------------------- Message Queue -------------------
-#kafka = "0.9"
+rdkafka = { version = "0.25", features = ["cmake-build"] }
 
 [dev-dependencies]
 trycmd = "0.14.0"

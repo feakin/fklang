@@ -1,9 +1,11 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+use std::time::Duration;
 
 use clap::{Args, Parser, Subcommand};
-use log::info;
+use log::{info, trace};
+use rdkafka::consumer::{BaseConsumer, Consumer};
 
 use fkl_parser::mir::Environment;
 use fkl_parser::parse;
@@ -81,6 +83,7 @@ pub enum RunFuncName {
   Guarding,
   TestConnection,
   MockServer,
+  MessageQueue,
 }
 
 // todo: add app context for save highlighter
@@ -138,6 +141,22 @@ async fn main() {
         }
         RunFuncName::MockServer => {
           builtin::funcs::mock_server_runner(&mir).await;
+        }
+        RunFuncName::MessageQueue => {
+          let brokers = "localhost:9092";
+          let topic = Some("test");
+          let consumer: BaseConsumer = rdkafka::ClientConfig::new()
+            .set("bootstrap.servers", brokers)
+            .create()
+            .expect("Consumer creation failed");
+
+          trace!("Consumer created");
+
+          let metadata = consumer
+            .fetch_metadata(topic, Duration::from_secs(5))
+            .expect("Failed to fetch metadata");
+
+          println!("Metadata for {:?}", metadata.topics().len());
         }
       }
     }
