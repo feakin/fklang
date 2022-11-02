@@ -1,36 +1,46 @@
 ContextMap TicketBooking {
-  ReservationCtx <-> UserCtx;
+  Reservation -> Cinema;
+  Reservation -> Movie;
+  Reservation -> User;
 }
 
-Context ReservationCtx {}
-
-Context UserCtx {
-  Aggregate Ticket, Reservation, User;
-}
-
-Aggregate User {
-  DomainEvent UserCreated;
-}
-
-Aggregate Ticket {
-  Entity Ticket, Seat;
-}
-
-Entity Ticket {
-  Struct {
-    id: UUID;
-    seat: String;
-    price: Int;
+// nested
+Context Reservation {
+  Aggregate Reservation {
+    Entity Ticket, Reservation;
   }
 }
 
-Entity Seat {
-  Struct {
-    id: UUID;
-    row: Int;
-    number: Int;
+// flatten
+Context Cinema {
+  Aggregate Cinema;
+}
+
+Aggregate Cinema {
+  Entity Cinema, ScreeningRoom, Seat;
+}
+
+Entity Cinema { }
+Entity ScreeningRoom { }
+Entity Seat { }
+
+Context Movie {
+  Aggregate Movie {
+    Entity Movie, Actor, Publisher;
   }
 }
+
+// entity => aggregate root
+Context User {
+  Aggregate User {
+    Struct {
+      id: String;
+    }
+  }
+}
+
+ValueObject Price { }
+ValueObject Notifications { }
 
 layered DDD {
   dependency {

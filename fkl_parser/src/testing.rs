@@ -46,4 +46,10 @@ pub mod tests {
   fn aggregate_sugar_test() {
     assert!(do_parse_test("aggregate_sugar"));
   }
+
+  #[test]
+  #[cfg(not(target_os = "windows"))]
+  fn empty_struct_test() {
+    assert!(do_parse_test("empty_struct"));
+  }
 }

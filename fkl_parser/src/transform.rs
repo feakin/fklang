@@ -861,6 +861,33 @@ impl CinemaCreatedEvent {
 }"#;
 
     let context_map = MirTransform::mir(str).unwrap();
-    println!("{:?}", context_map);
+    assert_eq!(context_map.contexts, vec![
+      BoundedContext {
+        name: "analyze".to_string(),
+        aggregates: vec![Aggregate {
+          name: "ArchSystem".to_string(),
+          description: "".to_string(),
+          entities: vec![
+            Entity {
+              name: "ArchSystem".to_string(),
+              description: "".to_string(),
+              is_aggregate_root: false,
+              identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
+              fields: vec![
+                Field { name: "id".to_string(), initializer: None, type_type: "String".to_string() },
+                Field { name: "name".to_string(), initializer: None, type_type: "String".to_string() }],
+            },
+            Entity {
+              name: "ArchComponent".to_string(),
+              description: "".to_string(),
+              is_aggregate_root: false,
+              identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
+              fields: vec![
+                Field { name: "name".to_string(), initializer: None, type_type: "String".to_string() },
+                Field { name: "type".to_string(), initializer: None, type_type: "ArchComponentType".to_string() }],
+            }],
+        }],
+      }
+    ]);
   }
 }

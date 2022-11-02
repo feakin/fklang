@@ -1,0 +1,5 @@
+Context MovieCtx {
+  Aggregate Movie {
+    Entity Movie, Actor, Publisher;
+  }
+}
