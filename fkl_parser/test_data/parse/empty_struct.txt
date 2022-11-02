@@ -1,3 +1,6 @@
 ContextMap()
   BoundedContext(MovieCtx)
     Aggregate(Movie)
+      Entity(Movie)
+      Entity(Actor)
+      Entity(Publisher)

@@ -160,13 +160,21 @@ impl MirTransform {
       Aggregate::new(&domain_object.name.clone())
     }).collect();
 
-    let from_inside: Vec<Aggregate> = context_decl.aggregates.iter().map(|aggregate| {
+    let from_inside: Vec<Aggregate> = context_decl.aggregates.iter().map(|decl| {
+      let mut entities: Vec<Entity> = decl.entities.iter().map(|entity| {
+        self.transform_entity(entity)
+      }).collect();
+
+      let used_entities: Vec<Entity> = decl.used_domain_objects.iter().map(|domain_object| {
+        Entity::new(&domain_object.name)
+      }).collect();
+
+      entities.extend(used_entities);
+
       Aggregate {
-        name: aggregate.name.clone(),
+        name: decl.name.clone(),
         description: "".to_string(),
-        entities: aggregate.entities.iter().map(|entity| {
-          self.transform_entity(entity)
-        }).collect(),
+        entities: entities,
       }
     }).collect();
 
@@ -180,6 +188,10 @@ impl MirTransform {
     aggregate.entities = decl.used_domain_objects.iter().map(|domain_object| {
       Entity::new(&domain_object.name)
     }).collect();
+
+    decl.entities.iter().for_each(|entity| {
+      aggregate.entities.push(self.transform_entity(entity));
+    });
 
     aggregate
   }
@@ -837,6 +849,53 @@ impl CinemaCreatedEvent {
           }
         ],
       }
+    ]);
+  }
+
+  #[test]
+  fn empty_struct() {
+    let str = r#"ContextMap Movie {
+  Context Movie {
+    Aggregate Movie {
+      Entity Movie, Actor, Publisher;
+    }
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.contexts, vec![
+      BoundedContext {
+        name: "Movie".to_string(),
+        aggregates: vec![
+          Aggregate {
+            name: "Movie".to_string(),
+            entities: vec![
+              Entity {
+                name: "Movie".to_string(),
+                fields: vec![],
+                description: "".to_string(),
+                is_aggregate_root: false,
+                identify: Default::default()
+              },
+              Entity {
+                name: "Actor".to_string(),
+                fields: vec![],
+                description: "".to_string(),
+                is_aggregate_root: false,
+                identify: Default::default()
+              },
+              Entity {
+                name: "Publisher".to_string(),
+                fields: vec![],
+                description: "".to_string(),
+                is_aggregate_root: false,
+                identify: Default::default()
+              },
+            ],
+            description: "".to_string(),
+          },
+        ],
+      },
     ]);
   }
 
