@@ -1,6 +1,6 @@
 [package]
 name = "fkl-wasm"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Phodal Huang <h@phodal.com>"]
 edition = "2018"
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
@@ -29,7 +29,7 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
 
-fkl-parser = { path = "../fkl_parser", version = "0.3.0" }
+fkl-parser = { path = "../fkl_parser", version = "0.4.0" }
 fkl-dot = { path = "../fkl_dot", version = "0.1.0" }
 
 serde = { version = "1.0", features = ["derive"] }
