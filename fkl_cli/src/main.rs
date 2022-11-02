@@ -7,7 +7,7 @@ use clap::{Args, Parser, Subcommand};
 use log::{info, trace};
 use rdkafka::consumer::{BaseConsumer, Consumer};
 
-use fkl_parser::mir::Environment;
+use fkl_parser::mir::{ContextMap, Environment};
 use fkl_parser::parse;
 
 pub mod construct;
@@ -127,27 +127,34 @@ async fn main() {
             panic!("environment is required");
           }
 
-          let env: &Environment = match &run.env {
-            Some(env_name) => {
-              mir.envs.iter()
-                .filter(|env| &env.name == env_name)
-                .collect::<Vec<&Environment>>()
-                .first()
-                .unwrap_or_else(|| panic!("cannot find environment: {}", env_name))
-            }
-            None => &mir.envs[0],
-          };
+          let env = env_from_opt(&run, &mir);
           builtin::funcs::test_connection_runner(&env).await;
         }
         RunFuncName::MockServer => {
           builtin::funcs::mock_server_runner(&mir).await;
         }
         RunFuncName::MessageQueue => {
-         // builtin::funcs::message_queue_runner(&mir).await;
+          let env = env_from_opt(&run, &mir);
+         builtin::funcs::message_queue_runner(&mir, &env).await;
         }
       }
     }
   }
+}
+
+fn env_from_opt(run: &RunOpt, mir: &ContextMap) -> Environment {
+  let env: &Environment = match &run.env {
+    Some(env_name) => {
+      mir.envs.iter()
+        .filter(|env| &env.name == env_name)
+        .collect::<Vec<&Environment>>()
+        .first()
+        .unwrap_or_else(|| panic!("cannot find environment: {}", env_name))
+    }
+    None => &mir.envs[0],
+  };
+
+  env.clone()
 }
 
 fn gen_to_dot(path: &PathBuf) {
@@ -180,8 +187,8 @@ mod tests {
   use fkl_parser::mir::implementation::Implementation;
   use fkl_parser::parse;
 
-  use crate::builtin::types::BuiltinType;
   use crate::builtin::funcs::endpoint_runner;
+  use crate::builtin::types::BuiltinType;
   use crate::mock::fake_value::FakeValue;
   use crate::RunFuncName;
 

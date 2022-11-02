@@ -20,7 +20,7 @@ impl KafkaConnector {
 }
 
 impl KafkaConnector {
-  async fn send(&self, topic: &str, message: &str) {
+  pub async fn send(&self, topic: &str, message: &str) {
     let brokers = format!("{}:{}", self.host, self.port);
 
     let producer: FutureProducer = ClientConfig::new()

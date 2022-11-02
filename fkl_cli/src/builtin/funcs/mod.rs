@@ -16,6 +16,8 @@ pub use layered_guarding::*;
 pub use layered_guarding::layered_guarding_exec::LayeredGuardingExec;
 #[allow(unused_imports)]
 pub use mock_server::*;
+#[allow(unused_imports)]
+pub use message::*;
 
 pub mod code_gen;
 pub mod layered_guarding;
