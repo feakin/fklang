@@ -40,4 +40,10 @@ pub mod tests {
   fn layered_test() {
     assert!(do_parse_test("layered"));
   }
+
+  #[test]
+  #[cfg(not(target_os = "windows"))]
+  fn aggregate_sugar_test() {
+    assert!(do_parse_test("aggregate_sugar"));
+  }
 }

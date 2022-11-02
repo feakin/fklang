@@ -102,7 +102,7 @@ impl MirTransform {
           self.context_map_name = context_map.name.name.clone();
 
           context_map.contexts.iter().for_each(|context_decl| {
-            let bounded_context = Self::transform_bounded_context(&context_decl);
+            let bounded_context = self.transform_bounded_context(&context_decl);
 
             self.contexts.insert(bounded_context.name.clone(), bounded_context);
           });
@@ -110,7 +110,7 @@ impl MirTransform {
           self.relations = context_map.relations.iter().map(|relation| Self::transform_relation(&relation)).collect();
         }
         FklDeclaration::BoundedContext(decl) => {
-          let context = Self::transform_bounded_context(&decl);
+          let context = self.transform_bounded_context(&decl);
           self.contexts.insert(decl.name.clone(), context);
         }
         FklDeclaration::Aggregate(decl) => {
@@ -154,11 +154,23 @@ impl MirTransform {
     }
   }
 
-  fn transform_bounded_context(context_decl: &&BoundedContextDecl) -> BoundedContext {
+  fn transform_bounded_context(&self, context_decl: &BoundedContextDecl) -> BoundedContext {
     let mut context = mir::BoundedContext::new(&context_decl.name);
     context.aggregates = context_decl.used_domain_objects.iter().map(|domain_object| {
       Aggregate::new(&domain_object.name.clone())
     }).collect();
+
+    let from_inside: Vec<Aggregate> = context_decl.aggregates.iter().map(|aggregate| {
+      Aggregate {
+        name: aggregate.name.clone(),
+        description: "".to_string(),
+        entities: aggregate.entities.iter().map(|entity| {
+          self.transform_entity(entity)
+        }).collect(),
+      }
+    }).collect();
+
+    context.aggregates.extend(from_inside);
 
     context
   }
@@ -172,7 +184,7 @@ impl MirTransform {
     aggregate
   }
 
-  fn transform_entity(&mut self, decl: &EntityDecl) -> mir::Entity {
+  fn transform_entity(&self, decl: &EntityDecl) -> mir::Entity {
     Entity {
       name: decl.name.clone(),
       is_aggregate_root: decl.is_aggregate_root,
@@ -826,5 +838,29 @@ impl CinemaCreatedEvent {
         ],
       }
     ]);
+  }
+
+  #[test]
+  fn nested_aggregate() {
+    let str = r#"ContextMap architecture {
+    Context analyze {
+        Aggregate ArchSystem {
+            Struct {
+                id: String;
+                name: String;
+            }
+
+            Entity ArchComponent {
+                Struct {
+                    name: String;
+                    type: ArchComponentType
+                }
+            }
+        }
+    }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    println!("{:?}", context_map);
   }
 }

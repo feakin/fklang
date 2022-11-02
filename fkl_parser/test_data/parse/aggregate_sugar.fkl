@@ -1,0 +1,17 @@
+ContextMap architecture {
+  Context analyze {
+    Aggregate ArchSystem {
+      Struct {
+        id: String;
+        name: String;
+      }
+
+      Entity ArchComponent {
+        Struct {
+          name: String;
+          type: ArchComponentType
+        }
+      }
+    }
+  }
+}
