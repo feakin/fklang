@@ -143,20 +143,7 @@ async fn main() {
           builtin::funcs::mock_server_runner(&mir).await;
         }
         RunFuncName::MessageQueue => {
-          let brokers = "localhost:9092";
-          let topic = Some("test");
-          let consumer: BaseConsumer = rdkafka::ClientConfig::new()
-            .set("bootstrap.servers", brokers)
-            .create()
-            .expect("Consumer creation failed");
-
-          trace!("Consumer created");
-
-          let metadata = consumer
-            .fetch_metadata(topic, Duration::from_secs(5))
-            .expect("Failed to fetch metadata");
-
-          println!("Metadata for {:?}", metadata.topics().len());
+         // builtin::funcs::message_queue_runner(&mir).await;
         }
       }
     }

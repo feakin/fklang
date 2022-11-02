@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
+
 use crate::default_config;
+use crate::mir::VariableDefinition;
 use crate::mir::datasource::Datasource;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -7,6 +9,7 @@ pub struct Environment {
   pub name: String,
   pub datasources: Vec<Datasource>,
   pub server: ServerConfig,
+  pub customs: Vec<CustomEnv>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -19,3 +22,10 @@ impl Default for ServerConfig {
     ServerConfig { port: default_config::SERVER_PORT }
   }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct CustomEnv {
+  pub name: String,
+  pub attrs: Vec<VariableDefinition>,
+}
+

@@ -3,13 +3,13 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, LayerRelation, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, Step, ValueObject, Datasource, MySqlDatasource, PostgresDatasource};
+use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, Step, ValueObject};
 use crate::mir::authorization::HttpAuthorization;
 use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use crate::mir::implementation::http_api_impl::HttpApiImpl;
 use crate::mir::tactic::aggregate::Aggregate;
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -355,6 +355,10 @@ impl MirTransform {
       environment.server = self.transform_server_config(&orm);
     }
 
+    environment.customs = decl.customs.iter().map(|custom| {
+      self.transform_custom_env(&custom)
+    }).collect();
+
     environment
   }
 
@@ -395,6 +399,20 @@ impl MirTransform {
 
     server
   }
+
+  fn transform_custom_env(&self, decl: &CustomDecl) -> mir::CustomEnv {
+    let mut custom = mir::CustomEnv::default();
+    custom.name = decl.name.clone();
+    custom.attrs = decl.attributes.iter().map(|attr| {
+      mir::VariableDefinition {
+        name: attr.key.clone(),
+        type_type: "".to_string(),
+        initializer: Some(attr.value[0].clone()),
+      }
+    }).collect();
+
+    custom
+  }
 }
 
 fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
@@ -408,7 +426,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, LayerRelation, Entity, Flow, HttpMethod, Layer, LayeredArchitecture, MethodCall, SourceSet, SourceSets, Step, VariableDefinition, Environment, PostgresDatasource, ServerConfig};
+  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, VariableDefinition};
   use crate::mir::authorization::HttpAuthorization;
   use crate::mir::ConnectionDirection::PositiveDirected;
   use crate::mir::Datasource::Postgres;
@@ -768,6 +786,44 @@ impl CinemaCreatedEvent {
         server: ServerConfig {
           port: 9090,
         },
+        customs: vec![],
+      }
+    ]);
+  }
+
+  #[test]
+  fn custom_env() {
+    let str = r#"env Local {
+  kafka {
+    host: "localhost"
+    port: 9092
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.envs, vec![
+      Environment {
+        name: "Local".to_string(),
+        datasources: vec![],
+        server: ServerConfig {
+          port: 8899,
+        },
+        customs: vec![
+          CustomEnv {
+            name: "kafka".to_string(),
+            attrs: vec![
+              VariableDefinition {
+                name: "host".to_string(),
+                type_type: "".to_string(),
+                initializer: Some("localhost".to_string()),
+              },
+              VariableDefinition {
+                name: "port".to_string(),
+                type_type: "".to_string(),
+                initializer: Some("9092".to_string()),
+              }],
+          }
+        ],
       }
     ]);
   }
