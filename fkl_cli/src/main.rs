@@ -1,11 +1,9 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use std::time::Duration;
 
 use clap::{Args, Parser, Subcommand};
-use log::{info, trace};
-use rdkafka::consumer::{BaseConsumer, Consumer};
+use log::info;
 
 use fkl_parser::mir::{ContextMap, Environment};
 use fkl_parser::parse;

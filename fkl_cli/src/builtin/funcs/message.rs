@@ -1,4 +1,4 @@
-use fkl_parser::mir::{ContextMap, CustomEnv, Environment, Field};
+use fkl_parser::mir::{ContextMap, CustomEnv, Environment};
 
 use crate::message::kafka_connector::KafkaConnector;
 
