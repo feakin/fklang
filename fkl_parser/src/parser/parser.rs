@@ -140,15 +140,16 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
   }
 
   // sort context map by name
-  let contexts = context_decl_map.into_iter().map(|(_, v)| v)
+  let mut contexts = context_decl_map.into_iter().map(|(_, v)| v)
     .collect::<Vec<BoundedContextDecl>>();
 
+  contexts.sort_by(|a, b| a.name.cmp(&b.name));
 
   return ContextMapDecl {
+    loc: Loc::from_pair(span),
     name: identify,
     contexts,
     relations,
-    loc: Loc::from_pair(span),
   };
 }
 
@@ -300,7 +301,7 @@ pub fn consume_use_domain_events(pair: Pair<Rule>) -> Vec<DomainEventDecl> {
         let loc = Loc::from_pair(p.as_span());
         domain_events.push(DomainEventDecl {
           name: p.as_str().to_string(),
-          loc,
+          loc
         });
       }
       _ => println!("unreachable use_domain_events rule: {:?}", p.as_rule())
@@ -344,7 +345,7 @@ fn consume_use_domain_object(pair: Pair<Rule>) -> Vec<UsedDomainObject> {
         let loc = Loc::from_pair(p.as_span());
         used_domain_objects.push(UsedDomainObject {
           name: p.as_str().to_string(),
-          loc,
+          loc
         });
       }
       _ => println!("unreachable use_domain_object rule: {:?}", p.as_rule())
@@ -1020,18 +1021,18 @@ Context ShoppingCarContext {
       },
       contexts: vec![
         BoundedContextDecl {
-          name: "ShoppingCarContext".to_string(),
-          domain_events: vec![],
-          aggregates: vec![],
-          used_domain_objects: vec![],
-          loc: Loc(53, 71),
-        },
-        BoundedContextDecl {
           name: "MallContext".to_string(),
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
           loc: Loc(76, 87),
+        },
+        BoundedContextDecl {
+          name: "ShoppingCarContext".to_string(),
+          domain_events: vec![],
+          aggregates: vec![],
+          used_domain_objects: vec![],
+          loc: Loc(53, 71),
         },
       ],
       relations: vec![
@@ -1355,7 +1356,7 @@ Component SalesComponent {
         },
       ],
       used_domain_objects: vec![
-        UsedDomainObject { name: "SalesOrder".to_string(), loc: Loc(87, 97) },
+        UsedDomainObject { name: "SalesOrder".to_string(), loc: Loc(87, 97)  },
       ],
       loc: Loc(1, 100),
     }));
@@ -1368,7 +1369,7 @@ Component SalesComponent {
 ContextMap Mall {
   SalesContext [ OHS ] <-> OrderContext [ rel = "ACL, OHS" ];
 }
-"#.trim()).unwrap();
+"#).unwrap();
 
     let except = FklDeclaration::ContextMap(ContextMapDecl {
       name: Identifier {
@@ -1376,8 +1377,8 @@ ContextMap Mall {
         loc: Loc(11, 15),
       },
       contexts: vec![
-        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(20, 32) },
         BoundedContextDecl { name: "OrderContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(65, 77) },
+        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(20, 32)  },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),
@@ -1386,7 +1387,7 @@ ContextMap Mall {
         source_types: vec!["OHS".to_string()],
         target_types: vec!["ACL".to_string(), "OHS".to_string()],
       }],
-      loc: Loc(0, 81),
+      loc: Loc(1, 89),
     });
     assert_eq!(decls[0], except);
 
@@ -1522,7 +1523,7 @@ struct Cinema {
         VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(177, 192) },
         VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None, loc: Loc(196, 221) },
       ],
-      loc: Loc(129, 224),
+      loc: Loc(129, 224)
     }));
   }
 
@@ -1828,11 +1829,11 @@ env Local {
         username: "youruser".to_string(),
         password: "yourpassword".to_string(),
         database: "".to_string(),
-        loc: Loc(15, 172),
+        loc: Loc(15, 172)
       }),
       server: None,
       customs: vec![],
-      loc: Loc(1, 174),
+      loc: Loc(1, 174)
     }));
   }
 
@@ -1852,10 +1853,10 @@ env Local {
       server: Some(ServerDecl {
         port: 8899,
         attributes: vec![],
-        loc: Loc(15, 42),
+        loc: Loc(15, 42)
       }),
       customs: vec![],
-      loc: Loc(1, 44),
+      loc: Loc(1, 44)
     }));
   }
 
@@ -1889,10 +1890,10 @@ env Local {
               value: vec!["9092".to_string()],
               loc: Loc(49, 62),
             }],
-          loc: Loc(15, 63),
+          loc: Loc(15, 63)
         }
       ],
-      loc: Loc(1, 65),
+      loc: Loc(1, 65)
     }));
   }
 
