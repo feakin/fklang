@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+fkl-parser = { path = "../fkl_parser", version = "0.2.0" }
+
 lsp = { version = "0.93", package = "lsp-types" }
 lsp-text = { version = "0.9", features = ["tree-sitter"] }
 tree-sitter = { version = "0.9", package = "tree-sitter-facade" }

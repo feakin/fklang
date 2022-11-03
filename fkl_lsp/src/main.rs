@@ -4,6 +4,8 @@ use tower_lsp::{Client, LanguageServer, LspService, Server};
 
 use dashmap::DashMap;
 
+use fkl_parser::ast_parse;
+
 #[derive(Debug)]
 pub struct Backend {
     client: Client,
@@ -30,6 +32,7 @@ impl Backend {
         self.content_cache.insert(uri.to_string(), text);
 
         // TODO(CGQAQ): parsing raw text to AST using fkl_parser
+        let ast = ast_parse(&text).unwrap();
     }
 }
 
