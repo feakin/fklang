@@ -169,14 +169,7 @@ pub struct VariableDefinition {
 pub struct AttributeDefinition {
   pub key: String,
   pub value: Vec<String>,
-}
-
-// ???
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Property {
-  pub required: bool,
-  pub nullable: bool,
-  pub unique: bool,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -184,6 +177,7 @@ pub struct ValueObjectDecl {
   pub name: String,
   pub inline_doc: String,
   pub fields: Vec<VariableDefinition>,
+  pub loc: Loc,
 }
 
 // Implementation Block
@@ -204,6 +198,7 @@ pub struct ImplementationDecl {
 pub struct ImplementationTarget {
   pub target_type: ImplementationTargetType,
   pub name: String,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -224,12 +219,14 @@ impl Default for ImplementationTargetType {
 pub struct SourceSetsDecl {
   pub name: String,
   pub source_sets: Vec<SourceSetDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SourceSetDecl {
   pub name: String,
   pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -240,6 +237,7 @@ pub struct EndpointDecl {
   pub authorization: Option<AuthorizationDecl>,
   pub request: Option<HttpRequestDecl>,
   pub response: Option<HttpResponseDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -247,16 +245,19 @@ pub struct AuthorizationDecl {
   pub auth_type: String,
   pub username: Option<String>,
   pub password: Option<String>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HttpRequestDecl {
   pub name: String,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct HttpResponseDecl {
   pub name: String,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

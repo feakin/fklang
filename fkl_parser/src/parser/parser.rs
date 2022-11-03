@@ -1,10 +1,10 @@
-// use core::panicking::panic;
 use std::collections::HashMap;
 use std::hash::Hash;
 
+use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
-use crate::default_config;
 
+use crate::default_config;
 use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
@@ -14,14 +14,39 @@ use crate::pest::Parser;
 pub struct FklParser;
 
 pub fn parse(code: &str) -> ParseResult<Vec<FklDeclaration>> {
-  match FklParser::parse(Rule::declarations, code) {
+  match inner_parse(code) {
     Err(e) => {
+      // match &e.variant {
+      //   ErrorVariant::CustomError { message } => {
+      //     println!("Custom error: {}", message);
+      //   }
+      //   ErrorVariant::ParsingError { positives, negatives } => {
+      //     positives.iter().for_each(|p| println!("Positive: {:?}", p));
+      //     negatives.iter().for_each(|p| println!("Negative: {:?}", p));
+      //     println!("Parsing error: positives: {:?}, negatives: {:?}", positives, negatives);
+      //   }
+      // };
+
+      // let fancy_e = e.renamed_rules(|rule| {
+      //   match *rule {
+      //     Rule::EOI => "end of input".to_string(),
+      //     Rule::inline_doc => "`\"\"\"`".to_string(),
+      //     Rule::layer_decl => "`layer`".to_string(),
+      //     Rule::dependency_decl => "`dependency`".to_string(),
+      //     _ => "".to_string(),
+      //   }
+      // });
+      // return Err(ParseError::msg(fancy_e));
       return Err(ParseError::msg(e.to_string()));
     }
     Ok(pairs) => {
       Ok(consume_declarations(pairs))
     }
   }
+}
+
+fn inner_parse(code: &str) -> Result<Pairs<Rule>, Error<Rule>> {
+  FklParser::parse(Rule::declarations, code)
 }
 
 fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
@@ -394,6 +419,8 @@ fn consume_parameter(pair: Pair<Rule>) -> VariableDefinition {
 
 fn consume_value_object(pair: Pair<Rule>) -> ValueObjectDecl {
   let mut value_object = ValueObjectDecl::default();
+  value_object.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -435,6 +462,7 @@ fn consume_component(pair: Pair<Rule>) -> ComponentDecl {
 
 fn consume_attribute(pair: Pair<Rule>) -> AttributeDefinition {
   let mut attribute = AttributeDefinition::default();
+  attribute.loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -504,6 +532,8 @@ fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
 
 fn consume_set_target_object(pair: Pair<Rule>) -> ImplementationTarget {
   let mut target = ImplementationTarget::default();
+  target.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::set_aggregate_name => {
@@ -522,6 +552,8 @@ fn consume_set_target_object(pair: Pair<Rule>) -> ImplementationTarget {
 
 fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
   let mut endpoint = EndpointDecl::default();
+  endpoint.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -544,8 +576,10 @@ fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
         for inner in p.into_inner() {
           match inner.as_rule() {
             Rule::identifier => {
+              let loc = Loc::from_pair(inner.as_span());
               endpoint.request = Some(HttpRequestDecl {
                 name: inner.as_str().to_string(),
+                loc,
               });
             }
             _ => println!("unreachable http_request_decl rule: {:?}", inner.as_rule())
@@ -585,6 +619,8 @@ fn consume_struct(pair: Pair<Rule>) -> StructDecl {
 
 fn consume_authorization(pair: Pair<Rule>) -> AuthorizationDecl {
   let mut authorization = AuthorizationDecl::default();
+  authorization.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::authorization_type => {
@@ -604,6 +640,8 @@ fn consume_authorization(pair: Pair<Rule>) -> AuthorizationDecl {
 
 fn consume_http_response(pair: Pair<Rule>) -> HttpResponseDecl {
   let mut response = HttpResponseDecl::default();
+  response.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -766,6 +804,8 @@ fn consume_dependency_entry(pair: Pair<Rule>) -> LayerRelationDecl {
 
 fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
   let mut source_sets = SourceSetsDecl::default();
+  source_sets.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -783,6 +823,8 @@ fn consume_source_sets(pair: Pair<Rule>) -> SourceSetsDecl {
 
 fn consume_source_set_decl(pair: Pair<Rule>) -> SourceSetDecl {
   let mut source_set = SourceSetDecl::default();
+  source_set.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -1200,36 +1242,43 @@ Entity SalesPerson {
                 name: "CartId".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(58, 83),
               },
               ValueObjectDecl {
                 name: "CartStatus".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(83, 112),
               },
               ValueObjectDecl {
                 name: "CartItem".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(112, 139),
               },
               ValueObjectDecl {
                 name: "CartItemQuantity".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(139, 174),
               },
               ValueObjectDecl {
                 name: "CartItemPrice".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(174, 206),
               },
               ValueObjectDecl {
                 name: "CartItemTotal".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(206, 238),
               },
               ValueObjectDecl {
                 name: "CartTotal".to_string(),
                 inline_doc: "".to_string(),
                 fields: vec![],
+                loc: Loc(238, 264),
               },
             ],
             loc: Loc(38, 265),
@@ -1262,9 +1311,12 @@ Component SalesComponent {
         AttributeDefinition {
           key: "name".to_string(),
           value: vec!["Sample Phodal".to_string()],
-        }, AttributeDefinition {
+          loc: Loc(30, 53),
+        },
+        AttributeDefinition {
           key: "type".to_string(),
           value: vec!["Application".to_string()],
+          loc: Loc(56, 74),
         },
       ],
       used_domain_objects: vec![
@@ -1409,11 +1461,14 @@ struct Cinema {
           auth_type: "Basic".to_string(),
           username: Some("admin".to_string()),
           password: Some("admin".to_string()),
+          loc: Loc(66, 99),
         }),
         request: None,
         response: Some(HttpResponseDecl {
-          name: "Cinema".to_string()
+          name: "Cinema".to_string(),
+          loc: Loc(104, 121),
         }),
+        loc: Loc(29, 125),
       },
       target: None,
       flow: None,
@@ -1486,17 +1541,22 @@ imple CinemaCreatedEvent {
           auth_type: "Basic".to_string(),
           username: Some("admin".to_string()),
           password: Some("admin".to_string()),
+          loc: Loc(133, 166),
         }),
         request: Some(HttpRequestDecl {
-          name: "CinemaUpdatedRequest".to_string()
+          name: "CinemaUpdatedRequest".to_string(),
+          loc: Loc(103, 123),
         }),
         response: Some(HttpResponseDecl {
-          name: "Cinema".to_string()
+          name: "Cinema".to_string(),
+          loc: Loc(175, 192),
         }),
+        loc: Loc(48, 198),
       },
       target: Some(ImplementationTarget {
         target_type: Aggregate,
         name: "Cinema".to_string(),
+        loc: Loc(25, 43),
       }),
       flow: Some(FlowDecl {
         inline_doc: "".to_string(),
@@ -1537,7 +1597,7 @@ imple CinemaCreatedEvent {
           }),
         ],
       }),
-      loc: Loc(0, 405) 
+      loc: Loc(0, 405),
     }));
   }
 
@@ -1642,7 +1702,9 @@ imple CinemaCreatedEvent {
             AttributeDefinition {
               key: "srcDir".to_string(),
               value: vec!["src/main/resources/uml".to_string()],
+              loc: Loc(37, 74),
             }],
+          loc: Loc(24, 75),
         },
         SourceSetDecl {
           name: "puml".to_string(),
@@ -1650,12 +1712,16 @@ imple CinemaCreatedEvent {
             AttributeDefinition {
               key: "parser".to_string(),
               value: vec!["PlantUML".to_string()],
+              loc: Loc(89, 112),
             },
             AttributeDefinition {
               key: "srcDir".to_string(),
               value: vec!["src/main/resources/uml".to_string()],
+              loc: Loc(112, 149),
             }],
+          loc: Loc(78, 150),
         }],
+      loc: Loc(0, 152),
     }));
   }
 
@@ -1761,10 +1827,12 @@ env Local {
             AttributeDefinition {
               key: "host".to_string(),
               value: vec!["localhost".to_string()],
+              loc: Loc(27, 49),
             },
             AttributeDefinition {
               key: "port".to_string(),
               value: vec!["9092".to_string()],
+              loc: Loc(49, 62),
             }],
         }
       ],
