@@ -77,6 +77,7 @@ pub struct ContextMapDecl {
   pub name: Identifier,
   pub contexts: Vec<BoundedContextDecl>,
   pub relations: Vec<ContextRelation>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -85,6 +86,7 @@ pub struct BoundedContextDecl {
   pub domain_events: Vec<DomainEventDecl>,
   pub aggregates: Vec<AggregateDecl>,
   pub used_domain_objects: Vec<UsedDomainObject>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -143,6 +145,7 @@ pub struct AggregateDecl {
   pub entities: Vec<EntityDecl>,
   pub value_objects: Vec<ValueObjectDecl>,
   pub domain_events: Vec<DomainEventDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
