@@ -8,6 +8,14 @@ use rdkafka::producer::{FutureProducer, FutureRecord};
 use fkl_ext_api::custom_runner::CustomRunner;
 use fkl_mir::{ContextMap, CustomEnv};
 
+#[no_mangle]
+#[allow(improper_ctypes_definitions)]
+pub extern "C" fn _fkl_create_runner() -> *mut dyn CustomRunner {
+  let object = KafkaRunner {};
+  let boxed = Box::new(object);
+  Box::into_raw(boxed)
+}
+
 pub struct KafkaRunner {}
 
 pub struct KafkaConfig {

@@ -13,3 +13,5 @@ fkl_ext_api = { path = "../fkl_ext_api", version = "0.1.0" }
 libloading = { version = "0.7" }
 thiserror = "1.0"
 
+[dev-dependencies]
+tokio = { version = "1", features = ["full"] }

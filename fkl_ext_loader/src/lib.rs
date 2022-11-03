@@ -22,3 +22,27 @@ pub unsafe fn dynamically_load_ext(
   let plugin = Box::from_raw(func());
   Ok((lib, plugin))
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use std::path::PathBuf;
+  use fkl_mir::{ContextMap, CustomEnv};
+
+  #[tokio::test]
+  #[ignore]
+  async fn test_load_ext() {
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .parent().unwrap()
+      .join("target")
+      .join("debug")
+      .join("libext_hello_world.dylib");
+
+    unsafe {
+      let (lib, ext) = dynamically_load_ext(path.to_str().unwrap()).unwrap();
+      std::mem::forget(lib); // Ensure that the library is not automatically unloaded
+      // println!("ext: {:?}", ext);
+      ext.execute(&ContextMap::default(), &CustomEnv::default()).await;
+    }
+  }
+}
