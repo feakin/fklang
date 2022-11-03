@@ -4,6 +4,7 @@ use crate::default_config;
 use crate::mir::VariableDefinition;
 use crate::mir::datasource::Datasource;
 
+/// Global environment configuration
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Environment {
   pub name: String,

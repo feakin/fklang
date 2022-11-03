@@ -5,9 +5,9 @@ use serde::Serialize;
 
 use crate::mir::tactic::aggregate::Aggregate;
 
-// # Bounded Context
-// A description of a boundary (typically a subsystem, or the work of a particular team) within
-// which a particular model is defined and applicable.
+/// # Bounded Context
+/// A description of a boundary (typically a subsystem, or the work of a particular team) within
+/// which a particular model is defined and applicable.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct BoundedContext {
   pub name: String,

@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
+/// Domain Object
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum DomainObjectType {
   ApplicationService,

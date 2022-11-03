@@ -3,6 +3,7 @@ use serde::Serialize;
 
 use crate::mir::tactic::block::Field;
 
+/// Entity Object
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct Entity {
   pub name: String,

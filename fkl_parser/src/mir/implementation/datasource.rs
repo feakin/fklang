@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// DataSource, like mysql, postgres, etc.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Datasource {
   MySql(MySqlDatasource),

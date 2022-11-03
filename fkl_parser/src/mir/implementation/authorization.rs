@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-// Basic, Digest, Bearer
+/// Http Authorization, used for http request, support basic and bearer, digest, etc.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum HttpAuthorization {
   None,

@@ -6,15 +6,15 @@ use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, LayeredAr
 use crate::mir::environment::Environment;
 use crate::mir::implementation::Implementation;
 
-//
-// Identify each model in play on the project and define its bounded context. This includes
-// the implicit models of non-object-oriented subsystems. Name each bounded context, and make
-// the names part of the ubiquitous language.
-//
-// Describe the points of contact between the models, outlining explicit translation for
-// any communication, highlighting any sharing, isolation mechanisms, and levels of influence.
-//
-// Map the existing terrain. Take up transformations later.
+///
+/// Identify each model in play on the project and define its bounded context. This includes
+/// the implicit models of non-object-oriented subsystems. Name each bounded context, and make
+/// the names part of the ubiquitous language.
+///
+/// Describe the points of contact between the models, outlining explicit translation for
+/// any communication, highlighting any sharing, isolation mechanisms, and levels of influence.
+///
+/// Map the existing terrain. Take up transformations later.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct ContextMap {
   pub name: String,
