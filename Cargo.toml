@@ -17,6 +17,7 @@ members = [
   "extensions/codegen-aws-lambda",
   # for swagger
   "extensions/sourceset-swagger",
+#  "fkl_ext_loader/examples/**/*"
 ]
 
 [profile.release]
