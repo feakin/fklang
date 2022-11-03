@@ -73,6 +73,12 @@ struct RunOpt {
   env: Option<String>,
   #[arg(short, required = true, long = "func")]
   func_name: RunFuncName,
+  /// for example run for kafka
+  ///```
+  /// fkl_cli --func custom-function --env Local --custom kafka --main impl.fkl
+  ///```
+  #[arg(short, required = false, long = "custom")]
+  custom_func: Option<String>,
 }
 
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
@@ -81,7 +87,7 @@ pub enum RunFuncName {
   Guarding,
   TestConnection,
   MockServer,
-  MessageQueue,
+  CustomFunction,
 }
 
 // todo: add app context for save highlighter
@@ -111,7 +117,7 @@ async fn main() {
       let mir = builtin::funcs::mir_from_file(&run.main);
 
       info!("runOpt: {:?}", run);
-      match run.func_name {
+      match &run.func_name {
         RunFuncName::HttpRequest => {
           let impl_name = run.impl_name.as_ref().unwrap();
           builtin::funcs::endpoint_runner(&mir, &run.func_name, &impl_name);
@@ -131,9 +137,14 @@ async fn main() {
         RunFuncName::MockServer => {
           builtin::funcs::mock_server_runner(&mir).await;
         }
-        RunFuncName::MessageQueue => {
+        RunFuncName::CustomFunction => {
+          let func_name = match &run.custom_func {
+            Some(name) => name,
+            None => panic!("custom function name is required"),
+          };
+
           let env = env_from_opt(&run, &mir);
-         builtin::funcs::message_queue_runner(&mir, &env).await;
+          builtin::funcs::custom_function_runner(&mir, &env, &func_name).await;
         }
       }
     }

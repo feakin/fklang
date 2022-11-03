@@ -2,7 +2,7 @@ use fkl_parser::mir::{ContextMap, CustomEnv, Environment};
 
 use crate::message::kafka_connector::KafkaConnector;
 
-pub async fn message_queue_runner(_context: &ContextMap, env: &Environment) {
+pub async fn kafka_runner(_context: &ContextMap, env: &Environment) {
   let kafka_envs: Vec<CustomEnv> = env.customs.iter()
     .filter(|env| env.name == "kafka")
     .map(|env| env.clone())
@@ -12,10 +12,10 @@ pub async fn message_queue_runner(_context: &ContextMap, env: &Environment) {
     panic!("kafka environment is required");
   }
 
-  kafka_runner(&kafka_envs[0]).await;
+  execute_kafka(&kafka_envs[0]).await;
 }
 
-pub async fn kafka_runner(env: &CustomEnv) {
+pub async fn execute_kafka(env: &CustomEnv) {
   let port: u16 = match env.attrs.iter().filter(|it| it.name == "port").next() {
     None => { 9092 }
     Some(env) => {
