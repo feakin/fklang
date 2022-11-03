@@ -78,6 +78,7 @@ pub struct BoundedContextDecl {
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct DomainEventDecl {
   pub name: String,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -139,11 +140,13 @@ pub struct StructDecl {
   pub name: String,
   pub inline_doc: String,
   pub fields: Vec<VariableDefinition>,
+  pub loc: Loc
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct UsedDomainObject {
   pub name: String,
+  pub loc: Loc
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::hash::Hash;
 
+use indexmap::IndexMap;
 use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 
@@ -115,7 +116,7 @@ fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
 }
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
-  let mut context_decl_map: HashMap<String, BoundedContextDecl> = HashMap::new();
+  let mut context_decl_map: IndexMap<String, BoundedContextDecl> = IndexMap::new();
   let mut identify = Identifier::default();
   let mut relations: Vec<ContextRelation> = Vec::new();
   let span = pair.as_span().clone();
@@ -266,7 +267,6 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
         aggregate.domain_events = consume_use_domain_events(p);
       }
       Rule::struct_decl => {
-        let loc = Loc::from_pair(p.as_span());
         let default_struct = consume_struct(p);
         let fields = default_struct.fields;
         aggregate.entities.push(EntityDecl {
@@ -276,7 +276,7 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
           inline_doc: "".to_string(),
           fields,
           value_objects: vec![],
-          loc,
+          loc: default_struct.loc,
         });
       }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
@@ -291,8 +291,10 @@ pub fn consume_use_domain_events(pair: Pair<Rule>) -> Vec<DomainEventDecl> {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::event_name => {
+        let loc = Loc::from_pair(p.as_span());
         domain_events.push(DomainEventDecl {
-          name: p.as_str().to_string()
+          name: p.as_str().to_string(),
+          loc
         });
       }
       _ => println!("unreachable use_domain_events rule: {:?}", p.as_rule())
@@ -333,8 +335,10 @@ fn consume_use_domain_object(pair: Pair<Rule>) -> Vec<UsedDomainObject> {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
+        let loc = Loc::from_pair(p.as_span());
         used_domain_objects.push(UsedDomainObject {
-          name: p.as_str().to_string()
+          name: p.as_str().to_string(),
+          loc
         });
       }
       _ => println!("unreachable use_domain_object rule: {:?}", p.as_rule())
@@ -602,6 +606,8 @@ fn consume_endpoint(pair: Pair<Rule>) -> EndpointDecl {
 
 fn consume_struct(pair: Pair<Rule>) -> StructDecl {
   let mut struct_decl = StructDecl::default();
+  struct_decl.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -1343,7 +1349,7 @@ Component SalesComponent {
         },
       ],
       used_domain_objects: vec![
-        UsedDomainObject { name: "SalesOrder".to_string() },
+        UsedDomainObject { name: "SalesOrder".to_string(), loc: Loc(87, 97)  },
       ],
       loc: Loc(1, 100),
     }));
@@ -1352,9 +1358,11 @@ Component SalesComponent {
   #[test]
   #[ignore]
   fn rel_with_context_map() {
-    let decls = parse(r#"ContextMap Mall {
+    let decls = parse(r#"
+ContextMap Mall {
   SalesContext [ OHS ] <-> OrderContext [ rel = "ACL, OHS" ];
-}"#).unwrap();
+}
+"#).unwrap();
 
     let except = FklDeclaration::ContextMap(ContextMapDecl {
       name: Identifier {
@@ -1362,8 +1370,8 @@ Component SalesComponent {
         loc: Loc(11, 15),
       },
       contexts: vec![
-        BoundedContextDecl { name: "OrderContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Default::default() },
-        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Default::default() },
+        BoundedContextDecl { name: "OrderContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(65, 77) },
+        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(20, 32)  },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),
@@ -1372,7 +1380,7 @@ Component SalesComponent {
         source_types: vec!["OHS".to_string()],
         target_types: vec!["ACL".to_string(), "OHS".to_string()],
       }],
-      loc: Loc(0, 81),
+      loc: Loc(1, 89),
     });
     assert_eq!(decls[0], except);
 
@@ -1443,9 +1451,9 @@ Aggregate Cinema {
         name: "Cinema".to_string(),
         inline_doc: "".to_string(),
         used_domain_objects: vec![
-          UsedDomainObject { name: "Cinema".to_string() },
-          UsedDomainObject { name: "ScreeningRoom".to_string() },
-          UsedDomainObject { name: "Seat".to_string() }],
+          UsedDomainObject { name: "Cinema".to_string(), loc: Loc(68, 74) },
+          UsedDomainObject { name: "ScreeningRoom".to_string(), loc: Loc(76, 89) },
+          UsedDomainObject { name: "Seat".to_string(), loc: Loc(91, 95) }],
         entities: vec![],
         value_objects: vec![],
         domain_events: vec![],
@@ -1508,6 +1516,7 @@ struct Cinema {
         VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(177, 192) },
         VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None, loc: Loc(196, 221) },
       ],
+      loc: Loc(129, 224)
     }));
   }
 
@@ -1780,8 +1789,8 @@ imple CinemaCreatedEvent {
       entities: vec![],
       value_objects: vec![],
       domain_events: vec![
-        DomainEventDecl { name: "UserCreated".to_string() },
-        DomainEventDecl { name: "UserUpdated".to_string() },
+        DomainEventDecl { name: "UserCreated".to_string(), loc: Loc(31, 42) },
+        DomainEventDecl { name: "UserUpdated".to_string(), loc: Loc(44, 55) },
       ],
       loc: Loc(0, 58),
     }));
