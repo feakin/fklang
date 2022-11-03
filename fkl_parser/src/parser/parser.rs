@@ -98,8 +98,8 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
-        identify.name = p.as_str().to_string();
         identify.loc = Loc::from_pair(p.as_span());
+        identify.name = p.as_str().to_string();
       }
       Rule::context_decl => {
         let context_decl = consume_context(p);
@@ -112,6 +112,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
         let mut target_type: Vec<String> = vec![];
 
         for p in p.into_inner() {
+          let loc = Loc::from_pair(p.as_span());
           match p.as_rule() {
             Rule::left_id | Rule::right_id => {
               let context_name = p.as_str().to_string();
@@ -121,7 +122,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
                 domain_events: vec![],
                 aggregates: vec![],
                 used_domain_objects: vec![],
-                loc: Default::default(),
+                loc,
               });
             }
             Rule::rel_symbol => {
@@ -200,6 +201,7 @@ fn rel_defs(pair: Pair<Rule>) -> Vec<String> {
 
 fn consume_context(pair: Pair<Rule>) -> BoundedContextDecl {
   let mut context = BoundedContextDecl::default();
+  context.loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -277,6 +279,7 @@ pub fn consume_use_domain_events(pair: Pair<Rule>) -> Vec<DomainEventDecl> {
 
 fn consume_entity(pair: Pair<Rule>) -> EntityDecl {
   let mut entity = EntityDecl::default();
+  entity.loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -942,14 +945,14 @@ Context ShoppingCarContext {
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
-          loc: Default::default(),
+          loc: Loc(76, 87),
         },
         BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
-          loc: Default::default(),
+          loc: Loc(53, 71),
         },
       ],
       relations: vec![
@@ -1016,7 +1019,7 @@ Aggregate ShoppingCart {
             loc: Loc(75, 87),
           }],
         value_objects: vec![],
-        loc: Default::default(),
+        loc: Loc(28, 92),
       }],
       value_objects: vec![],
       domain_events: vec![],
@@ -1227,7 +1230,7 @@ Entity SalesPerson {
                 fields: vec![],
               },
             ],
-            loc: Default::default(),
+            loc: Loc(38, 265),
           }],
           value_objects: vec![],
           domain_events: vec![],
@@ -1235,7 +1238,7 @@ Entity SalesPerson {
         }
       ],
       used_domain_objects: vec![],
-      loc: Default::default(),
+      loc: Loc(0, 271),
     }));
   }
 
@@ -1337,12 +1340,12 @@ Component SalesComponent {
         VariableDefinition { name: "createdAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None, loc: Loc(156, 180) },
         VariableDefinition { name: "screeningId".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(186, 205) },
         VariableDefinition { name: "screeningStartTime".to_string(), type_type: "LocalDateTime".to_string(), initializer: None, loc: Loc(211, 244) },
-        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc:  Loc(250, 262) },
+        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(250, 262) },
         VariableDefinition { name: "surname".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(268, 283) },
         VariableDefinition { name: "tickets".to_string(), type_type: "Set<Ticket>".to_string(), initializer: None, loc: Loc(289, 309) },
         VariableDefinition { name: "totalPrice".to_string(), type_type: "BigDecimal".to_string(), initializer: None, loc: Loc(315, 337) }],
       value_objects: vec![],
-      loc: Default::default(),
+      loc: Loc(0, 344),
     }));
   }
 
@@ -1809,7 +1812,7 @@ env Local {
                   inline_doc: "".to_string(),
                   fields: vec![
                     VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(116, 126) },
-                    VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc:  Loc(144, 156) },
+                    VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(144, 156) },
                   ],
                   value_objects: vec![],
                   loc: Loc(91, 171),
@@ -1834,7 +1837,7 @@ env Local {
                     },
                   ],
                   value_objects: vec![],
-                  loc: Default::default(),
+                  loc: Loc(185, 342),
                 },
               ],
               value_objects: vec![],
@@ -1844,7 +1847,7 @@ env Local {
           ],
           domain_events: vec![],
           used_domain_objects: vec![],
-          loc: Default::default(),
+          loc: Loc(30, 358),
         },
       ],
       relations: vec![],
