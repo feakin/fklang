@@ -34,7 +34,7 @@ use rand::Rng;
  * -----------------------------------------------------------------------------
  *
  * Based loosely on Luka Pusic's PHP Script:
- * http://360percents.com/posts/php-random-user-agent-generator/
+ * <http://360percents.com/posts/php-random-user-agent-generator/>
  *
  * The license for that script is as follows:
  *

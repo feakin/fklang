@@ -88,7 +88,7 @@ impl PostgresConnector {
   }
 
   /// postgres data_type to builtin type
-  /// refs: link https://www.postgresql.org/docs/current/datatype.html
+  /// refs:  <https://www.postgresql.org/docs/current/datatype.html>
   /// ```markdown
   /// | Name | Aliases | Description |
   /// | --- | --- | --- |

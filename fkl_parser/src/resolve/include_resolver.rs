@@ -1,5 +1,8 @@
 use std::path::PathBuf;
 
+/// # Include Resolver
+/// Resolve the include path to the actual file path.
+#[allow(dead_code)]
 pub fn include_resolver(base_path: &str, include_path: &str) -> Option<PathBuf> {
   let mut base_path = PathBuf::from(base_path);
   base_path.pop();

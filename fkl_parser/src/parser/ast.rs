@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use pest::Span;
 
-// Todo: add Loc support
+// todo: add Loc support
 #[derive(Debug, PartialEq, PartialOrd, Ord, Eq, Hash, Clone, Copy, Default)]
 pub struct Loc(pub usize, pub usize);
 

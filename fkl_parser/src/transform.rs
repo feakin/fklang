@@ -15,7 +15,6 @@ use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, Datasour
 pub struct MirTransform {
   pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
-  // pub contexts: HashMap<String, BoundedContext>,
   pub relations: Vec<ContextRelation>,
   pub aggregates: HashMap<String, Aggregate>,
   pub entities: IndexMap<String, Entity>,
@@ -875,21 +874,21 @@ impl CinemaCreatedEvent {
                 fields: vec![],
                 description: "".to_string(),
                 is_aggregate_root: false,
-                identify: Default::default()
+                identify: Default::default(),
               },
               Entity {
                 name: "Actor".to_string(),
                 fields: vec![],
                 description: "".to_string(),
                 is_aggregate_root: false,
-                identify: Default::default()
+                identify: Default::default(),
               },
               Entity {
                 name: "Publisher".to_string(),
                 fields: vec![],
                 description: "".to_string(),
                 is_aggregate_root: false,
-                identify: Default::default()
+                identify: Default::default(),
               },
             ],
             description: "".to_string(),
