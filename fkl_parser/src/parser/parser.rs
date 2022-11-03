@@ -132,83 +132,88 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
         context_decl_map.insert(context_decl.name.clone(), context_decl);
       }
       Rule::context_node_rel => {
-        let mut names: Vec<String> = vec![];
-        let mut direction: RelationDirection = RelationDirection::Undirected;
-        let mut source_type: Vec<String> = vec![];
-        let mut target_type: Vec<String> = vec![];
-
-        for p in p.into_inner() {
-          let loc = Loc::from_pair(p.as_span());
-          match p.as_rule() {
-            Rule::left_id | Rule::right_id => {
-              let context_name = p.as_str().to_string();
-              names.push(context_name.clone());
-              context_decl_map.insert(context_name.clone(), BoundedContextDecl {
-                name: context_name,
-                domain_events: vec![],
-                aggregates: vec![],
-                used_domain_objects: vec![],
-                loc,
-              });
-            }
-            Rule::rel_symbol => {
-              for p in p.into_inner() {
-                match p.as_rule() {
-                  Rule::rs_both => {
-                    direction = RelationDirection::BiDirected;
-                  }
-                  Rule::rs_left_to_right => {
-                    direction = RelationDirection::PositiveDirected;
-                  }
-                  Rule::rs_right_to_left => {
-                    direction = RelationDirection::NegativeDirected;
-                  }
-                  _ => println!("unreachable entity rule: {:?}", p.as_rule())
-                };
-              }
-            }
-            Rule::left_rel_defs => {
-              for p in p.into_inner() {
-                if p.as_rule() == Rule::rel_defs {
-                  source_type = rel_defs(p);
-                }
-              }
-            }
-            Rule::right_rel_defs => {
-              for p in p.into_inner() {
-                if p.as_rule() == Rule::rel_defs {
-                  target_type = rel_defs(p);
-                }
-              }
-            }
-            _ => println!("unreachable context rel rule: {:?}", p.as_rule())
-          };
-        }
-
-        relations.push(ContextRelation {
-          source: names[0].clone(),
-          target: names[1].clone(),
-          direction,
-          source_types: source_type,
-          target_types: target_type,
-        });
+        let context_relation = consume_context_node(&mut context_decl_map, p);
+        relations.push(context_relation);
       }
       _ => println!("unreachable context_map rule: {:?}", p.as_rule())
     };
   }
 
   // sort context map by name
-  let mut contexts = context_decl_map.into_iter().map(|(_, v)| v)
+  let contexts = context_decl_map.into_iter().map(|(_, v)| v)
     .collect::<Vec<BoundedContextDecl>>();
 
-  contexts.sort_by(|a, b| a.name.cmp(&b.name));
 
   return ContextMapDecl {
-    loc: Loc::from_pair(span),
     name: identify,
     contexts,
     relations,
+    loc: Loc::from_pair(span),
   };
+}
+
+fn consume_context_node(context_decl_map: &mut IndexMap<String, BoundedContextDecl>, pair: Pair<Rule>) -> ContextRelation {
+  let mut names: Vec<String> = vec![];
+  let mut direction: RelationDirection = RelationDirection::Undirected;
+  let mut source_type: Vec<String> = vec![];
+  let mut target_type: Vec<String> = vec![];
+
+  for p in pair.into_inner() {
+    let loc = Loc::from_pair(p.as_span());
+    match p.as_rule() {
+      Rule::left_id | Rule::right_id => {
+        let context_name = p.as_str().to_string();
+        names.push(context_name.clone());
+        context_decl_map.insert(context_name.clone(), BoundedContextDecl {
+          name: context_name,
+          domain_events: vec![],
+          aggregates: vec![],
+          used_domain_objects: vec![],
+          loc,
+        });
+      }
+      Rule::rel_symbol => {
+        for p in p.into_inner() {
+          match p.as_rule() {
+            Rule::rs_both => {
+              direction = RelationDirection::BiDirected;
+            }
+            Rule::rs_left_to_right => {
+              direction = RelationDirection::PositiveDirected;
+            }
+            Rule::rs_right_to_left => {
+              direction = RelationDirection::NegativeDirected;
+            }
+            _ => println!("unreachable entity rule: {:?}", p.as_rule())
+          };
+        }
+      }
+      Rule::left_rel_defs => {
+        for p in p.into_inner() {
+          if p.as_rule() == Rule::rel_defs {
+            source_type = rel_defs(p);
+          }
+        }
+      }
+      Rule::right_rel_defs => {
+        for p in p.into_inner() {
+          if p.as_rule() == Rule::rel_defs {
+            target_type = rel_defs(p);
+          }
+        }
+      }
+      _ => println!("unreachable context rel rule: {:?}", p.as_rule())
+    };
+  }
+
+  let context_relation = ContextRelation {
+    source: names[0].clone(),
+    target: names[1].clone(),
+    direction,
+    source_types: source_type,
+    target_types: target_type,
+  };
+  context_relation
 }
 
 fn rel_defs(pair: Pair<Rule>) -> Vec<String> {
@@ -228,6 +233,7 @@ fn rel_defs(pair: Pair<Rule>) -> Vec<String> {
 fn consume_context(pair: Pair<Rule>) -> BoundedContextDecl {
   let mut context = BoundedContextDecl::default();
   context.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -294,7 +300,7 @@ pub fn consume_use_domain_events(pair: Pair<Rule>) -> Vec<DomainEventDecl> {
         let loc = Loc::from_pair(p.as_span());
         domain_events.push(DomainEventDecl {
           name: p.as_str().to_string(),
-          loc
+          loc,
         });
       }
       _ => println!("unreachable use_domain_events rule: {:?}", p.as_rule())
@@ -338,7 +344,7 @@ fn consume_use_domain_object(pair: Pair<Rule>) -> Vec<UsedDomainObject> {
         let loc = Loc::from_pair(p.as_span());
         used_domain_objects.push(UsedDomainObject {
           name: p.as_str().to_string(),
-          loc
+          loc,
         });
       }
       _ => println!("unreachable use_domain_object rule: {:?}", p.as_rule())
@@ -1014,18 +1020,18 @@ Context ShoppingCarContext {
       },
       contexts: vec![
         BoundedContextDecl {
-          name: "MallContext".to_string(),
-          domain_events: vec![],
-          aggregates: vec![],
-          used_domain_objects: vec![],
-          loc: Loc(76, 87),
-        },
-        BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
           loc: Loc(53, 71),
+        },
+        BoundedContextDecl {
+          name: "MallContext".to_string(),
+          domain_events: vec![],
+          aggregates: vec![],
+          used_domain_objects: vec![],
+          loc: Loc(76, 87),
         },
       ],
       relations: vec![
@@ -1349,7 +1355,7 @@ Component SalesComponent {
         },
       ],
       used_domain_objects: vec![
-        UsedDomainObject { name: "SalesOrder".to_string(), loc: Loc(87, 97)  },
+        UsedDomainObject { name: "SalesOrder".to_string(), loc: Loc(87, 97) },
       ],
       loc: Loc(1, 100),
     }));
@@ -1362,7 +1368,7 @@ Component SalesComponent {
 ContextMap Mall {
   SalesContext [ OHS ] <-> OrderContext [ rel = "ACL, OHS" ];
 }
-"#).unwrap();
+"#.trim()).unwrap();
 
     let except = FklDeclaration::ContextMap(ContextMapDecl {
       name: Identifier {
@@ -1370,8 +1376,8 @@ ContextMap Mall {
         loc: Loc(11, 15),
       },
       contexts: vec![
+        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(20, 32) },
         BoundedContextDecl { name: "OrderContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(65, 77) },
-        BoundedContextDecl { name: "SalesContext".to_string(), domain_events: vec![], aggregates: vec![], used_domain_objects: vec![], loc: Loc(20, 32)  },
       ],
       relations: vec![ContextRelation {
         source: "SalesContext".to_string(),
@@ -1380,7 +1386,7 @@ ContextMap Mall {
         source_types: vec!["OHS".to_string()],
         target_types: vec!["ACL".to_string(), "OHS".to_string()],
       }],
-      loc: Loc(1, 89),
+      loc: Loc(0, 81),
     });
     assert_eq!(decls[0], except);
 
@@ -1516,7 +1522,7 @@ struct Cinema {
         VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(177, 192) },
         VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None, loc: Loc(196, 221) },
       ],
-      loc: Loc(129, 224)
+      loc: Loc(129, 224),
     }));
   }
 
@@ -1822,11 +1828,11 @@ env Local {
         username: "youruser".to_string(),
         password: "yourpassword".to_string(),
         database: "".to_string(),
-        loc: Loc(15, 172)
+        loc: Loc(15, 172),
       }),
       server: None,
       customs: vec![],
-      loc: Loc(1, 174)
+      loc: Loc(1, 174),
     }));
   }
 
@@ -1846,10 +1852,10 @@ env Local {
       server: Some(ServerDecl {
         port: 8899,
         attributes: vec![],
-        loc: Loc(15, 42)
+        loc: Loc(15, 42),
       }),
       customs: vec![],
-      loc: Loc(1, 44)
+      loc: Loc(1, 44),
     }));
   }
 
@@ -1883,10 +1889,10 @@ env Local {
               value: vec!["9092".to_string()],
               loc: Loc(49, 62),
             }],
-          loc: Loc(15, 63)
+          loc: Loc(15, 63),
         }
       ],
-      loc: Loc(1, 65)
+      loc: Loc(1, 65),
     }));
   }
 

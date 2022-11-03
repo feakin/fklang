@@ -43,7 +43,7 @@ pub struct IncludeDecl {
   pub loc: Loc,
 }
 
-// todo: add Loc support
+// todo: add support for unique
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UbiquitousLanguage {
   pub name: String,
@@ -79,11 +79,6 @@ pub struct BoundedContextDecl {
 pub struct DomainEventDecl {
   pub name: String,
   pub loc: Loc,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct UsedImplementation {
-  pub name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
