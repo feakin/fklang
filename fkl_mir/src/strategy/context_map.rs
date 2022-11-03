@@ -2,9 +2,9 @@ use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step};
-use crate::mir::environment::Environment;
-use crate::mir::implementation::Implementation;
+use crate::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step};
+use crate::environment::Environment;
+use crate::implementation::Implementation;
 
 ///
 /// Identify each model in play on the project and define its bounded context. This includes
@@ -113,7 +113,7 @@ impl Display for ContextMap {
 #[cfg(test)]
 mod tests {
   use crate::ContextMap;
-  use crate::mir::{Aggregate, BoundedContext, Entity};
+  use crate::{Aggregate, BoundedContext, Entity};
 
   #[test]
   fn display_context_map() {

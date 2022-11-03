@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::tactic::aggregate::Aggregate;
+use crate::tactic::aggregate::Aggregate;
 
 /// # Bounded Context
 /// A description of a boundary (typically a subsystem, or the work of a particular team) within

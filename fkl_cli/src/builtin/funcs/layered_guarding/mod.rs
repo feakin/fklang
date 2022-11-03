@@ -3,7 +3,7 @@ use std::process;
 
 use log::error;
 
-use fkl_parser::mir::LayeredArchitecture;
+use fkl_mir::LayeredArchitecture;
 pub use layered_guarding_exec::LayeredGuardingExec;
 
 pub mod package_guarding;

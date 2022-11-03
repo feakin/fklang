@@ -1,4 +1,4 @@
-use fkl_parser::mir::ContextMap;
+use fkl_mir::ContextMap;
 use futures::executor::block_on;
 use crate::mock::stub_server::feakin_rocket;
 

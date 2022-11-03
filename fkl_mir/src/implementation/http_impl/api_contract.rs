@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
-use crate::mir::authorization::HttpAuthorization;
-use crate::mir::implementation::validation::Validation;
+use crate::authorization::HttpAuthorization;
+use crate::implementation::validation::Validation;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct HttpEndpoint {

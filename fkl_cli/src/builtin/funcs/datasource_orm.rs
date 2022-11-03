@@ -1,6 +1,6 @@
 use log::info;
 
-use fkl_parser::mir::{Datasource, Environment};
+use fkl_mir::{Datasource, Environment};
 
 use crate::datasource::mysql_connector::MysqlConnector;
 use crate::datasource::postgres_connector::PostgresConnector;

@@ -1,5 +1,5 @@
 use log::error;
-use fkl_parser::mir::LayeredArchitecture;
+use fkl_mir::LayeredArchitecture;
 
 pub struct LayerMap {
   pub interface: String,
@@ -70,7 +70,7 @@ pub fn java_package_to_path(package: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::{Layer, LayeredArchitecture};
+  use fkl_mir::{Layer, LayeredArchitecture};
   use crate::builtin::funcs::{java_package_to_path, LayerMap};
 
   #[test]

@@ -2,12 +2,15 @@ use std::collections::HashMap;
 
 use indexmap::IndexMap;
 
-use crate::{ContextMap, mir, ParseError};
-use crate::mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, Step, ValueObject};
-use crate::mir::authorization::HttpAuthorization;
-use crate::mir::implementation::{HttpEndpoint, Implementation, Request, Response};
-use crate::mir::implementation::http_api_impl::HttpApiImpl;
-use crate::mir::tactic::aggregate::Aggregate;
+use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, Step, ValueObject};
+use fkl_mir::authorization::HttpAuthorization;
+use fkl_mir::implementation::{HttpEndpoint, Implementation, Request, Response};
+use fkl_mir::implementation::http_api_impl::HttpApiImpl;
+use fkl_mir::tactic::aggregate::Aggregate;
+
+use fkl_mir as mir;
+
+use crate::{ContextMap, ParseError};
 use crate::parser::{ast, parse as ast_parse};
 use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
 
@@ -21,8 +24,8 @@ pub struct MirTransform {
   pub value_objects: IndexMap<String, ValueObject>,
   pub implementations: Vec<HttpApiImpl>,
   pub layered: Option<LayeredArchitecture>,
-  pub source_sets: Option<mir::SourceSets>,
-  pub envs: Vec<mir::Environment>,
+  pub source_sets: Option<fkl_mir::SourceSets>,
+  pub envs: Vec<fkl_mir::Environment>,
 }
 
 impl MirTransform {
@@ -449,13 +452,14 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, VariableDefinition};
-  use crate::mir::authorization::HttpAuthorization;
-  use crate::mir::ConnectionDirection::PositiveDirected;
-  use crate::mir::Datasource::Postgres;
-  use crate::mir::implementation::{HttpEndpoint, Implementation, Response};
-  use crate::mir::implementation::http_api_impl::HttpApiImpl;
-  use crate::mir::tactic::block::Field;
+  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, VariableDefinition};
+  use fkl_mir::authorization::HttpAuthorization;
+  use fkl_mir::ConnectionDirection::PositiveDirected;
+  use fkl_mir::Datasource::Postgres;
+  use fkl_mir::implementation::{HttpEndpoint, Implementation, Response};
+  use fkl_mir::implementation::http_api_impl::HttpApiImpl;
+  use fkl_mir::tactic::block::Field;
+
   use crate::transform::MirTransform;
 
   #[test]

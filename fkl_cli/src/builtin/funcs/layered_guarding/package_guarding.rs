@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use fkl_parser::mir::LayeredArchitecture;
+use fkl_mir::LayeredArchitecture;
 
 use crate::code_meta::CodeFile;
 

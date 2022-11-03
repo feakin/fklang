@@ -2,7 +2,7 @@ use indexmap::IndexMap;
 use rocket::{get, post, put, delete, State};
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
-use fkl_parser::mir::{ContextMap, Entity};
+use fkl_mir::{ContextMap, Entity};
 use crate::mock::fake_value::FakeValue;
 use crate::mock::mock_type::MockType;
 use crate::mock::stub_server::{ApiError, MockServerConfig};

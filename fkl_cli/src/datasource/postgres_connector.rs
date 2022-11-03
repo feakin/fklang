@@ -4,7 +4,7 @@ use log::error;
 use sqlx::postgres::{PgPoolOptions, PgRow};
 use sqlx::Row;
 
-use fkl_parser::mir::PostgresDatasource;
+use fkl_mir::PostgresDatasource;
 use crate::builtin::types::BuiltinType;
 
 pub struct PostgresConnector {

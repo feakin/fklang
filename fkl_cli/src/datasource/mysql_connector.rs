@@ -4,7 +4,7 @@ use log::error;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::Row;
 
-use fkl_parser::mir::MySqlDatasource;
+use fkl_mir::MySqlDatasource;
 
 pub struct MysqlConnector {
   config: MySqlDatasource,

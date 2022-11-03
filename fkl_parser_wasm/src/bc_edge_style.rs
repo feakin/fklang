@@ -1,4 +1,4 @@
-use fkl_parser::mir::ContextRelationType;
+use fkl_mir::ContextRelationType;
 use std::collections::HashMap;
 
 #[derive(Eq, PartialEq, Debug)]
@@ -83,7 +83,7 @@ fn map_from_type(context_type: &ContextRelationType) -> HashMap<String, String> 
 
 #[cfg(test)]
 mod test {
-  use fkl_parser::mir::ContextRelationType;
+  use fkl_mir::ContextRelationType;
   use fkl_parser::parse;
     use crate::bc_edge_style::{BcEdgeStyle, generate_edge_style};
     use crate::dot_gen::to_dot;

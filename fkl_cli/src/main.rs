@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use log::info;
 
-use fkl_parser::mir::{ContextMap, Environment};
+use fkl_mir::{ContextMap, Environment};
 use fkl_parser::parse;
 
 pub mod construct;
@@ -192,8 +192,8 @@ mod tests {
   use indexmap::IndexMap;
 
   use fkl_codegen_java::gen_http_api;
-  use fkl_parser::mir::{BoundedContext, ContextMap};
-  use fkl_parser::mir::implementation::Implementation;
+  use fkl_mir::{BoundedContext, ContextMap};
+  use fkl_mir::implementation::Implementation;
   use fkl_parser::parse;
 
   use crate::builtin::funcs::endpoint_runner;

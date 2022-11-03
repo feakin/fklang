@@ -5,8 +5,8 @@ use reqwest::blocking::{Client, Response};
 use reqwest::header;
 use reqwest::header::HeaderMap;
 
-use fkl_parser::mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
-use fkl_parser::mir::authorization::HttpAuthorization;
+use fkl_mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
+use fkl_mir::authorization::HttpAuthorization;
 
 use crate::highlighter::Highlighter;
 use crate::mock::fake_user_agent::UserAgent;

@@ -9,7 +9,7 @@ pub use code_gen::layer_map::*;
 pub use code_gen::layer_path_builder::*;
 #[allow(unused_imports)]
 pub use datasource_orm::*;
-use fkl_parser::mir::ContextMap;
+use fkl_mir::ContextMap;
 use fkl_parser::parse;
 pub use http_request::*;
 pub use layered_guarding::*;

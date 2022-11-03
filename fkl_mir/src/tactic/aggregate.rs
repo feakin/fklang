@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
-use crate::mir::tactic::entity::Entity;
+use crate::Entity;
 
 /// Cluster the entities and value objects into aggregates and define boundaries around each.
 /// Choose one entity to be the root of each aggregate, and allow external objects to hold

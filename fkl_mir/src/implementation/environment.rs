@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
 use crate::default_config;
-use crate::mir::VariableDefinition;
-use crate::mir::datasource::Datasource;
+use crate::VariableDefinition;
+use crate::datasource::Datasource;
 
 /// Global environment configuration
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]

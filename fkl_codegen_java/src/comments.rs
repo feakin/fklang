@@ -1,4 +1,4 @@
-use fkl_parser::mir::Step;
+use fkl_mir::Step;
 
 pub fn ai_comments(steps: &Vec<Step>) -> Vec<String> {
   steps.iter().enumerate().map(|(index, step)| {
@@ -18,7 +18,7 @@ pub fn ai_comments(steps: &Vec<Step>) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::{Message, MethodCall, Step, VariableDefinition};
+  use fkl_mir::{Message, MethodCall, Step, VariableDefinition};
 
   use crate::comments::ai_comments;
 

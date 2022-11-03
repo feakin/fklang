@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::tactic::block::Field;
+use crate::tactic::block::Field;
 
 /// Entity Object
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use fkl_parser::mir::LayeredArchitecture;
+use fkl_mir::LayeredArchitecture;
 
 use crate::construct::file_resolver::{FileResolver, ResolvedFile};
 use crate::builtin::funcs::layered_guarding::package_guarding::PackageGuarding;

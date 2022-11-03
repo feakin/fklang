@@ -4,6 +4,7 @@ members = [
   "domain_derive",
   "fkl_cli",
   "fkl_lsp",
+  "fkl_mir",
   "fkl_parser",
   "fkl_parser_wasm",
   # codegen

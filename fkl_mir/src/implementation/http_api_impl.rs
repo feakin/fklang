@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
-use crate::mir::Flow;
-use crate::mir::implementation::HttpEndpoint;
+use crate::Flow;
+use crate::implementation::HttpEndpoint;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
 pub struct HttpApiImpl {

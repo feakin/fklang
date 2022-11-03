@@ -6,8 +6,8 @@ use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use serde::{Deserialize, Serialize};
 
-use fkl_parser::default_config;
-use fkl_parser::mir::{Aggregate, ContextMap, Entity};
+use fkl_mir::default_config;
+use fkl_mir::{Aggregate, ContextMap, Entity};
 
 pub use super::stub_aggregate_api;
 
@@ -97,7 +97,7 @@ mod test {
   use rocket::http::Status;
   use rocket::local::blocking::Client;
 
-  use fkl_parser::mir::ContextMap;
+  use fkl_mir::ContextMap;
   use fkl_parser::parse;
 
   use crate::mock::stub_server::{feakin_rocket, gen_api_list};

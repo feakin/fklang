@@ -1,4 +1,4 @@
-use fkl_parser::mir::{ContextMap, Environment};
+use fkl_mir::{ContextMap, Environment};
 
 use crate::builtin::funcs::message::kafka_runner;
 

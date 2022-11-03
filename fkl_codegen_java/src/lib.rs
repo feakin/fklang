@@ -7,7 +7,7 @@ pub use spring_gen::entity_gen::*;
 pub use spring_gen::jpa_gen::*;
 pub use spring_gen::spring_code_gen::*;
 
-use fkl_parser::mir::implementation::HttpApiImpl;
+use fkl_mir::implementation::HttpApiImpl;
 
 pub struct GenCode {
   pub code: String,
@@ -43,7 +43,7 @@ pub fn gen_http_api(api: &HttpApiImpl, _framework: &str) -> GenCode {
 
 #[cfg(test)]
 mod tests {
-  use fkl_parser::mir::implementation::{HttpApiImpl, HttpEndpoint};
+  use fkl_mir::implementation::{HttpApiImpl, HttpEndpoint};
 
   use crate::gen_http_api;
 

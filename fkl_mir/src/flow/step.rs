@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
-use crate::mir::binding::VariableDefinition;
+use crate::binding::VariableDefinition;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Step {

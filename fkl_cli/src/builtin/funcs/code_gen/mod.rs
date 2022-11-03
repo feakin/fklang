@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use log::info;
 
 use fkl_codegen_java::gen_http_api;
-use fkl_parser::mir::{ContextMap, Implementation};
+use fkl_mir::{ContextMap, Implementation};
 
 use crate::construct::code_construct::CodeConstruct;
 use crate::construct::java_construct::JavaConstruct;

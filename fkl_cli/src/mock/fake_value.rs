@@ -4,7 +4,7 @@ use rand::distributions::Alphanumeric;
 use rand::Rng;
 use sqlx::types::uuid;
 
-use fkl_parser::mir::Field;
+use fkl_mir::Field;
 
 use crate::builtin::types::BuiltinType;
 use crate::mock::mock_type::MockType;

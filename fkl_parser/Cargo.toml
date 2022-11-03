@@ -30,7 +30,7 @@ indexmap = "1.9.1"
 
 serde = { version = "1", features = ["derive"] }
 
-url = "2.3.1"
+fkl-mir = { path = "../fkl_mir" }
 
 [dev-dependencies]
 mockall = "0.11.2"

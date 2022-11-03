@@ -3,14 +3,11 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
+use fkl_mir::ContextMap;
 pub use parser::parse as ast_parse;
 
-use crate::mir::ContextMap;
 use crate::parser::parse_result::ParseError;
 use crate::transform::MirTransform;
-
-pub mod mir;
-pub mod default_config;
 
 mod parser;
 mod resolve;

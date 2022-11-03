@@ -1,8 +1,8 @@
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::mir::implementation::http_api_impl::HttpApiImpl;
-use crate::mir::implementation::Implementation::PublishHttpApi;
+use crate::implementation::http_api_impl::HttpApiImpl;
+use crate::implementation::Implementation::PublishHttpApi;
 
 // Todo: Subscribe / Publish / Event / Flow
 

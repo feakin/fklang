@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod test {
-  use crate::mir;
-  use crate::mir::{Aggregate, BoundedContext, ContextRelation, ContextState, Entity};
-  use crate::mir::ConnectionDirection::PositiveDirected;
-  use crate::mir::tactic::block::Field;
+  use fkl_mir;
+  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextState, Entity};
+  use fkl_mir::ConnectionDirection::PositiveDirected;
+  use fkl_mir::tactic::block::Field;
   use crate::parse;
 
   #[test]
@@ -99,7 +99,7 @@ ValueObject Notifications { }
 "#;
 
     let decls = parse(booking_ticket).unwrap();
-    assert_eq!(decls, mir::ContextMap {
+    assert_eq!(decls, fkl_mir::ContextMap {
       name: "TicketBooking".to_string(),
       state: ContextState::ToBe,
       contexts: vec![

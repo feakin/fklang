@@ -2,7 +2,7 @@ use fkl_dot::graph::Graph;
 use fkl_dot::helper::naming::cluster_name;
 use fkl_dot::node::Node;
 use fkl_dot::subgraph::Subgraph;
-use fkl_parser::mir::{ConnectionDirection, ContextMap, ContextRelation};
+use fkl_mir::{ConnectionDirection, ContextMap, ContextRelation};
 
 use crate::bc_edge_style;
 use crate::bc_edge_style::BcEdgeStyle;
