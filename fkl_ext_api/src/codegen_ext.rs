@@ -4,6 +4,6 @@ pub struct CodegenExt {
 }
 
 pub trait CodegenTrait {
-  fn new(name: &str) -> Self;
-  fn parser(&self) -> &str;
+  fn name(&self) -> String;
+  fn parser(&self) -> String;
 }

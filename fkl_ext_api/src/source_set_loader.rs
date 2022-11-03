@@ -1,4 +1,4 @@
 pub trait SourceSetLoaderTrait {
-  fn new() -> Self;
+  fn name() -> String;
   fn load(&self, path: &str) -> String;
 }
