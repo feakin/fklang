@@ -197,6 +197,7 @@ pub struct ImplementationDecl {
   pub endpoint: EndpointDecl,
   pub target: Option<ImplementationTarget>,
   pub flow: Option<FlowDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

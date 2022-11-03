@@ -477,6 +477,8 @@ fn consume_attr_value(pair: Pair<Rule>) -> Vec<String> {
 
 fn consume_implementation(pair: Pair<Rule>) -> ImplementationDecl {
   let mut implementation = ImplementationDecl::default();
+  implementation.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -1415,6 +1417,7 @@ struct Cinema {
       },
       target: None,
       flow: None,
+      loc: Loc(1, 127),
     }));
 
     assert_eq!(result[1], FklDeclaration::Struct(StructDecl {
@@ -1534,6 +1537,7 @@ imple CinemaCreatedEvent {
           }),
         ],
       }),
+      loc: Loc(0, 405) 
     }));
   }
 
