@@ -264,6 +264,7 @@ pub struct HttpResponseDecl {
 pub struct FlowDecl {
   pub inline_doc: String,
   pub steps: Vec<StepDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -279,6 +280,7 @@ pub struct MethodCallDecl {
   pub method: String,
   pub arguments: Vec<VariableDefinition>,
   pub return_type: Option<VariableDefinition>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -286,6 +288,7 @@ pub struct MessageDecl {
   pub from: String,
   pub topic: String,
   pub message: String,
+  pub loc: Loc,
 }
 
 // Binding block
@@ -303,6 +306,7 @@ pub struct SourceSet {
   pub source_type: String,
   pub src_dirs: Vec<String>,
   pub filter: String,
+  pub loc: Loc,
 }
 
 // Layered Block
@@ -313,12 +317,14 @@ pub struct LayeredDecl {
   pub inline_doc: String,
   pub dependencies: Vec<LayerRelationDecl>,
   pub layers: Vec<LayerDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct LayerRelationDecl {
   pub source: String,
   pub target: String,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -326,6 +332,7 @@ pub struct LayerDecl {
   pub name: String,
   pub inline_doc: String,
   pub package: String,
+  pub loc: Loc,
 }
 
 // Architecture Binding Block
@@ -357,6 +364,7 @@ pub struct ComponentDecl {
   pub inline_doc: String,
   pub used_domain_objects: Vec<UsedDomainObject>,
   pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -380,9 +388,9 @@ pub struct EnvDecl {
   pub name: String,
   pub inline_doc: String,
   pub datasource: Option<DatasourceDecl>,
-  pub message_broker: Option<MessageBrokerDecl>,
   pub server: Option<ServerDecl>,
   pub customs: Vec<CustomDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -394,19 +402,14 @@ pub struct DatasourceDecl {
   pub username: String,
   pub password: String,
   pub database: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct MessageBrokerDecl {
-  pub name: String,
-  pub inline_doc: String,
-  pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ServerDecl {
   pub port: u16,
   pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -414,4 +417,5 @@ pub struct CustomDecl {
   pub name: String,
   pub inline_doc: String,
   pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
 }

@@ -440,6 +440,8 @@ fn consume_value_object(pair: Pair<Rule>) -> ValueObjectDecl {
 
 fn consume_component(pair: Pair<Rule>) -> ComponentDecl {
   let mut component = ComponentDecl::default();
+  component.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -655,6 +657,8 @@ fn consume_http_response(pair: Pair<Rule>) -> HttpResponseDecl {
 
 fn consume_flow(pair: Pair<Rule>) -> Option<FlowDecl> {
   let mut flow = FlowDecl::default();
+  flow.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::inline_doc => {
@@ -678,6 +682,8 @@ fn consume_flow(pair: Pair<Rule>) -> Option<FlowDecl> {
 
 fn consume_via_method_decl(pair: Pair<Rule>) -> MethodCallDecl {
   let mut method_call = MethodCallDecl::default();
+  method_call.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -703,6 +709,8 @@ fn consume_via_method_decl(pair: Pair<Rule>) -> MethodCallDecl {
 
 fn consume_via_message_decl(pair: Pair<Rule>) -> MessageDecl {
   let mut message = MessageDecl::default();
+  message.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::object_name => {
@@ -722,6 +730,8 @@ fn consume_via_message_decl(pair: Pair<Rule>) -> MessageDecl {
 
 fn consume_layered(pair: Pair<Rule>) -> LayeredDecl {
   let mut layered = LayeredDecl::default();
+  layered.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -745,6 +755,8 @@ fn consume_layered(pair: Pair<Rule>) -> LayeredDecl {
 
 fn consume_layer_decl(pair: Pair<Rule>) -> LayerDecl {
   let mut layer = LayerDecl::default();
+  layer.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -786,6 +798,8 @@ fn consume_dependency_decl(pair: Pair<Rule>) -> Vec<LayerRelationDecl> {
 
 fn consume_dependency_entry(pair: Pair<Rule>) -> LayerRelationDecl {
   let mut relation = LayerRelationDecl::default();
+  relation.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::source => {
@@ -842,6 +856,8 @@ fn consume_source_set_decl(pair: Pair<Rule>) -> SourceSetDecl {
 
 fn consume_env(pair: Pair<Rule>) -> EnvDecl {
   let mut env = EnvDecl::default();
+  env.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -865,6 +881,8 @@ fn consume_env(pair: Pair<Rule>) -> EnvDecl {
 
 fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   let mut attrs: HashMap<String, String> = HashMap::default();
+  let loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::attr_decl => {
@@ -876,8 +894,8 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
   }
 
   let mut decl = DatasourceDecl::default();
+  decl.loc = loc;
   decl.url = attrs.get("url").unwrap_or(&"".to_string()).clone();
-
   decl.driver = attrs.get("driver").unwrap_or(&"".to_string()).clone();
   decl.port = attrs.get("port").unwrap_or(&"".to_string()).clone();
   decl.host = attrs.get("host").unwrap_or(&"".to_string()).clone();
@@ -890,6 +908,8 @@ fn consume_datasource_decl(pair: Pair<Rule>) -> DatasourceDecl {
 
 fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
   let mut attrs: HashMap<String, String> = HashMap::default();
+  let loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::attr_decl => {
@@ -901,6 +921,7 @@ fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
   }
 
   let mut decl = ServerDecl::default();
+  decl.loc = loc;
   decl.port = attrs.get("port")
     .unwrap_or(&default_config::SERVER_PORT.to_string())
     .parse()
@@ -911,6 +932,8 @@ fn consume_server_decl(pair: Pair<Rule>) -> ServerDecl {
 
 fn consume_custom_decl(pair: Pair<Rule>) -> CustomDecl {
   let mut decl = CustomDecl::default();
+  decl.loc = Loc::from_pair(pair.as_span());
+
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -1322,6 +1345,7 @@ Component SalesComponent {
       used_domain_objects: vec![
         UsedDomainObject { name: "SalesOrder".to_string() },
       ],
+      loc: Loc(1, 100),
     }));
   }
 
@@ -1558,7 +1582,8 @@ imple CinemaCreatedEvent {
         name: "Cinema".to_string(),
         loc: Loc(25, 43),
       }),
-      flow: Some(FlowDecl {
+      flow: Some(FlowDecl
+      {
         inline_doc: "".to_string(),
         steps: vec![
           MethodCall(MethodCallDecl {
@@ -1572,6 +1597,7 @@ imple CinemaCreatedEvent {
               initializer: None,
               loc: Loc(259, 278),
             }),
+            loc: Loc(219, 278),
           }),
           MethodCall(MethodCallDecl {
             name: "".to_string(),
@@ -1589,13 +1615,16 @@ imple CinemaCreatedEvent {
               initializer: None,
               loc: Loc(323, 333),
             }),
+            loc: Loc(278, 334),
           }),
           Message(MessageDecl {
             from: "MessageQueue".to_string(),
             topic: "\"CinemaCreated\"".to_string(),
             message: "CinemaCreated".to_string(),
+            loc: Loc(343, 402),
           }),
         ],
+        loc: Loc(204, 403),
       }),
       loc: Loc(0, 405),
     }));
@@ -1635,22 +1664,27 @@ imple CinemaCreatedEvent {
         LayerRelationDecl {
           source: "rest".to_string(),
           target: "application".to_string(),
+          loc: Loc(33, 56),
         },
         LayerRelationDecl {
           source: "rest".to_string(),
           target: "domain".to_string(),
+          loc: Loc(61, 79),
         },
         LayerRelationDecl {
           source: "domain".to_string(),
           target: "application".to_string(),
+          loc: Loc(84, 109),
         },
         LayerRelationDecl {
           source: "application".to_string(),
           target: "infrastructure".to_string(),
+          loc: Loc(114, 147),
         },
         LayerRelationDecl {
           source: "rest".to_string(),
           target: "infrastructure".to_string(),
+          loc: Loc(152, 178),
         },
       ],
       layers: vec![
@@ -1658,23 +1692,28 @@ imple CinemaCreatedEvent {
           name: "rest".to_string(),
           inline_doc: "".to_string(),
           package: "com.example.book".to_string(),
+          loc: Loc(185, 235),
         },
         LayerDecl {
           name: "domain".to_string(),
           inline_doc: "".to_string(),
           package: "com.example.domain".to_string(),
+          loc: Loc(238, 292),
         },
         LayerDecl {
           name: "application".to_string(),
           inline_doc: "".to_string(),
           package: "com.example.application".to_string(),
+          loc: Loc(295, 358),
         },
         LayerDecl {
           name: "infrastructure".to_string(),
           inline_doc: "".to_string(),
           package: "com.example.infrastructure".to_string(),
+          loc: Loc(361, 430),
         },
       ],
+      loc: Loc(0, 432),
     }));
   }
 
@@ -1774,10 +1813,11 @@ env Local {
         username: "youruser".to_string(),
         password: "yourpassword".to_string(),
         database: "".to_string(),
+        loc: Loc(15, 172)
       }),
-      message_broker: None,
       server: None,
       customs: vec![],
+      loc: Loc(1, 174)
     }));
   }
 
@@ -1794,12 +1834,13 @@ env Local {
       name: "Local".to_string(),
       inline_doc: "".to_string(),
       datasource: None,
-      message_broker: None,
       server: Some(ServerDecl {
         port: 8899,
         attributes: vec![],
+        loc: Loc(15, 42)
       }),
       customs: vec![],
+      loc: Loc(1, 44)
     }));
   }
 
@@ -1817,7 +1858,6 @@ env Local {
       name: "Local".to_string(),
       inline_doc: "".to_string(),
       datasource: None,
-      message_broker: None,
       server: None,
       customs: vec![
         CustomDecl {
@@ -1834,8 +1874,10 @@ env Local {
               value: vec!["9092".to_string()],
               loc: Loc(49, 62),
             }],
+          loc: Loc(15, 63)
         }
       ],
+      loc: Loc(1, 65)
     }));
   }
 
