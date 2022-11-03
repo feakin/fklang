@@ -58,20 +58,6 @@ pub struct UniqueWord {
   pub context_name: Option<String>,
 }
 
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct DomainDecl {
-//   pub name: String,
-//   pub description: String,
-//   pub sub_domains: Vec<SubDomain>,
-// }
-//
-// #[derive(Debug, Clone, PartialEq, Eq)]
-// pub struct SubDomain {
-//   pub name: String,
-//   pub subdomain_type: String,
-//   pub entities: Vec<BoundedContextDecl>,
-// }
-
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ContextMapDecl {
   pub name: Identifier,
@@ -168,6 +154,7 @@ pub struct EntityDecl {
   pub inline_doc: String,
   pub fields: Vec<VariableDefinition>,
   pub value_objects: Vec<ValueObjectDecl>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -175,6 +162,7 @@ pub struct VariableDefinition {
   pub name: String,
   pub type_type: String,
   pub initializer: Option<String>,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

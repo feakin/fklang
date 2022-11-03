@@ -121,7 +121,7 @@ fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {
                 domain_events: vec![],
                 aggregates: vec![],
                 used_domain_objects: vec![],
-                loc: Default::default()
+                loc: Default::default(),
               });
             }
             Rule::rel_symbol => {
@@ -239,6 +239,7 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
         aggregate.domain_events = consume_use_domain_events(p);
       }
       Rule::struct_decl => {
+        let loc = Loc::from_pair(p.as_span());
         let default_struct = consume_struct(p);
         let fields = default_struct.fields;
         aggregate.entities.push(EntityDecl {
@@ -248,6 +249,7 @@ fn consume_aggregate(pair: Pair<Rule>) -> AggregateDecl {
           inline_doc: "".to_string(),
           fields,
           value_objects: vec![],
+          loc,
         });
       }
       _ => println!("unreachable aggregate rule: {:?}", p.as_rule())
@@ -369,6 +371,7 @@ fn consume_fields_decl(pair: Pair<Rule>) -> Vec<VariableDefinition> {
 
 fn consume_parameter(pair: Pair<Rule>) -> VariableDefinition {
   let mut field = VariableDefinition::default();
+  field.loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::identifier => {
@@ -939,21 +942,21 @@ Context ShoppingCarContext {
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
-          loc: Default::default()
+          loc: Default::default(),
         },
         BoundedContextDecl {
           name: "ShoppingCarContext".to_string(),
           domain_events: vec![],
           aggregates: vec![],
           used_domain_objects: vec![],
-          loc: Default::default()
+          loc: Default::default(),
         },
       ],
       relations: vec![
         ContextRelation { source: "ShoppingCarContext".to_string(), target: "MallContext".to_string(), direction: PositiveDirected, source_types: vec![], target_types: vec![] },
         ContextRelation { source: "ShoppingCarContext".to_string(), target: "MallContext".to_string(), direction: BiDirected, source_types: vec![], target_types: vec![] },
       ],
-      loc: Loc(1, 90)
+      loc: Loc(1, 90),
     }));
   }
 
@@ -976,7 +979,7 @@ just for test
       entities: vec![],
       value_objects: vec![],
       domain_events: vec![],
-      loc: Loc(1, 63)
+      loc: Loc(1, 63),
     }));
   }
 
@@ -1004,17 +1007,20 @@ Aggregate ShoppingCart {
             name: "name".to_string(),
             type_type: "String".to_string(),
             initializer: None,
+            loc: Loc(61, 73),
           },
           VariableDefinition {
             name: "price".to_string(),
             type_type: "Money".to_string(),
             initializer: None,
+            loc: Loc(75, 87),
           }],
         value_objects: vec![],
+        loc: Default::default(),
       }],
       value_objects: vec![],
       domain_events: vec![],
-      loc: Loc(1, 94)
+      loc: Loc(1, 94),
     }))
   }
 
@@ -1221,14 +1227,15 @@ Entity SalesPerson {
                 fields: vec![],
               },
             ],
+            loc: Default::default(),
           }],
           value_objects: vec![],
           domain_events: vec![],
-          loc: Loc(17, 269)
+          loc: Loc(17, 269),
         }
       ],
       used_domain_objects: vec![],
-      loc: Default::default()
+      loc: Default::default(),
     }));
   }
 
@@ -1284,7 +1291,7 @@ Component SalesComponent {
         source_types: vec!["OHS".to_string()],
         target_types: vec!["ACL".to_string(), "OHS".to_string()],
       }],
-      loc: Loc(0, 81)
+      loc: Loc(0, 81),
     });
     assert_eq!(decls[0], except);
 
@@ -1319,21 +1326,23 @@ Component SalesComponent {
         name: "".to_string(),
         type_type: "".to_string(),
         initializer: None,
+        loc: Default::default(),
       },
       inline_doc: "".to_string(),
       fields: vec![
-        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "token".to_string(), type_type: "UUID".to_string(), initializer: None },
-        VariableDefinition { name: "status".to_string(), type_type: "ReservationStatus".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()) },
-        VariableDefinition { name: "expiresAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "createdAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "screeningId".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "screeningStartTime".to_string(), type_type: "LocalDateTime".to_string(), initializer: None },
-        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "surname".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "tickets".to_string(), type_type: "Set<Ticket>".to_string(), initializer: None },
-        VariableDefinition { name: "totalPrice".to_string(), type_type: "BigDecimal".to_string(), initializer: None }],
+        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(37, 47) },
+        VariableDefinition { name: "token".to_string(), type_type: "UUID".to_string(), initializer: None, loc: Loc(53, 64) },
+        VariableDefinition { name: "status".to_string(), type_type: "ReservationStatus".to_string(), initializer: Some("ReservationStatus.OPEN".to_string()), loc: Loc(70, 120) },
+        VariableDefinition { name: "expiresAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None, loc: Loc(126, 150) },
+        VariableDefinition { name: "createdAt".to_string(), type_type: "LocalDateTime".to_string(), initializer: None, loc: Loc(156, 180) },
+        VariableDefinition { name: "screeningId".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(186, 205) },
+        VariableDefinition { name: "screeningStartTime".to_string(), type_type: "LocalDateTime".to_string(), initializer: None, loc: Loc(211, 244) },
+        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc:  Loc(250, 262) },
+        VariableDefinition { name: "surname".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(268, 283) },
+        VariableDefinition { name: "tickets".to_string(), type_type: "Set<Ticket>".to_string(), initializer: None, loc: Loc(289, 309) },
+        VariableDefinition { name: "totalPrice".to_string(), type_type: "BigDecimal".to_string(), initializer: None, loc: Loc(315, 337) }],
       value_objects: vec![],
+      loc: Default::default(),
     }));
   }
 
@@ -1359,7 +1368,7 @@ Aggregate Cinema {
         entities: vec![],
         value_objects: vec![],
         domain_events: vec![],
-        loc: Loc(40, 98)
+        loc: Loc(40, 98),
       })
     );
   }
@@ -1409,10 +1418,10 @@ struct Cinema {
       name: "Cinema".to_string(),
       inline_doc: "".to_string(),
       fields: vec![
-        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None },
-        VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None },
+        VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(147, 157) },
+        VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(161, 173) },
+        VariableDefinition { name: "address".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(177, 192) },
+        VariableDefinition { name: "rooms".to_string(), type_type: "Set<ScreeningRoom>".to_string(), initializer: None, loc: Loc(196, 221) },
       ],
     }));
   }
@@ -1495,6 +1504,7 @@ imple CinemaCreatedEvent {
               name: "user".to_string(),
               type_type: "User".to_string(),
               initializer: None,
+              loc: Loc(259, 278),
             }),
           }),
           MethodCall(MethodCallDecl {
@@ -1505,11 +1515,13 @@ imple CinemaCreatedEvent {
               name: "user".to_string(),
               type_type: "User".to_string(),
               initializer: None,
+              loc: Loc(303, 313),
             }],
             return_type: Some(VariableDefinition {
               name: "user".to_string(),
               type_type: "User".to_string(),
               initializer: None,
+              loc: Loc(323, 333),
             }),
           }),
           Message(MessageDecl {
@@ -1659,7 +1671,7 @@ imple CinemaCreatedEvent {
         DomainEventDecl { name: "UserCreated".to_string() },
         DomainEventDecl { name: "UserUpdated".to_string() },
       ],
-      loc: Loc(0, 58)
+      loc: Loc(0, 58),
     }));
   }
 
@@ -1796,10 +1808,11 @@ env Local {
                   identify: Default::default(),
                   inline_doc: "".to_string(),
                   fields: vec![
-                    VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None },
-                    VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None },
+                    VariableDefinition { name: "id".to_string(), type_type: "String".to_string(), initializer: None, loc: Loc(116, 126) },
+                    VariableDefinition { name: "name".to_string(), type_type: "String".to_string(), initializer: None, loc:  Loc(144, 156) },
                   ],
                   value_objects: vec![],
+                  loc: Loc(91, 171),
                 },
                 EntityDecl {
                   name: "ArchComponent".to_string(),
@@ -1811,28 +1824,31 @@ env Local {
                       name: "name".to_string(),
                       type_type: "String".to_string(),
                       initializer: None,
+                      loc: Loc(253, 265),
                     },
                     VariableDefinition {
                       name: "type".to_string(),
                       type_type: "ArchComponentType".to_string(),
                       initializer: None,
+                      loc: Loc(287, 327),
                     },
                   ],
                   value_objects: vec![],
+                  loc: Default::default(),
                 },
               ],
               value_objects: vec![],
               domain_events: vec![],
-              loc: Loc(56, 352)
+              loc: Loc(56, 352),
             },
           ],
           domain_events: vec![],
           used_domain_objects: vec![],
-          loc: Default::default()
+          loc: Default::default(),
         },
       ],
       relations: vec![],
-      loc: Loc(0, 360)
+      loc: Loc(0, 360),
     }));
   }
 
