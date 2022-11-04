@@ -35,6 +35,14 @@ Spec: [Feakin Specification](https://book.feakin.com/fklang/specification.html)
 - plugin system
   - [ ] plugin api
   - [ ] plugin registry
+- simple expr
+  - [ ] Expr
+    - logic expr
+    - math expr
+    - etc.
+  - [ ] Filter
+  - [ ] REPL
+  - [ ] ExprTk with Rust?
 - module support
   - [ ] module dependency
   - [ ] module versioning
