@@ -22,7 +22,7 @@ jobs:
         run: cargo install just
 
       - name: Ext Helloworld Build
-        run: cargo build --release --manifest-path=fkl_cli/Cargo.toml
+        run: cargo build --debug --manifest-path=examples/ext_hello_world/Cargo.toml
 
       - name: Run unit tests
         run: ${{matrix.ENV_VARS}} just tests
