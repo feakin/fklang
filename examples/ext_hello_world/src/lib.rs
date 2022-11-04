@@ -36,6 +36,7 @@ impl CustomRunner for KafkaRunner {
 }
 
 impl KafkaRunner {
+  #[allow(dead_code)]
   async fn run_kafka() {
     let config = KafkaConfig {
       host: "localhost".to_string(),

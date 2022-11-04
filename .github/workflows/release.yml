@@ -30,7 +30,7 @@ jobs:
           profile: minimal
           toolchain: stable
 
-      - name: Build
+      - name: CLI Build
         run: cargo build --release --manifest-path=fkl_cli/Cargo.toml
 
       - name: Upload binaries to release
