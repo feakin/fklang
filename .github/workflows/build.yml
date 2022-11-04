@@ -21,8 +21,5 @@ jobs:
       - name: Install Just
         run: cargo install just
 
-      - name: Ext Helloworld Build
-        run: cargo build --manifest-path=examples/ext_hello_world/Cargo.toml
-
       - name: Run unit tests
         run: ${{matrix.ENV_VARS}} just tests
