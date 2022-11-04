@@ -23,6 +23,34 @@ pub unsafe fn dynamically_load_ext(
   Ok((lib, plugin))
 }
 
+#[cfg(target_os = "macos")]
+pub fn ext_path(plugin_name: &str, for_production: bool) -> String {
+  if for_production {
+    format!("plugins/lib{}.dylib", plugin_name)
+  } else {
+    format!("target/debug/lib{}.dylib", plugin_name)
+  }
+}
+
+#[cfg(target_os = "linux")]
+pub fn ext_path(plugin_name: &str, for_production: bool) -> String {
+  if for_production {
+    format!("plugins/lib{}.so", plugin_name)
+  } else {
+    format!("target/debug/lib{}.so", plugin_name)
+  }
+}
+
+#[cfg(target_os = "windows")]
+pub fn ext_path(plugin_name: &str, for_production: bool) -> String {
+  if for_production {
+    format!("plugins\\{}.dll", plugin_name)
+  } else {
+    format!("target\\debug\\{}.dll", plugin_name)
+  }
+}
+
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -30,13 +58,10 @@ mod tests {
   use fkl_mir::{ContextMap, CustomEnv};
 
   #[tokio::test]
-  #[ignore]
   async fn test_load_ext() {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
       .parent().unwrap()
-      .join("target")
-      .join("debug")
-      .join("libext_hello_world.dylib");
+      .join(ext_path("ext_hello_world", false));
 
     unsafe {
       let (lib, ext) = dynamically_load_ext(path.to_str().unwrap()).unwrap();

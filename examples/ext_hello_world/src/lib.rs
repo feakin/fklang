@@ -30,13 +30,19 @@ impl CustomRunner for KafkaRunner {
   }
 
   async fn execute(&self, _context: &ContextMap, _env: &CustomEnv) {
+    // Self::run_kafka().await;
+    println!("KafkaRunner");
+  }
+}
+
+impl KafkaRunner {
+  async fn run_kafka() {
     let config = KafkaConfig {
       host: "localhost".to_string(),
       port: 9092,
     };
 
     send("test", "test", config).await;
-    println!("KafkaRunner");
   }
 }
 
