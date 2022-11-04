@@ -1,7 +1,7 @@
 use tree_sitter::{Node, Parser, Query, QueryCursor};
 
 use crate::code_meta::{CodeClass, CodeFile};
-use crate::construct::code_construct::CodeConstruct;
+use crate::deconstruct::code_construct::CodeConstruct;
 
 const JAVA_QUERY: &'static str = "
 (package_declaration
@@ -137,8 +137,8 @@ impl JavaConstruct {
 #[cfg(test)]
 mod tests {
   use crate::code_meta::{CodeClass, CodeFunction, CodePoint};
-  use crate::construct::code_construct::CodeConstruct;
-  use crate::construct::java_construct::JavaConstruct;
+  use crate::deconstruct::code_construct::CodeConstruct;
+  use crate::deconstruct::java_construct::JavaConstruct;
 
   #[test]
   fn should_parse_import() {

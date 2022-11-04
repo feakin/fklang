@@ -5,7 +5,7 @@ use std::path::{PathBuf};
 use std::sync::Arc;
 
 use crate::code_meta::{CodeFile, CodeLanguage};
-use crate::construct::model_builder::ModelBuilder;
+use crate::deconstruct::model_builder::ModelBuilder;
 
 // inspired by [Solang](https://github.com/hyperledger-labs/solang)
 pub struct FileResolver {

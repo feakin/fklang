@@ -6,8 +6,8 @@ use log::info;
 use fkl_codegen_java::gen_http_api;
 use fkl_mir::{ContextMap, Implementation};
 
-use crate::construct::code_construct::CodeConstruct;
-use crate::construct::java_construct::JavaConstruct;
+use crate::deconstruct::code_construct::CodeConstruct;
+use crate::deconstruct::java_construct::JavaConstruct;
 use crate::builtin::funcs;
 use crate::builtin::funcs::LayerMap;
 use crate::builtin::funcs::LayerPathBuilder;

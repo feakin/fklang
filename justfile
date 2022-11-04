@@ -1,5 +1,9 @@
 tests:
-	cargo test --all
+  just prepare;
+  cargo test --all
+
+prepare:
+  cargo build --manifest-path=examples/ext_hello_world/Cargo.toml;
 
 e2e:
   cargo test --package

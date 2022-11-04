@@ -24,8 +24,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::code_meta::{CodeFile, CodeLanguage};
-use crate::construct::code_construct::CodeConstruct;
-use crate::construct::java_construct::JavaConstruct;
+use crate::deconstruct::code_construct::CodeConstruct;
+use crate::deconstruct::java_construct::JavaConstruct;
 
 pub struct ModelBuilder {}
 
@@ -70,7 +70,7 @@ impl ModelBuilder {
 mod tests {
   use std::env;
 
-  use crate::construct::model_builder::ModelBuilder;
+  use crate::deconstruct::model_builder::ModelBuilder;
 
   #[test]
   fn should_parse_current_dir() {

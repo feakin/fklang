@@ -8,7 +8,7 @@ use log::info;
 use fkl_mir::{ContextMap, Environment};
 use fkl_parser::parse;
 
-pub mod construct;
+pub mod deconstruct;
 pub mod code_meta;
 pub mod inserter;
 pub mod builtin;

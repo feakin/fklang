@@ -100,8 +100,8 @@ pub fn package_name(package_name: &str) -> &str {
 
 #[cfg(test)]
 mod tests {
-  use crate::construct::code_construct::CodeConstruct;
-  use crate::construct::java_construct::JavaConstruct;
+  use crate::deconstruct::code_construct::CodeConstruct;
+  use crate::deconstruct::java_construct::JavaConstruct;
 
   use crate::builtin::funcs::{mir_from_str};
   use crate::builtin::funcs::layered_guarding::package_guarding::{PackageGuarding, package_name};
