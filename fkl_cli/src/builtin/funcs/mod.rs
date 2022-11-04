@@ -25,7 +25,6 @@ pub mod layered_guarding;
 pub mod http_request;
 pub mod datasource_orm;
 pub mod mock_server;
-pub mod message;
 pub mod custom_function;
 
 pub fn mir_from_file(input_path: &PathBuf) -> ContextMap {

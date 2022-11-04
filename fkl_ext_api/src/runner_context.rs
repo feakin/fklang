@@ -24,11 +24,14 @@ impl RunnerContext {
   }
 
   pub fn add_plugin(&mut self, plugin: Box<dyn CustomRunner>) {
-    if self.plugin_names.contains(plugin.name()) {
-      panic!("plugin {} already exists", plugin.name());
+    let plugin_name: String = plugin.name().to_string();
+    let name = &plugin_name;
+
+    if self.plugin_names.contains(name) {
+      panic!("plugin {} already exists", name);
     }
     self.plugins.push(plugin);
-    self.plugin_names.insert(plugin.name().to_string());
+    self.plugin_names.insert(plugin_name);
   }
 
   pub async fn execute_plugins(&self) {

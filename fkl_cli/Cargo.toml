@@ -79,16 +79,14 @@ async-trait = "0.1.58"
 # http server
 rocket = { version = "0.5.0-rc.2", features = ["json"] }
 figment = { version = "0.10" }
-# type for uuid
+
+#------------------- Type System -------------------
 uuid = { version = "1.2.1", features = ["v4"] }
 phf = { version = "0.11", features = ["macros"] }
 indexmap = "1.9.1"
+# time
 chrono = "0.4"
 rand = "0.8.5"
-
-
-#------------------- Message Queue -------------------
-rdkafka = { version = "0.29.0", features = ["cmake-build"] }
 
 [dev-dependencies]
 trycmd = "0.14.0"

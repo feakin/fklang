@@ -16,7 +16,6 @@ pub mod highlighter;
 mod e2e;
 mod datasource;
 pub mod mock;
-pub mod message;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
