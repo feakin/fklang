@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-  "domain_derive",
   "fkl_cli",
   "fkl_lsp",
   "fkl_mir",
