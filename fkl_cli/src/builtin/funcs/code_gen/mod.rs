@@ -36,6 +36,7 @@ pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<String>, base_
   code_gen_by_mir(&mir, filter_impl, base_path);
 }
 
+// todo: extract to a separate module
 pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<String>, base_path: &PathBuf) {
   let code_blocks = collect_codes(filter_impl, &mir);
   let has_layered_define = mir.layered.is_some();
