@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use async_trait::async_trait;
 
 use fkl_ext_api::custom_runner::CustomRunner;
