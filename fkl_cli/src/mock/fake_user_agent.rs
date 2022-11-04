@@ -113,7 +113,12 @@ impl UserAgent {
 
   pub fn browser() -> String {
     let browser = Self::weighted_key_from_object(&BORWSER_WEIGHTED);
-    browser
+
+    if browser.is_empty() {
+      "chrome".to_string()
+    } else {
+      browser
+    }
   }
 
   pub fn os(browser: &str) -> String {
@@ -395,10 +400,12 @@ mod tests {
   }
 
   #[test]
-  #[cfg(not(target_os = "windows"))]
   fn test_browser() {
-    let browser = UserAgent::browser();
-    assert!(browser == "chrome" || browser == "iexplorer" || browser == "firefox" || browser == "safari" || browser == "opera");
+    for x in 1..1000 {
+      let browser = UserAgent::browser();
+      println!("{}: {}", x, browser);
+      assert!(browser == "chrome" || browser == "iexplorer" || browser == "firefox" || browser == "safari" || browser == "opera");
+    }
   }
 
   #[test]
