@@ -1,5 +1,5 @@
 [package]
-name = "ext_message_kafka"
+name = "runner_kafka"
 version = "0.1.0"
 edition = "2021"
 

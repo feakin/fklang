@@ -14,9 +14,7 @@ members = [
   "fkl_ext_api",
   "fkl_ext_loader",
   # for codegen
-  "extensions/codegen-aws-lambda",
-  # for swagger
-  "extensions/sourceset-swagger",
+  "extensions/*",
   "examples/*"
 ]
 
