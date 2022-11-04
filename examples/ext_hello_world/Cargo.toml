@@ -11,7 +11,7 @@ fkl-mir = { path = "../../fkl_mir", version = "0.4.0" }
 
 async-trait = "0.1.58"
 
-rdkafka = { version = "0.25", features = ["cmake-build"] }
+rdkafka = { version = "0.29.0", features = ["cmake-build"] }
 
 
 [lib]
