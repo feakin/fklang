@@ -27,6 +27,9 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
 
+      - name: Install Just
+        run: cargo install just
+
       - name: Build All
         run: ${{matrix.ENV_VARS}} cargo build --all
 
