@@ -20,9 +20,9 @@ Aggregate Cinema {
   Entity Cinema, ScreeningRoom, Seat;
 }
 
-Entity Cinema { }
-Entity ScreeningRoom { }
-Entity Seat { }
+Entity Cinema {}
+Entity ScreeningRoom {}
+Entity Seat {}
 
 Context Movie {
   Aggregate Movie {
@@ -39,8 +39,8 @@ Context User {
   }
 }
 
-ValueObject Price { }
-ValueObject Notifications { }
+ValueObject Price {}
+ValueObject Notifications {}
 
 layered DDD {
   dependency {
@@ -64,7 +64,6 @@ layered DDD {
   }
 }
 
-
 impl PackageJsonGet {
   endpoint {
     GET "https://raw.githubusercontent.com/feakin/vscode-feakin/master/package.json";
@@ -83,6 +82,15 @@ impl UserCreated {
     via UserRepository::getUserById receive user: User
     via UserRepository::save(user: User) receive user: User;
     via Kafak send User to "user.create";
+  }
+}
+
+impl UserUpdated {
+  endpoint {
+    PUT "/user/{id}";
+    request: UpdateUser;
+    authorization: Basic admin admin;
+    response: User;
   }
 }
 
@@ -110,10 +118,10 @@ env Staging {
   }
 }
 
+/// import from PlantUml
 SourceSet sourceSet {
   puml {
     parser: "PlantUML"
     srcDir: ["src/main/resources/uml"]
   }
 }
-
