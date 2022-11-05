@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use salsa::DebugWithDb;
 
 fn calc() {
-  let mut db = Database::default();
+  let _db = Database::default();
 }
 
 #[derive(Default)]
@@ -39,7 +39,7 @@ pub struct SourceProgram {
 }
 
 #[salsa::tracked]
-pub fn sum(db: &dyn crate::Db) -> u32 {
+pub fn sum(_db: &dyn crate::Db) -> u32 {
   return 0;
 }
 

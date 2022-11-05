@@ -3,6 +3,7 @@ use crate::inc_salsa::SourceProgram;
 use crate::inc_salsa::sum;
 
 pub mod inc_salsa;
+pub mod function_type;
 
 // salsa should be in crate root.
 
