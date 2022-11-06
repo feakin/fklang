@@ -4,6 +4,8 @@ use crate::inc_salsa::sum;
 
 pub mod inc_salsa;
 pub mod function_type;
+pub mod token;
+pub mod ast;
 
 // salsa should be in crate root.
 
