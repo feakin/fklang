@@ -17,3 +17,9 @@ pub trait Db: salsa::DbWithJar<Jar> {}
 // ANCHOR: jar_db_impl
 impl<DB> Db for DB where DB: ?Sized + salsa::DbWithJar<Jar> {}
 // ANCHOR_END: jar_db_impl
+
+
+#[cfg(test)]
+mod tests {
+
+}
