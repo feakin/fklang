@@ -96,6 +96,9 @@ pub enum Instruction {
   // Functions
   FuncSin,
   FuncCos,
+  Fac {
+    val: Box<Instruction>,
+  },
 
   // Others
   // with Builtin Types?

@@ -22,3 +22,4 @@ lazy_static = "1.4.0"
 actix-web = "4"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3.18"
+exprtk_rs="0.1.0"

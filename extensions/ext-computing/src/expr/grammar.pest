@@ -3,7 +3,7 @@ program     = _{ SOI ~ expr ~ EOI }
 stmt        = _{ assign | expr }
 assign      = { ident ~ "=" ~ expr }
 expr        = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
-primary     = _{ constants | function | variable | num | "(" ~ expr ~ ")"  }
+primary     = _{ (num ~ constants) | constants | function | variable | num | "(" ~ expr ~ ")" }
 infix       = _{ sub | add | mul | div | pow | percentOf | percentOn | rightShift | leftShift | modulus }
 prefix      = _{ neg }
 postfix     = _{ fac }

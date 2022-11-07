@@ -18,6 +18,7 @@ lazy_static! {
           .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
           .op(Op::infix(Rule::pow, Assoc::Right))
           .op(Op::postfix(Rule::fac))
+          .op(Op::postfix(Rule::e))
           .op(Op::prefix(Rule::neg))
     };
 }
@@ -27,6 +28,7 @@ pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
+      println!("expr: {:?}", expr);
       namespace.eval(expr)
     }
     Err(err) => {
@@ -102,6 +104,11 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
       Rule::pow => Instruction::Pow { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       _ => panic!("unimplemented: {:?}", op),
     })
+    .map_postfix(|lhs, op: Pair<Rule>| match op.as_rule() {
+      Rule::fac => Instruction::Fac { val: Box::from(lhs) },
+      Rule::e => Instruction::Mul { lhs: Box::from(lhs), rhs: Box::from(Instruction::Const(std::f64::consts::E)) },
+      _ => panic!("unimplemented: {:?}", op),
+    })
     .parse(pairs)
 }
 
@@ -154,13 +161,22 @@ mod tests {
   }
 
   #[test]
-  fn function_sqrt() {
+  fn function_demo() {
     assert_eq!(parse("sqrt(4)", &Default::default()), 2.0);
     let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
     assert_eq!(parse("sqrt(1 - (3 / x^2))", &vars), 0.5);
     assert_eq!(parse("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
+  }
 
-    let vars2 = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(3.0))]);
-    assert_eq!(parse("sin(2.34e-x *2)", &vars2), 0.00467998291);
+  #[test]
+  fn const_e() {
+    let vars2 = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
+    assert_eq!(parse("sin(2.34e-3 * x)", &vars2), 0.004679982916146709);
+
+    let mut symbol_table = exprtk_rs::SymbolTable::new();
+    symbol_table.add_variable("x", 2.0).unwrap().unwrap();
+    let mut expr = exprtk_rs::Expression::new("sin(2.34e-3 * x)", symbol_table).unwrap();
+
+    assert_eq!(expr.value(), 0.004679982916146709);
   }
 }
