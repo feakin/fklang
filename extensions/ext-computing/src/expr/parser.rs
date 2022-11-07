@@ -6,35 +6,35 @@ use pest::pratt_parser::*;
 #[grammar = "expr/grammar.pest"]
 struct Calculator;
 
+lazy_static! {
+    static ref PRATT_PARSER: PrattParser<Rule> = {
+        // Precedence is defined lowest to highest
+        PrattParser::new()
+          .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
+          .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+          .op(Op::infix(Rule::pow, Assoc::Right))
+          .op(Op::postfix(Rule::fac))
+          .op(Op::prefix(Rule::neg))
+    };
+}
+
 pub fn parse(input: &str) -> f64 {
-  let parse_result = Calculator::parse(Rule::program, input);
-  match parse_result {
-    Ok(r) => eval(r),
+  match Calculator::parse(Rule::program, input) {
+    Ok(mut pairs) => parse_expr(pairs.next().unwrap().into_inner()),
     Err(_) => f64::NAN,
   }
 }
 
-fn eval(pairs: Pairs<Rule>) -> f64 {
-  let pratt =
-    PrattParser::new()
-      .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
-      .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
-      .op(Op::infix(Rule::pow, Assoc::Right))
-      .op(Op::postfix(Rule::fac))
-      .op(Op::prefix(Rule::neg));
-
-  parse_expr(pairs, &pratt)
-}
-
-fn parse_expr(pairs: Pairs<Rule>, pratt: &PrattParser<Rule>) -> f64 {
-  pratt
+// can be follow: <https://github.com/pest-parser/book/blob/master/examples/pest-calculator/src/main.rs>
+fn parse_expr(pairs: Pairs<Rule>) -> f64 {
+  PRATT_PARSER
     .map_primary(|primary| match primary.as_rule() {
+      Rule::expr => parse_expr(primary.into_inner()),
       Rule::int => primary.as_str().parse().unwrap(),
-      Rule::expr => parse_expr(primary.into_inner(), pratt), // from "(" ~ expr ~ ")"
       Rule::num => primary.as_str().parse().unwrap(),
       _ => panic!("unimplemented, {:?}", primary.as_rule()),
     })
-    .map_prefix(|op, rhs| match op.as_rule() {
+    .map_prefix(|op, rhs: f64| match op.as_rule() {
       Rule::neg => -rhs,
       _ => panic!("unimplemented, {:?}", op.as_rule()),
     })
@@ -58,14 +58,13 @@ mod tests {
   use super::*;
 
   #[test]
-  #[ignore]
   fn it_works() {
     assert_eq!(parse("1 + 2"), 3.0);
-    // assert_eq!(parse("1 + 2 * 3"), 7.0);
-    // assert_eq!(parse("(1 + 2) * 3"), 9.0);
-    // assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
-    // assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
-    // assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.0);
-    // assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -3.0);
+    assert_eq!(parse("1 + 2 * 3"), 7.0);
+    assert_eq!(parse("(1 + 2) * 3"), 9.0);
+    assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
+    assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
+    assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.0);
+    assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -3.0);
   }
 }

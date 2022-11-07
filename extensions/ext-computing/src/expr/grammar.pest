@@ -19,14 +19,16 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-program = _{ SOI ~ stmt ~ EOI }
+program     = _{ SOI ~ expr ~ EOI }
 
-stmt = _{ assign | expr }
-assign = { ident ~ "=" ~ expr }
-expr = { prefix* ~ atom ~ postfix* ~ (operation ~ atom)* }
-atom = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
+stmt        = _{ assign | expr }
+assign      = { ident ~ "=" ~ expr }
+expr        = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
+primary     = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
+infix       = _{ sub | add | mul | div | pow | percentOf | percentOn | rightShift | leftShift | modulus }
+prefix      = _{ neg }
+postfix     = _{ fac }
 
-operation = _{ sub | add | mul | div | pow | percentOf | percentOn | rightShift | leftShift | modulus }
 add         = { "+" | "with" | "plus" | "add" }
 sub         = { "-" | "without" | "subtract" | "minus" }
 mul         = { "*" | "times" | "multiply by" | "mul" }
@@ -34,9 +36,7 @@ div         = { "/" | "divide by" | "divide" }
 pow         = { "^" | "power" }
 modulus     = { "%" | "mod" }
 
-prefix      =  _{ neg }
 neg         =   { "-" } // Negation
-postfix     =  _{ fac }
 fac         = { "!" } // Factorial
 rightShift  = { ">>" }
 
@@ -46,7 +46,6 @@ percentOn   = { "percent on" | "%" ~ "on" }
 
 function = { ident ~ "(" ~ expr ~ ")" }
 
-WHITESPACE = _{ " " | "\t" }
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ "'"* }
 int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
@@ -155,3 +154,5 @@ YOTTABYTE = { "yottabytes" | "yottabyte"| ^"yb" }
 
 siunit = { AREA | DIGITALINFORMATION | SPEED | MASS | ANGLE  | TIME | LENGTH | TEMPERATURE  }
 convert = {  num ~ siunit ~  ( "to" | "as" | "in" ) ~ siunit }
+
+WHITESPACE   =  _{ " " | "\t" | NEWLINE }

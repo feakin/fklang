@@ -16,6 +16,8 @@ salsa = { git = "https://github.com/salsa-rs/salsa", package = "salsa-2022" }
 pest = "2.3.1"
 pest_derive = "2.3.1"
 
+lazy_static = "1.4.0"
+
 [dev-dependencies]
 actix-web = "4"
 tokio = { version = "1", features = ["full"] }
