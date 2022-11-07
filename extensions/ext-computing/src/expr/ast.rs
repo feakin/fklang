@@ -1,15 +1,34 @@
 #[derive(Clone, PartialEq, Debug)]
-pub enum Expr {
-  Int(i64),
-  // Convert(Box<Expr>, Type),
+pub struct Expr {
+  pub first: Value,
+  pub pairs: Vec<ExprPair>,
+}
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct ExprPair(pub BinaryOp, pub Value);
+
+impl ExprPair {
+  pub fn new(op: BinaryOp, value: Value) -> Self {
+    ExprPair(op, value)
+  }
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum UnaryOp {
   Not,
-  Neg,
-  Parenthesized
+  Neg(ValueIndex),
+  Parenthesized,
+}
+
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub struct ValueIndex(pub usize);
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum Value {
+  Const(f64),
+  Var(String),
+  UnaryOp(UnaryOp),
+  StdFunc(StdMathFunc),
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -33,6 +52,7 @@ pub enum BinaryOp {
   Le,
   Gt,
   Ge,
+  Exp,
 }
 
 #[derive(Clone, PartialEq, Debug)]
