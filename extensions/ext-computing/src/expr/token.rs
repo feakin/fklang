@@ -101,4 +101,8 @@ pub enum Instruction {
   // with Builtin Types?
   Const(f64),
   Var(String),
+  Function {
+    name: String,
+    args: Vec<Instruction>,
+  },
 }

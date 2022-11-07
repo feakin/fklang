@@ -29,7 +29,8 @@ pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
       namespace.eval(expr)
     }
-    Err(_err) => {
+    Err(err) => {
+      println!("Error: {}", err);
       f64::NAN
     }
   }
@@ -57,7 +58,10 @@ impl<'b> EvalNamespace<'b> {
         let var = self.vars.get(&value).unwrap();
         self.eval(var.clone())
       }
-      // Instruction::Fac(a) => (1..=eval(*a) as u64).product::<u64>() as f64,
+      Instruction::Function { name, args } => {
+        let args = args.into_iter().map(|arg| self.eval(arg)).collect::<Vec<f64>>();
+        execute_func(&*name, args[0])
+      }
       _ => panic!("Not implemented: {:?}", ins),
     }
   }
@@ -75,6 +79,14 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
         Rule::ident => {
           Instruction::Var(primary.as_str().to_string())
         }
+        Rule::function => {
+          let mut i = primary.into_inner();
+          let name = i.next().unwrap().as_str();
+          Instruction::Function {
+            name: name.to_string(),
+            args: vec![parse_expr(i.next().unwrap().into_inner())],
+          }
+        }
         _ => panic!("unimplemented: {:?}", primary),
       }
     })
@@ -83,14 +95,11 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
       _ => panic!("unimplemented: {:?}", op),
     })
     .map_infix(|lhs, op: Pair<Rule>, rhs| match op.as_rule() {
-      Rule::add => Instruction::Add {
-        lhs: Box::from(lhs),
-        rhs: Box::from(rhs),
-      },
-      Rule::mul => Instruction::Mul {
-        lhs: Box::from(lhs),
-        rhs: Box::from(rhs),
-      },
+      Rule::add => Instruction::Add { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::mul => Instruction::Mul { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::sub => Instruction::Sub { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::div => Instruction::Div { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::pow => Instruction::Pow { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       _ => panic!("unimplemented: {:?}", op),
     })
     .parse(pairs)
@@ -139,7 +148,7 @@ mod tests {
 
     let map2: BTreeMap<String, Instruction> = BTreeMap::from_iter(vec![
       ("x".to_string(), Instruction::Const(2.0)),
-      ("y".to_string(), Instruction::Const(1.0))
+      ("y".to_string(), Instruction::Const(1.0)),
     ]);
     assert_eq!(parse("1 + 2 * 3 + x + y", &map2), 10.0);
   }
@@ -147,5 +156,11 @@ mod tests {
   #[test]
   fn function_sqrt() {
     assert_eq!(parse("sqrt(4)", &Default::default()), 2.0);
+    let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
+    assert_eq!(parse("sqrt(1 - (3 / x^2))", &vars), 0.5);
+    assert_eq!(parse("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
+
+    let vars2 = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(3.0))]);
+    assert_eq!(parse("sin(2.34e-x *2)", &vars2), 0.00467998291);
   }
 }
