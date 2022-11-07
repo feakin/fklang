@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
-use std::fmt::Error;
+
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest::pratt_parser::*;
 
-use crate::expr::ast::{BinaryOp, Expr, ExprPair, UnaryOp, Value, ValueIndex};
 use crate::expr::token::Instruction;
 
 #[derive(Parser)]
@@ -30,7 +29,7 @@ pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
       namespace.eval(expr)
     }
-    Err(err) => {
+    Err(_err) => {
       f64::NAN
     }
   }
@@ -63,8 +62,6 @@ impl<'b> EvalNamespace<'b> {
     }
   }
 }
-
-const VALUE_INDEX: usize = 0;
 
 fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
   PRATT_PARSER
@@ -147,8 +144,8 @@ mod tests {
     assert_eq!(parse("1 + 2 * 3 + x + y", &map2), 10.0);
   }
 
-  // #[test]
-  // fn function_sqrt() {
-  //   assert_eq!(parse("sqrt(4)"), 2.0);
-  // }
+  #[test]
+  fn function_sqrt() {
+    assert_eq!(parse("sqrt(4)", &Default::default()), 2.0);
+  }
 }
