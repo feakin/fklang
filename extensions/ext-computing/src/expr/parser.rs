@@ -23,35 +23,44 @@ lazy_static! {
 pub fn parse(input: &str) {
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
-      old_parser(pairs.next().unwrap().into_inner());
-    },
+      parse_eval(pairs.next().unwrap().into_inner());
+    }
     Err(err) => {
       println!("Error: {:?}", err);
-    },
+    }
   };
 }
-//
-// const VALUE_INDEX: usize = 0;
-//
-// fn parse_eval(pairs: Pairs<Rule>) -> ExprPair {
-//   PRATT_PARSER
-//     .map_primary(|primary| {
-//       match primary.as_rule() {
-//         Rule::expr => parse_eval(primary.into_inner()),
-//         _ => unreachable!(),
-//       }
-//     })
-//     .map_prefix(|op: Pair<Rule>, rhs| match op.as_rule() {
-//       Rule::neg => {
-//         ExprPair::new(BinaryOp::Exp, Value::UnaryOp(UnaryOp::Neg(ValueIndex(VALUE_INDEX))))
-//       }
-//     })
-//     .map_infix(|lhs, op: Pair<Rule>, rhs| match op.as_rule() {
-//       Rule::add => ExprPair::new(BinaryOp::Add, Value::UnaryOp(lhs, rhs)),
-//       _ => unreachable!(),
-//     })
-//     .parse(pairs)
-// }
+
+const VALUE_INDEX: usize = 0;
+
+fn parse_eval(pairs: Pairs<Rule>) -> ExprPair {
+  PRATT_PARSER
+    .map_primary(|primary| {
+      match primary.as_rule() {
+        Rule::expr => parse_eval(primary.into_inner()),
+        Rule::num => {
+          let number = primary.as_str().parse::<f64>().unwrap();
+          ExprPair::new(BinaryOp::Add, Value::Const(number))
+        }
+        _ => panic!("unimplemented: {:?}", primary),
+      }
+    })
+    .map_prefix(|op: Pair<Rule>, rhs| match op.as_rule() {
+      Rule::neg => {
+        ExprPair::new(BinaryOp::Exp, Value::UnaryOp(UnaryOp::Neg(ValueIndex(VALUE_INDEX))))
+      }
+      _ => panic!("unimplemented: {:?}", op),
+    })
+    .map_infix(|lhs, op: Pair<Rule>, rhs| {
+      let op = match op.as_rule() {
+        Rule::add => BinaryOp::Add,
+        _ => panic!("unimplemented: {:?}", op),
+      };
+
+      ExprPair::new(op, Value::UnaryOp(UnaryOp::Parenthesized))
+    })
+    .parse(pairs)
+}
 
 // can be follow: <https://github.com/pest-parser/book/blob/master/examples/pest-calculator/src/main.rs>
 fn old_parser(pairs: Pairs<Rule>) -> f64 {
