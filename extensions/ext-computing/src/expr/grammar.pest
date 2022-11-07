@@ -19,6 +19,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+program = _{ SOI ~ stmt ~ EOI }
+
+stmt = _{ assign | expr }
+assign = { ident ~ "=" ~ expr }
+expr = { atom ~ (operation ~ atom)* }
+atom = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
+
+operation = _{ sub | add | mul | div | power | percentOf | percentOn | rightShift | leftShift | modulus }
+add         = { "+" | "with" | "plus" | "add" }
+sub         = { "-" | "without" | "subtract" | "minus" }
+mul         = { "*" | "times" | "multiply by" | "mul" }
+div         = { "/" | "divide by" | "divide" }
+power       = { "^" | "power" }
+modulus     = { "%" | "mod" }
+rightShift  = { ">>" }
+leftShift   = { "<<" }
+percentOf   = { "percent of" | "%" ~ "of" }
+percentOn   = { "percent on" | "%" ~ "on" }
+
+function = { ident ~ "(" ~ expr ~ ")" }
 
 WHITESPACE = _{ " " | "\t" }
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ "'"* }
@@ -29,27 +49,6 @@ e  = { "e" }
 pi = { "pi" | "π" }
 tau = { "tau" | "τ" }
 constants = _{ pi | e | tau }
-
-operation = _{ subtract | add | multiply | divide | power | percentOf | percentOn | rightShift | leftShift | modulus }
-add         = { "+" | "with" | "plus" | "add" }
-subtract    = { "-" | "without" | "subtract" | "minus" }
-multiply    = { "*" | "times" | "multiply by" | "mul" }
-divide      = { "/" | "divide by" | "divide" }
-power       = { "^" | "power" }
-modulus     = { "%" | "mod" }
-rightShift  = { ">>" }
-leftShift   = { "<<" }
-percentOf   = { "percent of" | "%" ~ "of" }
-percentOn   = { "percent on" | "%" ~ "on" }
-
-function = { ident ~ "(" ~ expr ~ ")" }
-atom = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
-expr = { atom ~ (operation ~ atom)* }
-assign = { ident ~ "=" ~ expr }
-
-stmt = _{ assign | expr }
-
-calculation = _{ SOI ~ stmt ~ EOI }
 
 // SiUnits parser starts from here.
 // Angle
