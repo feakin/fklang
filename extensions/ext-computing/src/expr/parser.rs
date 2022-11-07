@@ -28,11 +28,20 @@ pub fn parse(input: &str) -> f64 {
 // can be follow: <https://github.com/pest-parser/book/blob/master/examples/pest-calculator/src/main.rs>
 fn parse_expr(pairs: Pairs<Rule>) -> f64 {
   PRATT_PARSER
-    .map_primary(|primary| match primary.as_rule() {
-      Rule::expr => parse_expr(primary.into_inner()),
-      Rule::int => primary.as_str().parse().unwrap(),
-      Rule::num => primary.as_str().parse().unwrap(),
-      _ => panic!("unimplemented, {:?}", primary.as_rule()),
+    .map_primary(|primary| {
+      match primary.as_rule() {
+        Rule::expr => parse_expr(primary.into_inner()),
+        Rule::int => primary.as_str().parse().unwrap(),
+        Rule::num => primary.as_str().parse().unwrap(),
+        Rule::function => {
+          let mut inner = primary.into_inner();
+          let name = inner.next().unwrap().as_str();
+          let arg = inner.next().unwrap().into_inner();
+          let func_name = parse_expr(arg);
+          execute_func(name, func_name)
+        },
+        _ => panic!("unimplemented, {:?}", primary.as_rule()),
+      }
     })
     .map_prefix(|op, rhs: f64| match op.as_rule() {
       Rule::neg => -rhs,
@@ -53,12 +62,42 @@ fn parse_expr(pairs: Pairs<Rule>) -> f64 {
     .parse(pairs)
 }
 
+fn execute_func(name: &str, func_name: f64) -> f64 {
+  match name {
+    "sin" => func_name.sin(),
+    "cos" => func_name.cos(),
+    "tan" => func_name.tan(),
+    "asin" => func_name.asin(),
+    "acos" => func_name.acos(),
+    "atan" => func_name.atan(),
+    "sinh" => func_name.sinh(),
+    "cosh" => func_name.cosh(),
+    "tanh" => func_name.tanh(),
+    "asinh" => func_name.asinh(),
+    "acosh" => func_name.acosh(),
+    "atanh" => func_name.atanh(),
+    "sqrt" => func_name.sqrt(),
+    "cbrt" => func_name.cbrt(),
+    "exp" => func_name.exp(),
+    "ln" => func_name.ln(),
+    "log2" => func_name.log2(),
+    "log10" => func_name.log10(),
+    "abs" => func_name.abs(),
+    "ceil" => func_name.ceil(),
+    "floor" => func_name.floor(),
+    "round" => func_name.round(),
+    "trunc" => func_name.trunc(),
+    "fract" => func_name.fract(),
+    _ => f64::NAN,
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
 
   #[test]
-  fn it_works() {
+  fn basic_expr() {
     assert_eq!(parse("1 + 2"), 3.0);
     assert_eq!(parse("1 + 2 * 3"), 7.0);
     assert_eq!(parse("(1 + 2) * 3"), 9.0);
@@ -66,5 +105,10 @@ mod tests {
     assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
     assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.8);
     assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -2.2);
+  }
+
+  #[test]
+  fn function_sqrt() {
+    assert_eq!(parse("sqrt(4)"), 2.0);
   }
 }

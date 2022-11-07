@@ -1,4 +1,11 @@
 #[derive(Clone, PartialEq, Debug)]
+pub enum Expr {
+  Int(i64),
+  // Convert(Box<Expr>, Type),
+
+}
+
+#[derive(Clone, PartialEq, Debug)]
 pub enum UnaryOp {
   Not,
   Neg,
