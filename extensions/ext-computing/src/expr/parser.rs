@@ -18,13 +18,13 @@ lazy_static! {
           .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
           .op(Op::infix(Rule::pow, Assoc::Right))
           .op(Op::postfix(Rule::fac))
-          .op(Op::postfix(Rule::e))
           .op(Op::prefix(Rule::neg))
     };
 }
 
 pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
-  let namespace = EvalNamespace::new(vars);
+  let namespace = EvalNamespace::new(vars, true);
+
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
@@ -37,13 +37,20 @@ pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
   }
 }
 
-pub struct EvalNamespace<'b> {
-  vars: &'b BTreeMap<String, Instruction>,
+pub struct EvalNamespace {
+  vars: BTreeMap<String, Instruction>,
 }
 
-impl<'b> EvalNamespace<'b> {
-  pub fn new(vars: &BTreeMap<String, Instruction>) -> EvalNamespace {
-    EvalNamespace { vars }
+impl EvalNamespace {
+  pub fn new(vars: &BTreeMap<String, Instruction>, with_default: bool) -> EvalNamespace {
+    let mut vars = vars.clone();
+    if with_default {
+      vars.insert("pi".to_string(), Instruction::Const(std::f64::consts::PI));
+      vars.insert("e".to_string(), Instruction::Const(std::f64::consts::E));
+      EvalNamespace { vars }
+    } else {
+      EvalNamespace { vars }
+    }
   }
 
   fn eval(&self, ins: Instruction) -> f64 {
@@ -86,7 +93,6 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
           let args = i.map(|pair| parse_expr(pair.into_inner())).collect();
           Instruction::Function { name, args }
         }
-        Rule::e => Instruction::Const(std::f64::consts::E),
         _ => panic!("unimplemented: {:?}", primary),
       }
     })
@@ -104,7 +110,6 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
     })
     .map_postfix(|lhs, op: Pair<Rule>| match op.as_rule() {
       Rule::fac => Instruction::Fac { val: Box::from(lhs) },
-      Rule::e => Instruction::Mul { lhs: Box::from(lhs), rhs: Box::from(Instruction::Const(std::f64::consts::E)) },
       _ => panic!("unimplemented: {:?}", op),
     })
     .parse(pairs)
@@ -181,6 +186,14 @@ mod tests {
     let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
     assert_eq!(parse("sqrt(1 - (3 / x^2))", &vars), 0.5);
     assert_eq!(parse("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
+  }
+
+  #[test]
+  fn sinh_demo() {
+    assert_eq!(parse("sinh(0)", &Default::default()), 0.0);
+    assert_eq!(parse("sinh(1)", &Default::default()), 1.1752011936438014);
+    assert_eq!(parse("sinh(2)", &Default::default()), 3.6268604078470186);
+    assert_eq!(parse("sinh(pi/2)", &Default::default()), 2.3012989023072947);
   }
 
   #[test]
