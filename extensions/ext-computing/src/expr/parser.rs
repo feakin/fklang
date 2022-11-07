@@ -1,8 +1,11 @@
+use std::collections::BTreeMap;
+use std::fmt::Error;
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest::pratt_parser::*;
 
 use crate::expr::ast::{BinaryOp, Expr, ExprPair, UnaryOp, Value, ValueIndex};
+use crate::expr::token::Instruction;
 
 #[derive(Parser)]
 #[grammar = "expr/grammar.pest"]
@@ -20,91 +23,80 @@ lazy_static! {
     };
 }
 
-pub fn parse(input: &str) {
+pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
+  let namespace = EvalNamespace::new(vars);
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
-      parse_eval(pairs.next().unwrap().into_inner());
+      let expr = parse_expr(pairs.next().unwrap().into_inner());
+      namespace.eval(expr)
     }
     Err(err) => {
-      println!("Error: {:?}", err);
+      f64::NAN
     }
-  };
+  }
+}
+
+pub struct EvalNamespace<'b> {
+  vars: &'b BTreeMap<String, Instruction>,
+}
+
+impl<'b> EvalNamespace<'b> {
+  pub fn new(vars: &BTreeMap<String, Instruction>) -> EvalNamespace {
+    EvalNamespace { vars }
+  }
+
+  fn eval(&self, ins: Instruction) -> f64 {
+    match ins {
+      Instruction::Const(v) => v,
+      Instruction::Add { lhs, rhs } => self.eval(*lhs) + self.eval(*rhs),
+      Instruction::Sub { lhs, rhs } => self.eval(*lhs) - self.eval(*rhs),
+      Instruction::Mul { lhs, rhs } => self.eval(*lhs) * self.eval(*rhs),
+      Instruction::Div { lhs, rhs } => self.eval(*lhs) / self.eval(*rhs),
+      Instruction::Pow { lhs, rhs } => self.eval(*lhs).powf(self.eval(*rhs)),
+      Instruction::Neg { val } => -self.eval(*val),
+      Instruction::Var(value) => {
+        let var = self.vars.get(&value).unwrap();
+        self.eval(var.clone())
+      }
+      // Instruction::Fac(a) => (1..=eval(*a) as u64).product::<u64>() as f64,
+      _ => panic!("Not implemented: {:?}", ins),
+    }
+  }
 }
 
 const VALUE_INDEX: usize = 0;
 
-fn parse_eval(pairs: Pairs<Rule>) -> ExprPair {
+fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
   PRATT_PARSER
     .map_primary(|primary| {
       match primary.as_rule() {
-        Rule::expr => parse_eval(primary.into_inner()),
+        Rule::expr => parse_expr(primary.into_inner()),
         Rule::num => {
-          let number = primary.as_str().parse::<f64>().unwrap();
-          ExprPair::new(BinaryOp::Add, Value::Const(number))
+          let num = primary.as_str().parse::<f64>().unwrap();
+          Instruction::Const(num)
+        }
+        Rule::ident => {
+          Instruction::Var(primary.as_str().to_string())
         }
         _ => panic!("unimplemented: {:?}", primary),
       }
     })
     .map_prefix(|op: Pair<Rule>, rhs| match op.as_rule() {
-      Rule::neg => {
-        ExprPair::new(BinaryOp::Exp, Value::UnaryOp(UnaryOp::Neg(ValueIndex(VALUE_INDEX))))
-      }
+      Rule::neg => Instruction::Neg { val: Box::new(rhs) },
       _ => panic!("unimplemented: {:?}", op),
     })
-    .map_infix(|lhs, op: Pair<Rule>, rhs| {
-      let op = match op.as_rule() {
-        Rule::add => BinaryOp::Add,
-        _ => panic!("unimplemented: {:?}", op),
-      };
-
-      ExprPair::new(op, Value::UnaryOp(UnaryOp::Parenthesized))
+    .map_infix(|lhs, op: Pair<Rule>, rhs| match op.as_rule() {
+      Rule::add => Instruction::Add {
+        lhs: Box::from(lhs),
+        rhs: Box::from(rhs),
+      },
+      Rule::mul => Instruction::Mul {
+        lhs: Box::from(lhs),
+        rhs: Box::from(rhs),
+      },
+      _ => panic!("unimplemented: {:?}", op),
     })
     .parse(pairs)
-}
-
-// can be follow: <https://github.com/pest-parser/book/blob/master/examples/pest-calculator/src/main.rs>
-fn old_parser(pairs: Pairs<Rule>) -> f64 {
-  PRATT_PARSER
-    .map_primary(|primary| {
-      match primary.as_rule() {
-        Rule::expr => old_parser(primary.into_inner()),
-        Rule::int => primary.as_str().parse().unwrap(),
-        Rule::num => primary.as_str().parse().unwrap(),
-        Rule::function => {
-          let mut inner = primary.into_inner();
-          let name = inner.next().unwrap().as_str();
-          let arg = inner.next().unwrap().into_inner();
-          let func_name = old_parser(arg);
-          execute_func(name, func_name)
-        }
-        _ => panic!("unimplemented, {:?}", primary.as_rule()),
-      }
-    })
-    .map_prefix(|op, rhs: f64| match op.as_rule() {
-      Rule::neg => -rhs,
-      _ => panic!("unimplemented, {:?}", op.as_rule()),
-    })
-    .map_postfix(|lhs, op| match op.as_rule() {
-      Rule::fac => (1..=lhs as u64).product::<u64>() as f64,
-      _ => panic!("unimplemented, {:?}", op.as_rule()),
-    })
-    .map_infix(|lhs, op, rhs| match op.as_rule() {
-      Rule::add => lhs + rhs,
-      Rule::sub => lhs - rhs,
-      Rule::mul => lhs * rhs,
-      Rule::div => lhs / rhs,
-      Rule::pow => lhs.powf(rhs),
-      _ => panic!("unimplemented, {:?}", op.as_rule()),
-    })
-    .parse(pairs)
-}
-
-pub fn parse_value(pair: pest::iterators::Pair<Rule>) -> Value {
-  match pair.as_rule() {
-    Rule::int => Value::Const(pair.as_str().parse().unwrap()),
-    Rule::variable => Value::Var(pair.as_str().to_string()),
-    _ => unreachable!(),
-  }
 }
 
 fn execute_func(func_name: &str, arg: f64) -> f64 {
@@ -143,14 +135,16 @@ mod tests {
 
   #[test]
   fn basic_expr() {
-    parse("1 + 2");
-    // assert_eq!(parse("1 + 2"), 3.0);
-    // assert_eq!(parse("1 + 2 * 3"), 7.0);
-    // assert_eq!(parse("(1 + 2) * 3"), 9.0);
-    // assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
-    // assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
-    // assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.8);
-    // assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -2.2);
+    assert_eq!(parse("1 + 2", &Default::default()), 3.0);
+    assert_eq!(parse("1 + 2 * 3", &Default::default()), 7.0);
+    let map: BTreeMap<String, Instruction> = BTreeMap::from_iter(vec![("y".to_string(), Instruction::Const(1.0))]);
+    assert_eq!(parse("1 + 2 * 3 + y", &map), 8.0);
+
+    let map2: BTreeMap<String, Instruction> = BTreeMap::from_iter(vec![
+      ("x".to_string(), Instruction::Const(2.0)),
+      ("y".to_string(), Instruction::Const(1.0))
+    ]);
+    assert_eq!(parse("1 + 2 * 3 + x + y", &map2), 10.0);
   }
 
   // #[test]

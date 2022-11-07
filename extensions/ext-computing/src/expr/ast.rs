@@ -33,7 +33,10 @@ pub enum Value {
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum BinaryOp {
-  Add,
+  Add {
+    lhs: Value,
+    rhs: Value,
+  },
   Sub,
   Mul,
   Div,

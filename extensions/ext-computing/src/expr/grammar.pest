@@ -25,7 +25,8 @@ percentOn   = { "percent on" | "%" ~ "on" }
 
 function = { ident ~ "(" ~ expr ~ ")" }
 
-variable = { ident }
+variable = _{ ident }
+
 ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ "'"* }
 int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }

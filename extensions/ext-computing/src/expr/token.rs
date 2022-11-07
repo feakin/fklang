@@ -42,19 +42,39 @@
 //  (11) Calculus:        numerical integration and differentiation
 //
 #[derive(Clone, PartialEq, Debug)]
-pub enum MathInstruction {
+pub enum Instruction {
   // Unary
   Not,
-  Neg,
+  Neg {
+    val: Box<Instruction>,
+  },
   Parenthesized,
 
   // Arithmetic
-  Add,
-  Sub,
-  Mul,
-  Div,
-  Mod,
-  Pow,
+  Add {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  Sub {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  Mul {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  Div {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  Mod {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  Pow {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
 
   // Logical
   And,
