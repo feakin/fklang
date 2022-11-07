@@ -23,17 +23,23 @@ program = _{ SOI ~ stmt ~ EOI }
 
 stmt = _{ assign | expr }
 assign = { ident ~ "=" ~ expr }
-expr = { atom ~ (operation ~ atom)* }
+expr = { prefix* ~ atom ~ postfix* ~ (operation ~ atom)* }
 atom = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
 
-operation = _{ sub | add | mul | div | power | percentOf | percentOn | rightShift | leftShift | modulus }
+operation = _{ sub | add | mul | div | pow | percentOf | percentOn | rightShift | leftShift | modulus }
 add         = { "+" | "with" | "plus" | "add" }
 sub         = { "-" | "without" | "subtract" | "minus" }
 mul         = { "*" | "times" | "multiply by" | "mul" }
 div         = { "/" | "divide by" | "divide" }
-power       = { "^" | "power" }
+pow         = { "^" | "power" }
 modulus     = { "%" | "mod" }
+
+prefix      =  _{ neg }
+neg         =   { "-" } // Negation
+postfix     =  _{ fac }
+fac         = { "!" } // Factorial
 rightShift  = { ">>" }
+
 leftShift   = { "<<" }
 percentOf   = { "percent of" | "%" ~ "of" }
 percentOn   = { "percent on" | "%" ~ "on" }

@@ -7,7 +7,7 @@ use pest::pratt_parser::*;
 struct Calculator;
 
 pub fn parse(input: &str) -> f64 {
-  let parse_result = Calculator::parse(Rule::calculation, input);
+  let parse_result = Calculator::parse(Rule::program, input);
   match parse_result {
     Ok(r) => eval(r),
     Err(_) => f64::NAN,
@@ -15,20 +15,42 @@ pub fn parse(input: &str) -> f64 {
 }
 
 fn eval(pairs: Pairs<Rule>) -> f64 {
-  PrattParser::new()
-    .map_primary(|pair| match pair.as_rule() {
-      Rule::calculation => eval(pair.into_inner()),
-      Rule::expr => eval(pair.into_inner()),
-      Rule::num => pair.as_str().trim().parse::<f64>().unwrap(),
-      _ => panic!("unimplemented, {:?}", pair.as_rule()),
+  let pratt =
+    PrattParser::new()
+      .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
+      .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+      .op(Op::infix(Rule::pow, Assoc::Right))
+      .op(Op::postfix(Rule::fac))
+      .op(Op::prefix(Rule::neg));
+
+  parse_expr(pairs, &pratt)
+}
+
+fn parse_expr(pairs: Pairs<Rule>, pratt: &PrattParser<Rule>) -> f64 {
+  pratt
+    .map_primary(|primary| match primary.as_rule() {
+      Rule::int => primary.as_str().parse().unwrap(),
+      Rule::expr => parse_expr(primary.into_inner(), pratt), // from "(" ~ expr ~ ")"
+      Rule::num => primary.as_str().parse().unwrap(),
+      _ => panic!("unimplemented, {:?}", primary.as_rule()),
+    })
+    .map_prefix(|op, rhs| match op.as_rule() {
+      Rule::neg => -rhs,
+      _ => panic!("unimplemented, {:?}", op.as_rule()),
+    })
+    .map_postfix(|lhs, op| match op.as_rule() {
+      Rule::fac => (1..=lhs as u64).product::<u64>() as f64,
+      _ => panic!("unimplemented, {:?}", op.as_rule()),
     })
     .map_infix(|lhs, op, rhs| match op.as_rule() {
       Rule::add => lhs + rhs,
+      Rule::sub => lhs - rhs,
+      Rule::mul => lhs * rhs,
+      Rule::div => lhs / rhs,
+      Rule::pow => lhs.powf(rhs),
       _ => panic!("unimplemented, {:?}", op.as_rule()),
     })
-    .parse(pairs);
-
-  0.0
+    .parse(pairs)
 }
 
 #[cfg(test)]
@@ -39,11 +61,11 @@ mod tests {
   #[ignore]
   fn it_works() {
     assert_eq!(parse("1 + 2"), 3.0);
-    assert_eq!(parse("1 + 2 * 3"), 7.0);
-    assert_eq!(parse("(1 + 2) * 3"), 9.0);
-    assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
-    assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
-    assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.0);
-    assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -3.0);
+    // assert_eq!(parse("1 + 2 * 3"), 7.0);
+    // assert_eq!(parse("(1 + 2) * 3"), 9.0);
+    // assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
+    // assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
+    // assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.0);
+    // assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -3.0);
   }
 }
