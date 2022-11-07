@@ -23,7 +23,7 @@ leftShift   = { "<<" }
 percentOf   = { "percent of" | "%" ~ "of" }
 percentOn   = { "percent on" | "%" ~ "on" }
 
-function = { ident ~ "(" ~ expr ~ ")" }
+function = { ident ~ "(" ~ expr ~ ("," ~ expr)* ~ ")" }
 
 variable = _{ ident }
 
@@ -32,8 +32,7 @@ int = { ("+" | "-")? ~ ASCII_DIGIT+ }
 num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
 
 e  = { "e" }
-pi = { "pi" | "π" }
 tau = { "tau" | "τ" }
-constants = _{ pi | e | tau }
+constants = _{ e | tau }
 
 WHITESPACE   =  _{ " " | "\t" | NEWLINE }

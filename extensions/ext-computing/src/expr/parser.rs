@@ -28,7 +28,6 @@ pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
-      println!("expr: {:?}", expr);
       namespace.eval(expr)
     }
     Err(err) => {
@@ -62,7 +61,7 @@ impl<'b> EvalNamespace<'b> {
       }
       Instruction::Function { name, args } => {
         let args = args.into_iter().map(|arg| self.eval(arg)).collect::<Vec<f64>>();
-        execute_func(&*name, args[0])
+        execute_func(&*name, args)
       }
       _ => panic!("Not implemented: {:?}", ins),
     }
@@ -83,12 +82,11 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
         }
         Rule::function => {
           let mut i = primary.into_inner();
-          let name = i.next().unwrap().as_str();
-          Instruction::Function {
-            name: name.to_string(),
-            args: vec![parse_expr(i.next().unwrap().into_inner())],
-          }
+          let name = i.next().unwrap().as_str().to_string();
+          let args = i.map(|pair| parse_expr(pair.into_inner())).collect();
+          Instruction::Function { name, args }
         }
+        Rule::e => Instruction::Const(std::f64::consts::E),
         _ => panic!("unimplemented: {:?}", primary),
       }
     })
@@ -112,33 +110,34 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
     .parse(pairs)
 }
 
-fn execute_func(func_name: &str, arg: f64) -> f64 {
+fn execute_func(func_name: &str, args: Vec<f64>) -> f64 {
   match func_name {
-    "sin" => arg.sin(),
-    "cos" => arg.cos(),
-    "tan" => arg.tan(),
-    "asin" => arg.asin(),
-    "acos" => arg.acos(),
-    "atan" => arg.atan(),
-    "sinh" => arg.sinh(),
-    "cosh" => arg.cosh(),
-    "tanh" => arg.tanh(),
-    "asinh" => arg.asinh(),
-    "acosh" => arg.acosh(),
-    "atanh" => arg.atanh(),
-    "sqrt" => arg.sqrt(),
-    "cbrt" => arg.cbrt(),
-    "exp" => arg.exp(),
-    "ln" => arg.ln(),
-    "log2" => arg.log2(),
-    "log10" => arg.log10(),
-    "abs" => arg.abs(),
-    "ceil" => arg.ceil(),
-    "floor" => arg.floor(),
-    "round" => arg.round(),
-    "trunc" => arg.trunc(),
-    "fract" => arg.fract(),
-    _ => f64::NAN,
+    "sin" => args[0].sin(),
+    "cos" => args[0].cos(),
+    "tan" => args[0].tan(),
+    "asin" => args[0].asin(),
+    "acos" => args[0].acos(),
+    "atan" => args[0].atan(),
+    "sinh" => args[0].sinh(),
+    "cosh" => args[0].cosh(),
+    "tanh" => args[0].tanh(),
+    "asinh" => args[0].asinh(),
+    "acosh" => args[0].acosh(),
+    "atanh" => args[0].atanh(),
+    "sqrt" => args[0].sqrt(),
+    "exp" => args[0].exp(),
+    "ln" => args[0].ln(),
+    "log" => args[0].log10(),
+    "abs" => args[0].abs(),
+    "floor" => args[0].floor(),
+    "ceil" => args[0].ceil(),
+    "round" => args[0].round(),
+    "signum" => args[0].signum(),
+    "max" => args[0].max(args[1]),
+    "min" => args[0].min(args[1]),
+    "pow" => args[0].powf(args[1]),
+    "clamp" => args[0].max(args[1]).min(args[2]),
+    _ => panic!("Function not implemented: {}", func_name),
   }
 }
 
@@ -178,5 +177,24 @@ mod tests {
     let mut expr = exprtk_rs::Expression::new("sin(2.34e-3 * x)", symbol_table).unwrap();
 
     assert_eq!(expr.value(), 0.004679982916146709);
+  }
+
+  #[test]
+  fn clamp() {
+    let vars2 = BTreeMap::from_iter(vec![
+      ("x".to_string(), Instruction::Const(2.0)),
+      ("y".to_string(), Instruction::Const(2.0)),
+      ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
+    ]);
+    assert_eq!(parse("clamp(-1, sin(2 * pi * x) + cos(y / 2 * pi), +1)", &vars2), -1.0);
+
+    let mut symbol_table = exprtk_rs::SymbolTable::new();
+    symbol_table.add_variable("x", 2.0).unwrap().unwrap();
+    symbol_table.add_variable("y", 2.0).unwrap().unwrap();
+    symbol_table.add_variable("pi", std::f64::consts::PI).unwrap().unwrap();
+
+    let mut expr = exprtk_rs::Expression::new("clamp(-1, sin(2 * pi * x) + cos(y / 2 * pi), +1)", symbol_table).unwrap();
+
+    assert_eq!(expr.value(), -1.0);
   }
 }
