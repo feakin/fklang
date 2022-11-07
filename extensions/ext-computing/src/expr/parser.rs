@@ -133,8 +133,24 @@ fn execute_func(func_name: &str, args: Vec<f64>) -> f64 {
     "ceil" => args[0].ceil(),
     "round" => args[0].round(),
     "signum" => args[0].signum(),
-    "max" => args[0].max(args[1]),
-    "min" => args[0].min(args[1]),
+    "max" => {
+      let mut max = args[0];
+      for arg in args {
+        if arg > max {
+          max = arg;
+        }
+      }
+      max
+    },
+    "min" => {
+      let mut min = args[0];
+      for arg in args {
+        if arg < min {
+          min = arg;
+        }
+      }
+      min
+    },
     "pow" => args[0].powf(args[1]),
     "clamp" => args[0].max(args[1]).min(args[2]),
     _ => panic!("Function not implemented: {}", func_name),
@@ -165,6 +181,17 @@ mod tests {
     let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
     assert_eq!(parse("sqrt(1 - (3 / x^2))", &vars), 0.5);
     assert_eq!(parse("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
+  }
+
+  #[test]
+  fn max_min() {
+    assert_eq!(parse("max(1, 2)", &Default::default()), 2.0);
+    assert_eq!(parse("min(1, 2)", &Default::default()), 1.0);
+    assert_eq!(parse("max(1, 2, 3)", &Default::default()), 3.0);
+    assert_eq!(parse("min(1, 2, 3)", &Default::default()), 1.0);
+
+    let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
+    assert_eq!(parse("1.2 + max(1, 2, 3, x)", &vars), 4.2);
   }
 
   #[test]
