@@ -64,7 +64,7 @@ mod tests {
     assert_eq!(parse("(1 + 2) * 3"), 9.0);
     assert_eq!(parse("1 + 2 * 3 + 4"), 11.0);
     assert_eq!(parse("1 + 2 * (3 + 4)"), 15.0);
-    assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.0);
-    assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -3.0);
+    assert_eq!(parse("1 + 2 * (3 + 4) / 5"), 3.8);
+    assert_eq!(parse("1 + 2 * (3 + 4) / 5 - 6"), -2.2);
   }
 }
