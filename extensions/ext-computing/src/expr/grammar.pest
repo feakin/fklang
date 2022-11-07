@@ -1,0 +1,152 @@
+// MIT License
+//
+// Copyright (c) 2021 Abhimanyu Sharma
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+WHITESPACE = _{ " " | "\t" }
+ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* ~ "'"* }
+int = { ("+" | "-")? ~ ASCII_DIGIT+ }
+num = @{ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
+
+e  = { "e" }
+pi = { "pi" | "π" }
+tau = { "tau" | "τ" }
+constants = _{ pi | e | tau }
+
+operation = _{ subtract | add | multiply | divide | power | percentOf | percentOn | rightShift | leftShift | modulus }
+add         = { "+" | "with" | "plus" | "add" }
+subtract    = { "-" | "without" | "subtract" | "minus" }
+multiply    = { "*" | "times" | "multiply by" | "mul" }
+divide      = { "/" | "divide by" | "divide" }
+power       = { "^" | "power" }
+modulus     = { "%" | "mod" }
+rightShift  = { ">>" }
+leftShift   = { "<<" }
+percentOf   = { "percent of" | "%" ~ "of" }
+percentOn   = { "percent on" | "%" ~ "on" }
+
+function = { ident ~ "(" ~ expr ~ ")" }
+atom = _{ constants | function | ident | convert | num | "(" ~ expr ~ ")"  }
+expr = { atom ~ (operation ~ atom)* }
+assign = { ident ~ "=" ~ expr }
+
+stmt = _{ assign | expr }
+
+calculation = _{ SOI ~ stmt ~ EOI }
+
+// SiUnits parser starts from here.
+// Angle
+ANGLE = { TURN | RADIAN | DEGREE | GRADIAN }
+TURN = { "turn" | "tr" | "pal"}
+RADIAN = { "radian" | "rad" }
+DEGREE = { "degree" | "deg" }
+GRADIAN = { "gradian" | "grad" | "gon" }
+
+// MASS
+MASS = { MICROGRAM | MILLIGRAM | GRAM | KILOGRAM | METRIC_TON | OUNCE | POUND | STONE | SHORT_TON | LONG_TON }
+MICROGRAM = { "μg" | "microgramme" | "microgram" | "mcg" }
+MILLIGRAM = { "milligram" | "mg" }
+GRAM = { "gram" | "g" }
+KILOGRAM = { "kilogram" | "kg" }
+METRIC_TON = { "tonne" | "ton" }
+OUNCE = {  "ounce" }
+POUND = { "pound" }
+STONE = { "stone" }
+SHORT_TON = { "short ton" }
+LONG_TON = { "long ton" }
+
+// LENGTH
+LENGTH = { FOOT | YARD | NAUTICAL_MILE | KILOMETRE | CENTIMETRE | MILLIMETRE | INCH | MILE | METRE }
+MILLIMETRE = { "millimetres" | "millimeters" | "millimetre" | "millimeter" | "mm" }
+CENTIMETRE = { "centimeters" | "centimetres" | "centimetre" | "centimeter" | "cm" }
+METRE = { "metres" | "meters" | "meter" | "metre" |  "m"  }
+KILOMETRE = { "kilometers" | "kilometres" | "kilometer" | "kilometre" | "km" }
+INCH = { "inches" | "inch" | "in" }
+FOOT = { "foots" | "foot" | "feet" | "ft" }
+YARD = { "yards" | "yard" | "yd" }
+MILE = { "miles" | "mile" | "mi" }
+NAUTICAL_MILE = { "nautical miles" | "nautical mile" | "mni" }
+
+// Temperature
+TEMPERATURE = { CELSIUS | FAHRENHEIT | KELVIN }
+CELSIUS = { "celsius" | ^"c" }
+FAHRENHEIT = { "fahrenheit" | ^"f" }
+KELVIN = { "kelvin" | ^"k" }
+
+// Time
+TIME = { NANOSECOND | MICROSECOND | MILLISECOND | SECOND | MINUTE | HOUR | DAY | WEEK | MONTH | YEAR | DECADE | CENTURY | MILLENIUM }
+NANOSECOND = { "nanoseconds" | "nanosecond" | "nanosecs" | "nanosec" | "ns" }
+MICROSECOND = { "microseconds" | "microsecond" |  "microsecs" | "microsec" | "µs" }
+MILLISECOND = { "milliseconds" | "millisecond" | "millisecs" | "millisec" | "ms" }
+SECOND = { "seconds" | "second" | "secs" | "sec" }
+MINUTE = { "minutes" | "minute" | "min" }
+HOUR = { "hours" | "hour" | "hrs" | "hr" }
+DAY = { "days" | "day" }
+WEEK = { "weeks" | "week" | "wks" | "wk" }
+MONTH = { "months" | "month" | "mos" | "mo" }
+YEAR = { "years" | "year" | "yrs" | "yr" }
+DECADE = { "decades" | "decade" }
+CENTURY = { "centuries" | "centry" }
+MILLENIUM = { "milleniums" | "millenium" | "millenia" }
+
+// Area
+AREA = { SQUARE_MILE | SQUARE_METRE | HECTARE | SQUARE_KILOMETRE | SQUARE_INCH | SQUARE_FEET | SQUARE_YARD | ACRE }
+SQUARE_METRE = { "metres2" | "metre2" | "meters2" | "meter2" | "sqm" | "m2" }
+HECTARE = { "hectare" | "ha" }
+SQUARE_KILOMETRE = { "kilometres2" | "kilometre2" | "kilometers2" | "kilometer2" | "sqkm" | "km2" }
+SQUARE_INCH = { "inches2" | "inch2" | "sqin" | "in2" }
+SQUARE_FEET = { "feet2" | "foot2" | "sqft" | "ft2" }
+SQUARE_YARD = { "yards2" | "yard2" | "sqyd" | "yd2"  }
+ACRE = { "acre" | "ac" }
+SQUARE_MILE = { "miles2" | "mile2" | "sqmi" | "mi2"  }
+
+// Speed
+SPEED = { METRE_PER_SECOND | KILOMETRES_PER_HOUR | FEET_PER_SECOND | MILES_PER_HOUR | KNOT }
+METRE_PER_SECOND = { "mps" }
+KILOMETRES_PER_HOUR = { "kph" | "kmh" }
+FEET_PER_SECOND = { "fps" }
+MILES_PER_HOUR = { "mph" }
+KNOT = { "knots" | "knot" | "kn" | "kt" }
+
+// DIGITALINFORMATION
+DIGITALINFORMATION = { BIT | BYTE | KILOBIT | KILOBYTE | MEGABIT | MEGABYTE | MEGABYTE | GIGABIT | GIGABYTE |
+                       TERABIT | TERABYTE | PETABIT | PETABYTE | EXABIT | EXABYTE | ZETTABIT | ZETTABYTE |
+                       YOTTABIT | YOTTABYTE }
+BIT = { "bits" | "bit" }
+BYTE = { "bytes" | "byte" }
+KILOBIT = { "kilobits" | "kilobit" | ^"kbit" }
+KILOBYTE = { "kilobytes" | "kilobyte" | ^"kb" }
+MEGABIT = { "megabits" | "megabit" | ^"mbit" }
+MEGABYTE = { "megabytes" | "megabyte" | ^"mb" }
+GIGABIT = { "gigabits" |  "gigabit" | ^"gbit" }
+GIGABYTE = { "gigabytes" | "gigabyte" |  ^"gb" }
+TERABIT = { "terabits" | "terabit" | ^"tbit" }
+TERABYTE = { "terabytes" | "terabyte" | ^"tb" }
+PETABIT = { "petabits" |  "petabit" | ^"pbit" }
+PETABYTE = { "petabytes" | "petabyte"| ^"pb" }
+EXABIT = { "exabits" | "exabit"| ^"ebit" }
+EXABYTE = { "exabytes" | "exabyte" | ^"eb" }
+ZETTABIT = { "zettabits" | "zettabit"| ^"zbit" }
+ZETTABYTE = { "zettabytes" | "zettabyte" | ^"zb" }
+YOTTABIT = { "yottabits" | "yottabit"| ^"ybit" }
+YOTTABYTE = { "yottabytes" | "yottabyte"| ^"yb" }
+
+siunit = { AREA | DIGITALINFORMATION | SPEED | MASS | ANGLE  | TIME | LENGTH | TEMPERATURE  }
+convert = {  num ~ siunit ~  ( "to" | "as" | "in" ) ~ siunit }
