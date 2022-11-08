@@ -273,4 +273,21 @@ mod tests {
     assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) == except", &vars2), 1.0);
     assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 0.0);
   }
+
+  #[test]
+  #[ignore]
+  fn polynomial() {
+    let expr_str = "25x^5 - 35x^4 - 15x^3 + 40x^2 - 15x + 1";
+    let mut symbol_table = exprtk_rs::SymbolTable::new();
+    symbol_table.add_variable("x", 2.0).unwrap().unwrap();
+
+    let mut expr = exprtk_rs::Expression::new(expr_str, symbol_table).unwrap();
+
+    assert_eq!(expr.value(), 251.0);
+
+    let vars2 = BTreeMap::from_iter(vec![
+      ("x".to_string(), Instruction::Const(2.0)),
+    ]);
+    assert_eq!(computing(expr_str, &vars2), 251.0);
+  }
 }
