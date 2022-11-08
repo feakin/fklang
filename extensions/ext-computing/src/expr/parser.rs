@@ -250,6 +250,7 @@ mod tests {
   }
 
   #[test]
+  #[ignore]
   fn test_equal() {
     let vars2 = BTreeMap::from_iter(vec![
       ("x".to_string(), Instruction::Const(2.0)),
@@ -257,6 +258,6 @@ mod tests {
       ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
     ]);
 
-    // assert_eq!(parse("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 1.0);
+    assert_eq!(parse("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 1.0);
   }
 }
