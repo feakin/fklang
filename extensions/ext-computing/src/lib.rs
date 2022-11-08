@@ -1,17 +1,9 @@
-#[macro_use]
-extern crate lazy_static;
-
-extern crate pest;
-#[macro_use]
-extern crate pest_derive;
-
 use crate::inc_salsa::File;
 use crate::inc_salsa::SourceProgram;
 use crate::inc_salsa::sum;
 
 pub mod inc_salsa;
 pub mod function_type;
-pub mod expr;
 
 // salsa should be in crate root.
 
