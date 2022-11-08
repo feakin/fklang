@@ -4,7 +4,7 @@ use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest::pratt_parser::*;
 
-use crate::expr::token::Instruction;
+use crate::expr::token::{ComparisonOp, Instruction};
 
 #[derive(Parser)]
 #[grammar = "expr/grammar.pest"]
@@ -16,19 +16,20 @@ lazy_static! {
         PrattParser::new()
           .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
           .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
-          .op(Op::infix(Rule::equal, Assoc::Left))
+          .op(Op::infix(Rule::equal_op, Assoc::Left))
           .op(Op::infix(Rule::pow, Assoc::Right))
           .op(Op::postfix(Rule::fac))
           .op(Op::prefix(Rule::neg))
     };
 }
 
-pub fn parse(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
+pub fn computing(input: &str, vars: &BTreeMap<String, Instruction>) -> f64 {
   let namespace = EvalNamespace::new(vars, true);
 
   match Calculator::parse(Rule::program, input) {
     Ok(mut pairs) => {
       let expr = parse_expr(pairs.next().unwrap().into_inner());
+      println!("{:?}", expr);
       namespace.eval(expr)
     }
     Err(err) => {
@@ -71,14 +72,21 @@ impl EvalNamespace {
         let args = args.into_iter().map(|arg| self.eval(arg)).collect::<Vec<f64>>();
         execute_func(&*name, args)
       }
-      Instruction::Equal { lhs, rhs } => {
+      Instruction::Comparison { lhs, rhs, op } => {
         let lhs = self.eval(*lhs);
         let rhs = self.eval(*rhs);
-        if lhs == rhs {
-          1.0
-        } else {
-          0.0
-        }
+        println!("{} {:?} {}", lhs, op, rhs);
+
+        let equal = match op {
+          ComparisonOp::Eq => lhs == rhs,
+          ComparisonOp::Ne => lhs != rhs,
+          ComparisonOp::Lt => lhs < rhs,
+          ComparisonOp::Le => lhs <= rhs,
+          ComparisonOp::Gt => lhs > rhs,
+          ComparisonOp::Ge => lhs >= rhs,
+        };
+
+        equal as i32 as f64
       }
       _ => panic!("Not implemented: {:?}", ins),
     }
@@ -89,6 +97,8 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
   PRATT_PARSER
     .map_primary(|primary| {
       match primary.as_rule() {
+        Rule::comparison => parse_expr(primary.into_inner()),
+        Rule::elvis_expr => parse_expr(primary.into_inner()),
         Rule::expr => parse_expr(primary.into_inner()),
         Rule::num => {
           let num = primary.as_str().parse::<f64>().unwrap();
@@ -116,7 +126,7 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
       Rule::sub => Instruction::Sub { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::div => Instruction::Div { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::pow => Instruction::Pow { lhs: Box::from(lhs), rhs: Box::from(rhs) },
-      Rule::equal => Instruction::Equal { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::equal_op => Instruction::Comparison { lhs: Box::from(lhs), rhs: Box::from(rhs), op: ComparisonOp::Eq },
       _ => panic!("unimplemented: {:?}", op),
     })
     .map_postfix(|lhs, op: Pair<Rule>| match op.as_rule() {
@@ -157,7 +167,7 @@ fn execute_func(func_name: &str, args: Vec<f64>) -> f64 {
         }
       }
       max
-    },
+    }
     "min" => {
       let mut min = args[0];
       for arg in args {
@@ -166,7 +176,7 @@ fn execute_func(func_name: &str, args: Vec<f64>) -> f64 {
         }
       }
       min
-    },
+    }
     "pow" => args[0].powf(args[1]),
     "clamp" => args[0].max(args[1]).min(args[2]),
     _ => panic!("Function not implemented: {}", func_name),
@@ -179,49 +189,49 @@ mod tests {
 
   #[test]
   fn basic_expr() {
-    assert_eq!(parse("1 + 2", &Default::default()), 3.0);
-    assert_eq!(parse("1 + 2 * 3", &Default::default()), 7.0);
+    assert_eq!(computing("1 + 2", &Default::default()), 3.0);
+    assert_eq!(computing("1 + 2 * 3", &Default::default()), 7.0);
     let map: BTreeMap<String, Instruction> = BTreeMap::from_iter(vec![("y".to_string(), Instruction::Const(1.0))]);
-    assert_eq!(parse("1 + 2 * 3 + y", &map), 8.0);
+    assert_eq!(computing("1 + 2 * 3 + y", &map), 8.0);
 
     let map2: BTreeMap<String, Instruction> = BTreeMap::from_iter(vec![
       ("x".to_string(), Instruction::Const(2.0)),
       ("y".to_string(), Instruction::Const(1.0)),
     ]);
-    assert_eq!(parse("1 + 2 * 3 + x + y", &map2), 10.0);
+    assert_eq!(computing("1 + 2 * 3 + x + y", &map2), 10.0);
   }
 
   #[test]
   fn function_demo() {
-    assert_eq!(parse("sqrt(4)", &Default::default()), 2.0);
+    assert_eq!(computing("sqrt(4)", &Default::default()), 2.0);
     let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
-    assert_eq!(parse("sqrt(1 - (3 / x^2))", &vars), 0.5);
-    assert_eq!(parse("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
+    assert_eq!(computing("sqrt(1 - (3 / x^2))", &vars), 0.5);
+    assert_eq!(computing("sqrt(1 - (3 / 3^2))", &vars), 0.816496580927726);
   }
 
   #[test]
   fn sinh_demo() {
-    assert_eq!(parse("sinh(0)", &Default::default()), 0.0);
-    assert_eq!(parse("sinh(1)", &Default::default()), 1.1752011936438014);
-    assert_eq!(parse("sinh(2)", &Default::default()), 3.6268604078470186);
-    assert_eq!(parse("sinh(pi/2)", &Default::default()), 2.3012989023072947);
+    assert_eq!(computing("sinh(0)", &Default::default()), 0.0);
+    assert_eq!(computing("sinh(1)", &Default::default()), 1.1752011936438014);
+    assert_eq!(computing("sinh(2)", &Default::default()), 3.6268604078470186);
+    assert_eq!(computing("sinh(pi/2)", &Default::default()), 2.3012989023072947);
   }
 
   #[test]
   fn max_min() {
-    assert_eq!(parse("max(1, 2)", &Default::default()), 2.0);
-    assert_eq!(parse("min(1, 2)", &Default::default()), 1.0);
-    assert_eq!(parse("max(1, 2, 3)", &Default::default()), 3.0);
-    assert_eq!(parse("min(1, 2, 3)", &Default::default()), 1.0);
+    assert_eq!(computing("max(1, 2)", &Default::default()), 2.0);
+    assert_eq!(computing("min(1, 2)", &Default::default()), 1.0);
+    assert_eq!(computing("max(1, 2, 3)", &Default::default()), 3.0);
+    assert_eq!(computing("min(1, 2, 3)", &Default::default()), 1.0);
 
     let vars = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
-    assert_eq!(parse("1.2 + max(1, 2, 3, x)", &vars), 4.2);
+    assert_eq!(computing("1.2 + max(1, 2, 3, x)", &vars), 4.2);
   }
 
   #[test]
   fn const_e() {
     let vars2 = BTreeMap::from_iter(vec![("x".to_string(), Instruction::Const(2.0))]);
-    assert_eq!(parse("sin(2.34e-3 * x)", &vars2), 0.004679982916146709);
+    assert_eq!(computing("sin(2.34e-3 * x)", &vars2), 0.004679982916146709);
 
     let mut symbol_table = exprtk_rs::SymbolTable::new();
     symbol_table.add_variable("x", 2.0).unwrap().unwrap();
@@ -237,7 +247,7 @@ mod tests {
       ("y".to_string(), Instruction::Const(2.0)),
       ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
     ]);
-    assert_eq!(parse("clamp(-1, sin(2 * pi * x) + cos(y / 2 * pi), +1)", &vars2), -1.0);
+    assert_eq!(computing("clamp(-1, sin(2 * pi * x) + cos(y / 2 * pi), +1)", &vars2), -1.0);
 
     let mut symbol_table = exprtk_rs::SymbolTable::new();
     symbol_table.add_variable("x", 2.0).unwrap().unwrap();
@@ -250,14 +260,17 @@ mod tests {
   }
 
   #[test]
-  #[ignore]
   fn test_equal() {
+    let rust_result = (2.0 * 2.0 * std::f64::consts::PI).sin() + (2.0 / 2.0 * std::f64::consts::PI).cos();
+
     let vars2 = BTreeMap::from_iter(vec![
       ("x".to_string(), Instruction::Const(2.0)),
       ("y".to_string(), Instruction::Const(2.0)),
       ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
+      ("except".to_string(), Instruction::Const(rust_result)),
     ]);
 
-    assert_eq!(parse("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 1.0);
+    assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) == except", &vars2), 1.0);
+    assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 0.0);
   }
 }

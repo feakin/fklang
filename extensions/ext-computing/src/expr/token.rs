@@ -81,19 +81,14 @@ pub enum Instruction {
   Or,
   Xor,
 
-  // Comparison
-  Eq,
-  Ne,
-  Lt,
-  Le,
-  Gt,
-  Ge,
-
-  // Equality
-  Equal {
+  Comparison {
     lhs: Box<Instruction>,
     rhs: Box<Instruction>,
+    op: ComparisonOp,
   },
+
+  // Equality
+  ComparisonOp(ComparisonOp),
   NotEqual,
 
   // Precedence
@@ -115,4 +110,14 @@ pub enum Instruction {
     name: String,
     args: Vec<Instruction>,
   },
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum ComparisonOp {
+  Eq,
+  Ne,
+  Lt,
+  Le,
+  Gt,
+  Ge,
 }
