@@ -8,14 +8,23 @@ use log::info;
 use fkl_mir::{ContextMap, Environment};
 use fkl_parser::parse;
 
+/// parse source code and generate MIR
 pub mod deconstruct;
+/// the MIR of source code
 pub mod code_meta;
+/// insert code to the source
 pub mod inserter;
+/// some built-in functions
 pub mod builtin;
+/// code highlight
 pub mod highlighter;
 mod e2e;
+/// the database, datasource support
 mod datasource;
+/// mock server
 pub mod mock;
+/// generate feakin code
+pub mod generator;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

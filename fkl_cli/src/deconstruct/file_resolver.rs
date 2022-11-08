@@ -61,7 +61,7 @@ impl FileResolver {
     let pos = self.files.len();
     self.cached_paths.insert(path.to_path_buf(), pos);
 
-    let meta = ModelBuilder::model_by_file(path);
+    let meta = ModelBuilder::by_file(path);
     let mut imports: Vec<String> = vec![];
     let mut exports: Vec<String> = vec![];
 
