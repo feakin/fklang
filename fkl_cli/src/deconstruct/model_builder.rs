@@ -47,7 +47,7 @@ impl ModelBuilder {
 
     match ext {
       "java" => {
-        let mut file = Self::by_str(path);
+        let mut file = Self::by_str(ModelBuilder::read_content(path).as_str());
         file.path = ModelBuilder::format_path(path);
         file.file_name = file_name.to_string();
         file.pure_name = file_name.replace(".java", "");
@@ -57,8 +57,8 @@ impl ModelBuilder {
     }
   }
 
-  fn by_str(path: &Path) -> CodeFile {
-    JavaConstruct::parse(ModelBuilder::read_content(path).as_str())
+  pub fn by_str(content: &str) -> CodeFile {
+    JavaConstruct::parse(content)
   }
 
   fn read_content(path: &Path) -> String {
