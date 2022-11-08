@@ -16,6 +16,7 @@ lazy_static! {
         PrattParser::new()
           .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
           .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+          .op(Op::infix(Rule::equal, Assoc::Left))
           .op(Op::infix(Rule::pow, Assoc::Right))
           .op(Op::postfix(Rule::fac))
           .op(Op::prefix(Rule::neg))
@@ -70,6 +71,15 @@ impl EvalNamespace {
         let args = args.into_iter().map(|arg| self.eval(arg)).collect::<Vec<f64>>();
         execute_func(&*name, args)
       }
+      Instruction::Equal { lhs, rhs } => {
+        let lhs = self.eval(*lhs);
+        let rhs = self.eval(*rhs);
+        if lhs == rhs {
+          1.0
+        } else {
+          0.0
+        }
+      }
       _ => panic!("Not implemented: {:?}", ins),
     }
   }
@@ -106,6 +116,7 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
       Rule::sub => Instruction::Sub { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::div => Instruction::Div { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::pow => Instruction::Pow { lhs: Box::from(lhs), rhs: Box::from(rhs) },
+      Rule::equal => Instruction::Equal { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       _ => panic!("unimplemented: {:?}", op),
     })
     .map_postfix(|lhs, op: Pair<Rule>| match op.as_rule() {
@@ -236,5 +247,16 @@ mod tests {
     let mut expr = exprtk_rs::Expression::new("clamp(-1, sin(2 * pi * x) + cos(y / 2 * pi), +1)", symbol_table).unwrap();
 
     assert_eq!(expr.value(), -1.0);
+  }
+
+  #[test]
+  fn test_equal() {
+    let vars2 = BTreeMap::from_iter(vec![
+      ("x".to_string(), Instruction::Const(2.0)),
+      ("y".to_string(), Instruction::Const(2.0)),
+      ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
+    ]);
+
+    // assert_eq!(parse("sin(2 * pi * x) + cos(y / 2 * pi) == 0", &vars2), 1.0);
   }
 }

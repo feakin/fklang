@@ -89,6 +89,13 @@ pub enum Instruction {
   Gt,
   Ge,
 
+  // Equality
+  Equal {
+    lhs: Box<Instruction>,
+    rhs: Box<Instruction>,
+  },
+  NotEqual,
+
   // Precedence
   LBrace,
   RBrace,

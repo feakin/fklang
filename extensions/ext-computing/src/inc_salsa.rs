@@ -38,13 +38,3 @@ pub struct SourceProgram {
 pub fn sum(_db: &dyn crate::Db) -> u32 {
   return 0;
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn it_works() {
-    calc();
-  }
-}
