@@ -20,8 +20,9 @@ modulus     = { "%" | "mod" }
 neg         = { "-" } // Negation
 fac         = { "!" } // Factorial
 
-equal_op    = { equal }
-equal       = { "==" }
+equal_op    = { equal | not_equal }
+equal       = _{ "==" }
+not_equal   = _{ "!=" }
 
 assign_op   = { ":=" }
 

@@ -126,7 +126,20 @@ fn parse_expr(pairs: Pairs<Rule>) -> Instruction {
       Rule::sub => Instruction::Sub { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::div => Instruction::Div { lhs: Box::from(lhs), rhs: Box::from(rhs) },
       Rule::pow => Instruction::Pow { lhs: Box::from(lhs), rhs: Box::from(rhs) },
-      Rule::equal_op => Instruction::Comparison { lhs: Box::from(lhs), rhs: Box::from(rhs), op: ComparisonOp::Eq },
+      Rule::equal_op => {
+        println!("equal_op: {:?}", op);
+        let op = match op.as_str() {
+          "==" => ComparisonOp::Eq,
+          "!=" => ComparisonOp::Ne,
+          "<" => ComparisonOp::Lt,
+          "<=" => ComparisonOp::Le,
+          ">" => ComparisonOp::Gt,
+          ">=" => ComparisonOp::Ge,
+          _ => panic!("unimplemented: {:?}", op),
+        };
+
+        Instruction::Comparison { lhs: Box::from(lhs), rhs: Box::from(rhs), op }
+      },
       _ => panic!("unimplemented: {:?}", op),
     })
     .map_postfix(|lhs, op: Pair<Rule>| match op.as_rule() {
@@ -276,8 +289,23 @@ mod tests {
 
   #[test]
   #[ignore]
+  fn not_equal() {
+    let rust_result = (2.0 * 2.0 * std::f64::consts::PI).sin() + (2.0 / 2.0 * std::f64::consts::PI).cos();
+
+    let vars2 = BTreeMap::from_iter(vec![
+      ("x".to_string(), Instruction::Const(2.0)),
+      ("y".to_string(), Instruction::Const(2.0)),
+      ("pi".to_string(), Instruction::Const(std::f64::consts::PI)),
+      ("except".to_string(), Instruction::Const(rust_result)),
+    ]);
+
+    assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) != except", &vars2), 0.0);
+    assert_eq!(computing("sin(2 * pi * x) + cos(y / 2 * pi) != 0", &vars2), 1.0);
+  }
+
+  #[test]
   fn polynomial() {
-    let expr_str = "25x^5 - 35x^4 - 15x^3 + 40x^2 - 15x + 1";
+    let expr_str = "25 * x^5 - 35 * x^4 - 15 * x^3 + 40 * x^2 - 15 * x + 1";
     let mut symbol_table = exprtk_rs::SymbolTable::new();
     symbol_table.add_variable("x", 2.0).unwrap().unwrap();
 
