@@ -1,5 +1,5 @@
 [package]
-name = "fkl-codegen-java"
+name = "fkl_codegen_java"
 version = "0.4.0"
 authors = ["Phodal Huang <h@phodal.com>"]
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
@@ -27,5 +27,5 @@ anyhow = "1.0.31"
 
 rust-stemmers = "1.2.0"
 
-fkl-parser = { path = "../fkl_parser", version = "0.4.0" }
-fkl-mir = { path = "../fkl_mir", version = "0.4.0" }
+fkl_parser = { path = "../fkl_parser", version = "0.4.0" }
+fkl_mir = { path = "../fkl_mir", version = "0.4.0" }

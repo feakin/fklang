@@ -1,5 +1,5 @@
 [package]
-name = "fkl-runner-kafka"
+name = "fkl_runner_kafka"
 version = "0.1.0"
 authors = ["Phodal Huang <h@phodal.com>" ]
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
@@ -23,7 +23,7 @@ include = [
 
 [dependencies]
 fkl_ext_api = { path = "../../fkl_ext_api", version = "0.1.0" }
-fkl-mir = { path = "../../fkl_mir", version = "0.4.0" }
+fkl_mir = { path = "../../fkl_mir", version = "0.4.0" }
 
 async-trait = "0.1.58"
 

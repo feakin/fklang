@@ -23,7 +23,7 @@ include = [
 
 [dependencies]
 fkl_ext_api = { path = "../../fkl_ext_api", version = "0.1.0" }
-fkl-mir = { path = "../../fkl_mir", version = "0.4.0" }
+fkl_mir = { path = "../../fkl_mir", version = "0.4.0" }
 
 async-trait = "0.1.58"
 

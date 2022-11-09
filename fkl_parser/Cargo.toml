@@ -1,5 +1,5 @@
 [package]
-name = "fkl-parser"
+name = "fkl_parser"
 version = "0.4.0"
 authors = ["Phodal Huang <h@phodal.com>"]
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
@@ -30,7 +30,7 @@ indexmap = "1.9.1"
 
 serde = { version = "1", features = ["derive"] }
 
-fkl-mir = { path = "../fkl_mir" }
+fkl_mir = { path = "../fkl_mir" }
 
 [dev-dependencies]
 mockall = "0.11.2"

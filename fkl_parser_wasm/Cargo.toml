@@ -1,5 +1,5 @@
 [package]
-name = "fkl-wasm"
+name = "fkl_wasm"
 version = "0.4.0"
 authors = ["Phodal Huang <h@phodal.com>"]
 edition = "2018"
@@ -29,9 +29,9 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.5", optional = true }
 
-fkl-mir = { path = "../fkl_mir", version = "0.4.0" }
-fkl-parser = { path = "../fkl_parser", version = "0.4.0" }
-fkl-dot = { path = "../fkl_dot", version = "0.1.0" }
+fkl_mir = { path = "../fkl_mir", version = "0.4.0" }
+fkl_parser = { path = "../fkl_parser", version = "0.4.0" }
+fkl_dot = { path = "../fkl_dot", version = "0.1.0" }
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

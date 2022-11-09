@@ -25,4 +25,4 @@ include = [
 downcast-rs = "1.2.0"
 async-trait = "0.1.58"
 
-fkl-mir = { path = "../fkl_mir", version = "0.4.0" }
+fkl_mir = { path = "../fkl_mir", version = "0.4.0" }
