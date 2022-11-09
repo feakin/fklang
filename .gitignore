@@ -19,3 +19,4 @@ coco_plugins
 temp
 .DS_Store
 lcov.info
+plugins/

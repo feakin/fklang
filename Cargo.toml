@@ -14,7 +14,10 @@ members = [
   "fkl_ext_loader",
   # for codegen
   "extensions/*",
-  "examples/*"
+  "examples/*",
+
+  # for ci copy and build and zip
+  "scripts/ext-builder"
 ]
 
 [profile.release]
