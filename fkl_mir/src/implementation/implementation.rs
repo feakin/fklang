@@ -20,3 +20,12 @@ impl Default for Implementation {
     PublishHttpApi(HttpApiImpl::default())
   }
 }
+
+impl Implementation {
+  pub(crate) fn name(&self) -> String {
+    match self {
+      PublishHttpApi(impl_) => impl_.name.clone(),
+      _ => "".to_string(),
+    }
+  }
+}

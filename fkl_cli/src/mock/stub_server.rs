@@ -8,20 +8,23 @@ use serde::{Deserialize, Serialize};
 
 use fkl_mir::default_config;
 use fkl_mir::{Aggregate, ContextMap, Entity};
+use fkl_mir::symbol_table::SymbolTable;
 
 pub use super::stub_aggregate_api;
 
 #[get("/")]
-pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
+pub(crate) async fn index<'a>(conf: &State<MockServerConfig<'a>>) -> Json<ContextMap> {
   Json(conf.context_map.clone())
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
-pub struct MockServerConfig {
+pub struct MockServerConfig<'a> {
   pub port: u32,
   pub context_map: ContextMap,
-  pub symbol_table: Vec<Struct>,
+  // ignore serialization
+  #[serde(skip)]
+  pub symbol_table: SymbolTable<'a>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -69,6 +72,7 @@ fn merge_config(context_map: &ContextMap) -> MockServerConfig {
   let server_config = MockServerConfig {
     port,
     context_map: context_map.clone(),
+    symbol_table: Default::default()
   };
   server_config
 }
