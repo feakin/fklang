@@ -201,7 +201,6 @@ impl MirTransform {
   fn transform_entity(&self, decl: &EntityDecl) -> mir::Entity {
     Entity {
       name: decl.name.clone(),
-      is_aggregate_root: decl.is_aggregate_root,
       description: decl.inline_doc.clone(),
       fields: decl.fields.iter().map(|field| Self::transform_field(field)).collect(),
       identify: Self::transform_field(&decl.identify),
@@ -556,7 +555,6 @@ Entity Shopping {
               Entity {
                 name: "Shopping".to_string(),
                 description: "".to_string(),
-                is_aggregate_root: false,
                 identify: Field {
                   name: "".to_string(),
                   initializer: None,
@@ -877,21 +875,18 @@ impl CinemaCreatedEvent {
                 name: "Movie".to_string(),
                 fields: vec![],
                 description: "".to_string(),
-                is_aggregate_root: false,
                 identify: Default::default(),
               },
               Entity {
                 name: "Actor".to_string(),
                 fields: vec![],
                 description: "".to_string(),
-                is_aggregate_root: false,
                 identify: Default::default(),
               },
               Entity {
                 name: "Publisher".to_string(),
                 fields: vec![],
                 description: "".to_string(),
-                is_aggregate_root: false,
                 identify: Default::default(),
               },
             ],
@@ -933,7 +928,6 @@ impl CinemaCreatedEvent {
             Entity {
               name: "ArchSystem".to_string(),
               description: "".to_string(),
-              is_aggregate_root: false,
               identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
               fields: vec![
                 Field { name: "id".to_string(), initializer: None, type_type: "String".to_string() },
@@ -942,7 +936,6 @@ impl CinemaCreatedEvent {
             Entity {
               name: "ArchComponent".to_string(),
               description: "".to_string(),
-              is_aggregate_root: false,
               identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
               fields: vec![
                 Field { name: "name".to_string(), initializer: None, type_type: "String".to_string() },

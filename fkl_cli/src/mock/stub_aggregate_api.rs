@@ -130,3 +130,11 @@ fn mock_value_from_entity(entity: &Entity, _context_map: &ContextMap) -> IndexMa
   let map = FakeValue::fields(fields);
   map
 }
+
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn simple_entity() {
+
+  }
+}

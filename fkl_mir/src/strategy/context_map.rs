@@ -129,7 +129,6 @@ mod tests {
             entities: vec![Entity {
               name: "TicketEntity".to_string(),
               description: "".to_string(),
-              is_aggregate_root: false,
               identify: Default::default(),
               fields: vec![],
             }],

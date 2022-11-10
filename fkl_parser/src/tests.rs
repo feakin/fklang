@@ -113,21 +113,18 @@ ValueObject Notifications { }
                 Entity {
                   name: "Cinema".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
                   fields: vec![],
                 },
                 Entity {
                   name: "ScreeningRoom".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field { name: "".to_string(), initializer: None, type_type: "".to_string() },
                   fields: vec![],
                 },
                 Entity {
                   name: "Seat".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -149,7 +146,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "Movie".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -160,7 +156,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "Actor".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -171,7 +166,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "Publisher".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -193,7 +187,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "Ticket".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -204,7 +197,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "Reservation".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
@@ -238,7 +230,6 @@ ValueObject Notifications { }
                 Entity {
                   name: "User".to_string(),
                   description: "".to_string(),
-                  is_aggregate_root: false,
                   identify: Field {
                     name: "".to_string(),
                     initializer: None,
