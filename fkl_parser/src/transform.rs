@@ -25,6 +25,7 @@ pub struct MirTransform {
   pub layered: Option<LayeredArchitecture>,
   pub source_sets: Option<fkl_mir::SourceSets>,
   pub envs: Vec<fkl_mir::Environment>,
+  pub structs: HashMap<String, fkl_mir::Struct>,
 }
 
 impl MirTransform {
@@ -41,6 +42,7 @@ impl MirTransform {
       layered: Default::default(),
       source_sets: None,
       envs: vec![],
+      structs: Default::default()
     };
 
     match ast_parse(str) {
@@ -51,6 +53,8 @@ impl MirTransform {
     };
 
     let contexts = transform.update_aggregates();
+
+    // todo: add custom struct
 
     Ok(ContextMap {
       name: transform.context_map_name,
@@ -63,6 +67,7 @@ impl MirTransform {
       layered: transform.layered,
       source_sets: transform.source_sets,
       envs: transform.envs,
+      structs: transform.structs,
     })
   }
 
@@ -129,7 +134,13 @@ impl MirTransform {
           let api_impl = self.transform_implementation(implementation);
           self.implementations.push(api_impl);
         }
-        FklDeclaration::Struct(_) => {}
+        FklDeclaration::Struct(decl) => {
+          let fields: Vec<Field> = decl.fields.iter().map(|field| Self::transform_field(field)).collect();
+          self.structs.insert(decl.name.clone(), fkl_mir::Struct {
+            name: decl.name.clone(),
+            fields,
+          });
+        }
         FklDeclaration::Layered(decl) => {
           self.layered = Some(self.transform_layered(&decl));
         }

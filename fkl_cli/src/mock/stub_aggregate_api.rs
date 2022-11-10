@@ -133,8 +133,32 @@ fn mock_value_from_entity(entity: &Entity, _context_map: &ContextMap) -> IndexMa
 
 #[cfg(test)]
 mod tests {
+  use crate::builtin::funcs::mir_from_str;
+
   #[test]
   fn simple_entity() {
+    let context_map = mir_from_str("Entity User {
+      struct {
+        id: String
+        name: String
+        age: Int
+        address: Address
+        is_active: Boolean
+        created_at: DateTime
+        updated_at: DateTime
+      }
+    }
 
+    struct Address {
+      street: String
+      city: String
+      state: String
+      zip: String
+    }
+    ");
+
+    // todo: use symbol table to get entity
+    // let entity = context_map.get_entity("User").unwrap();
+    // println!("{:?}", entity);
   }
 }

@@ -1,8 +1,9 @@
+use std::collections::HashMap;
 use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step};
+use crate::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step, Struct};
 use crate::environment::Environment;
 use crate::implementation::Implementation;
 
@@ -24,7 +25,13 @@ pub struct ContextMap {
   pub implementations: Vec<Implementation>,
   pub layered: Option<LayeredArchitecture>,
   pub source_sets: Option<SourceSets>,
-  pub envs: Vec<Environment>
+  pub envs: Vec<Environment>,
+  pub structs: HashMap<String, Struct>,
+}
+
+#[allow(dead_code)]
+impl ContextMap {
+  // todo: from symbol table?
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -139,7 +146,8 @@ mod tests {
       implementations: vec![],
       layered: None,
       source_sets: None,
-      envs: vec![]
+      envs: vec![],
+      structs: Default::default()
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)

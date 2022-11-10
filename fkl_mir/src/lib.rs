@@ -14,6 +14,7 @@ pub use tactic::entity::*;
 pub use tactic::value_object::*;
 pub use tactic::domain_object::*;
 pub use tactic::block::*;
+pub use tactic::struct_::*;
 pub use implementation::*;
 
 pub use binding::*;

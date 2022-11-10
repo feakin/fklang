@@ -209,7 +209,7 @@ parameters_decl = {
 }
 
 fields_decl = {
-  (name_type_def ~ ";"?)*
+  (name_type_def ~ (";" | ",")?)*
 }
 
 // list?

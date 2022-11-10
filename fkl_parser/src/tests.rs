@@ -273,7 +273,8 @@ ValueObject Notifications { }
       implementations: vec![],
       layered: None,
       source_sets: None,
-      envs: vec![]
+      envs: vec![],
+      structs: Default::default()
     });
   }
 }
