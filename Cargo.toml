@@ -7,7 +7,7 @@ members = [
   "fkl_parser",
   "fkl_parser_wasm",
   # codegen
-  "fkl_dot",
+  "fkl_codegen_dot",
   "fkl_codegen_java",
   # extension
   "fkl_ext_api",

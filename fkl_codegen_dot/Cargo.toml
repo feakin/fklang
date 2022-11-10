@@ -1,5 +1,5 @@
 [package]
-name = "fkl_dot"
+name = "fkl_codegen_dot"
 version = "0.1.0"
 authors = ["Phodal Huang <h@phodal.com>"]
 edition = "2018"
