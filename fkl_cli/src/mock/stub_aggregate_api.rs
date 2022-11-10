@@ -25,11 +25,11 @@ fn filter_entity(aggregate_name: &str, entity_name: &str, context_map: &ContextM
 
 #[allow(unused_variables)]
 #[get("/<aggregate_name>/<entity_name>/<id>")]
-pub async fn get_aggregate_by_id<'a>(
+pub async fn get_aggregate_by_id(
   aggregate_name: &str,
   entity_name: &str,
   id: usize,
-  config: &State<MockServerConfig<'a>>,
+  config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
@@ -45,10 +45,10 @@ pub async fn get_aggregate_by_id<'a>(
 }
 
 #[get("/<aggregate_name>/<entity_name>")]
-pub async fn get_entities<'a>(
+pub async fn get_entities(
   aggregate_name: &str,
   entity_name: &str,
-  config: &State<MockServerConfig<'a>>,
+  config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
@@ -67,10 +67,10 @@ pub async fn get_entities<'a>(
 }
 
 #[put("/<aggregate_name>/<entity_name>")]
-pub async fn create_entity<'a>(
+pub async fn create_entity(
   aggregate_name: &str,
   entity_name: &str,
-  config: &State<MockServerConfig<'a>>,
+  config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
@@ -88,11 +88,11 @@ pub async fn create_entity<'a>(
 // update entity
 #[allow(unused_variables)]
 #[post("/<aggregate_name>/<entity_name>/<id>")]
-pub async fn update_entity<'a>(
+pub async fn update_entity(
   aggregate_name: &str,
   entity_name: &str,
   id: usize,
-  config: &State<MockServerConfig<'a>>,
+  config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {
@@ -110,11 +110,11 @@ pub async fn update_entity<'a>(
 // delete entity
 #[allow(unused_variables)]
 #[delete("/<aggregate_name>/<entity_name>/<id>")]
-pub async fn delete_entity<'a>(
+pub async fn delete_entity(
   aggregate_name: &str,
   entity_name: &str,
   id: usize,
-  config: &State<MockServerConfig<'a>>,
+  config: &State<MockServerConfig>,
 ) -> Result<Json<Vec<IndexMap<String, MockType>>>, NotFound<Json<ApiError>>> {
   let opt_entity = filter_entity(aggregate_name, entity_name, &config.context_map);
   if let None = opt_entity {

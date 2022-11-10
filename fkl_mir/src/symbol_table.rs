@@ -5,52 +5,52 @@ use crate::tactic::struct_::Struct;
 
 /// SymbolType combines all DDD types and some other top level types
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum SymbolType<'a> {
-  ContextMap(Box<&'a ContextMap>),
-  BoundedContext(Box<&'a BoundedContext>),
-  Aggregate(Box<&'a Aggregate>),
-  Entity(Box<&'a Entity>),
-  ValueObject(Box<&'a ValueObject>),
-  Struct(Box<&'a Struct>),
-  Implementation(Box<&'a Implementation>),
-  Environment(Box<&'a Environment>),
-  SourceSet(Box<&'a SourceSet>),
-  DataSource(Box<&'a Datasource>),
+pub enum SymbolType {
+  ContextMap(ContextMap),
+  BoundedContext(BoundedContext),
+  Aggregate(Aggregate),
+  Entity(Entity),
+  ValueObject(ValueObject),
+  Struct(Struct),
+  Implementation(Implementation),
+  Environment(Environment),
+  SourceSet(SourceSet),
+  DataSource(Datasource),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct SymbolTable<'a> {
-  pub symbols: HashMap<String, Symbol<'a>>,
+pub struct SymbolTable {
+  pub symbols: HashMap<String, Symbol>,
 }
 
-impl<'a> SymbolTable<'a> {
+impl SymbolTable {
   pub fn new() -> Self {
     SymbolTable { symbols: HashMap::new() }
   }
 
-  pub fn add(&mut self, symbol_type: SymbolType<'a>) {
+  pub fn add(&mut self, symbol_type: SymbolType) {
     let name = Symbol::name(&symbol_type);
     self.symbols.insert(name.clone(), Symbol { name, symbol_type });
   }
 
-  pub fn get(&self, name: &str) -> Option<&Symbol<'a>> {
+  pub fn get(&self, name: &str) -> Option<&Symbol> {
     self.symbols.get(name)
   }
 }
 
 /// Symbol is a DDD type or a top level type
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Symbol<'a> {
+pub struct Symbol {
   pub name: String,
-  pub symbol_type: SymbolType<'a>,
+  pub symbol_type: SymbolType,
 }
 
-impl<'a> Symbol<'a> {
+impl Symbol {
   /// symbol name start with DDD type name, for example:
   /// `Aggregate Ticket  {}` will have symbol name `aggregate_ticket`
   /// `Entity Ticket {}` will have symbol name `entity_ticket`
   /// `ValueObject Ticket {}` will have symbol name `value_object_ticket`
-  pub fn new(symbol_type: SymbolType<'a>) -> Self {
+  pub fn new(symbol_type: SymbolType) -> Self {
     let name = Self::name(&symbol_type);
     Symbol { name, symbol_type }
   }
@@ -82,7 +82,7 @@ mod tests {
     let context_map = ContextMap::default();
     let symbol = Symbol {
       name: "context_map".to_string(),
-      symbol_type: SymbolType::ContextMap(Box::new(&context_map)),
+      symbol_type: SymbolType::ContextMap(context_map),
     };
     symbol_table.symbols.insert(symbol.name.clone(), symbol);
     assert_eq!(symbol_table.symbols.len(), 1);
@@ -94,7 +94,7 @@ mod tests {
     let mut symbol_table = SymbolTable::default();
     let context_map = ContextMap::default();
 
-    symbol_table.add(SymbolType::ContextMap(Box::new(&context_map)));
+    symbol_table.add(SymbolType::ContextMap(context_map));
     assert_eq!(symbol_table.symbols.len(), 1);
     assert_eq!(symbol_table.symbols.get("context_map_").unwrap().name, "context_map_");
   }
@@ -105,7 +105,7 @@ mod tests {
     let mut context_map = ContextMap::default();
     context_map.name = "demo".to_string();
 
-    symbol_table.add(SymbolType::ContextMap(Box::new(&context_map)));
+    symbol_table.add(SymbolType::ContextMap(context_map));
     assert_eq!(symbol_table.symbols.len(), 1);
 
     assert_eq!(symbol_table.symbols.get("context_map_demo").unwrap().name, "context_map_demo");
