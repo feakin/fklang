@@ -4,6 +4,7 @@ use fkl_mir::{ContextMap, CustomEnv};
 
 use crate::custom_runner::CustomRunner;
 
+/// A runner context is a map of custom runners which can supported for DAG style called.
 pub struct RunnerContext {
   pub context: ContextMap,
   pub env: CustomEnv,

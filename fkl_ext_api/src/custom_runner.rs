@@ -8,7 +8,6 @@ use fkl_mir::{ContextMap, CustomEnv};
 pub struct Argument {
   pub name: String,
   pub value: String,
-
 }
 
 /// A custom runner is a function that takes a context map and returns a result.

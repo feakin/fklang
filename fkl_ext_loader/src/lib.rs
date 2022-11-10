@@ -15,10 +15,15 @@ pub enum ExtLoadError {
 pub unsafe fn dynamically_load_ext(
   path: &str,
 ) -> Result<(Library, Box<dyn CustomRunner>), ExtLoadError> {
+  // 1. load the dynamic library
   let lib = Library::new(path).map_err(ExtLoadError::Library)?;
+
+  // 2. get and check the function pointer
   let func: Symbol<CreateRunner> = lib
     .get(b"_fkl_create_runner")
     .map_err(ExtLoadError::Plugin)?;
+
+  // 3. call the function pointer
   let plugin = Box::from_raw(func());
   Ok((lib, plugin))
 }
