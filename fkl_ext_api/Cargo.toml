@@ -1,6 +1,6 @@
 [package]
 name = "fkl_ext_api"
-version = "0.1.0"
+version = "0.4.0"
 authors = ["Phodal Huang <h@phodal.com>" ]
 description = "Feakin is a architecture design and visual collaboration tool. This is the parser for Feakin."
 repository = "https://github.com/feakin/fklang"
