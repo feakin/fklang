@@ -51,7 +51,7 @@ regex = "1.6.0"
 
 # plugin systems
 fkl_ext_loader = { path = "../fkl_ext_loader", version = "0.4.0" }
-fkl_ext_api = { path = "../fkl_ext_api", version = "0.1.0" }
+fkl_ext_api = { path = "../fkl_ext_api", version = "0.4.0" }
 
 #------------------- Http Verify -------------------
 

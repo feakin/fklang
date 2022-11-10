@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fkl_ext_api = { path = "../../fkl_ext_api", version = "0.1.0" }
+fkl_ext_api = { path = "../../fkl_ext_api", version = "0.4.0" }
 fkl_mir = { path = "../../fkl_mir", version = "0.4.0" }
 
 salsa = { git = "https://github.com/salsa-rs/salsa", package = "salsa-2022" }
