@@ -3,19 +3,19 @@ use std::collections::HashMap;
 use indexmap::IndexMap;
 
 use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, Step, ValueObject};
+use fkl_mir as mir;
 use fkl_mir::authorization::HttpAuthorization;
 use fkl_mir::implementation::{HttpEndpoint, Implementation, Request, Response};
 use fkl_mir::implementation::http_api_impl::HttpApiImpl;
+use fkl_mir::symbol_table::SymbolTable;
 use fkl_mir::tactic::aggregate::Aggregate;
-
-use fkl_mir as mir;
 
 use crate::{ContextMap, ParseError};
 use crate::parser::{ast, parse as ast_parse};
 use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct MirTransform {
+pub struct MirTransform<'a> {
   pub context_map_name: String,
   pub contexts: IndexMap<String, BoundedContext>,
   pub relations: Vec<ContextRelation>,
@@ -26,9 +26,11 @@ pub struct MirTransform {
   pub layered: Option<LayeredArchitecture>,
   pub source_sets: Option<fkl_mir::SourceSets>,
   pub envs: Vec<fkl_mir::Environment>,
+  symbol_table: SymbolTable<'a>,
 }
 
-impl MirTransform {
+impl MirTransform<'_> {
+  // todo: refactor to symbol table
   pub fn mir(str: &str) -> Result<ContextMap, ParseError> {
     let mut transform = MirTransform {
       context_map_name: "".to_string(),
@@ -41,6 +43,7 @@ impl MirTransform {
       layered: Default::default(),
       source_sets: None,
       envs: vec![],
+      symbol_table: Default::default()
     };
 
     match ast_parse(str) {

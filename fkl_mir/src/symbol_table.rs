@@ -28,11 +28,24 @@ impl<'a> SymbolTable<'a> {
     SymbolTable { symbols: HashMap::new() }
   }
 
-  pub fn add_symbol(&mut self, symbol: Symbol<'a>) {
-    self.symbols.insert(symbol.name.clone(), symbol);
+  pub fn add(&mut self, symbol_type: SymbolType<'a>) {
+    let name = match &symbol_type {
+      SymbolType::ContextMap(context_map) => context_map.name.clone(),
+      SymbolType::BoundedContext(bounded_context) => bounded_context.name.clone(),
+      SymbolType::Aggregate(aggregate) => aggregate.name.clone(),
+      SymbolType::Entity(entity) => entity.name.clone(),
+      SymbolType::ValueObject(value_object) => value_object.name.clone(),
+      SymbolType::Struct(struct_) => struct_.name.clone(),
+      SymbolType::Implementation(implementation) => implementation.name(),
+      SymbolType::Environment(environment) => environment.name.clone(),
+      SymbolType::SourceSet(source_set) => source_set.name.clone(),
+      SymbolType::DataSource(data_source) => data_source.name(),
+    };
+
+    self.symbols.insert(name.clone(), Symbol { name, symbol_type });
   }
 
-  pub fn get_symbol(&self, name: &str) -> Option<&Symbol<'a>> {
+  pub fn get(&self, name: &str) -> Option<&Symbol<'a>> {
     self.symbols.get(name)
   }
 }
