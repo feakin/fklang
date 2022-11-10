@@ -39,8 +39,7 @@ pub async fn get_aggregate_by_id(
   }
 
   let entity = opt_entity.unwrap();
-  let fields = &entity.fields;
-  let map = FakeValue::fields(fields);
+  let map = mock_value_from_entity(&entity, &config.context_map);
   return Ok(Json(vec![map]));
 }
 
@@ -60,8 +59,8 @@ pub async fn get_entities(
   let entity = opt_entity.unwrap();
   let mut vec = vec![];
   for _ in 0..20 {
-    let fields = &entity.fields;
-    vec.push(FakeValue::fields(fields));
+    let map = mock_value_from_entity(&entity, &config.context_map);
+    vec.push(map);
   }
   return Ok(Json(vec));
 }
@@ -80,8 +79,7 @@ pub async fn create_entity(
   }
 
   let entity = opt_entity.unwrap();
-  let fields = &entity.fields;
-  let map = FakeValue::fields(fields);
+  let map = mock_value_from_entity(&entity, &config.context_map);
   return Ok(Json(vec![map]));
 }
 
@@ -102,8 +100,7 @@ pub async fn update_entity(
   }
 
   let entity = opt_entity.unwrap();
-  let fields = &entity.fields;
-  let map = FakeValue::fields(fields);
+  let map = mock_value_from_entity(&entity, &config.context_map);
   return Ok(Json(vec![map]));
 }
 
@@ -124,7 +121,12 @@ pub async fn delete_entity(
   }
 
   let entity = opt_entity.unwrap();
+  let map = mock_value_from_entity(&entity, &config.context_map);
+  return Ok(Json(vec![map]));
+}
+
+fn mock_value_from_entity(entity: &Entity, _context_map: &ContextMap) -> IndexMap<String, MockType> {
   let fields = &entity.fields;
   let map = FakeValue::fields(fields);
-  return Ok(Json(vec![map]));
+  map
 }
