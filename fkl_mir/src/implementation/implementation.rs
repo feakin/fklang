@@ -29,3 +29,22 @@ impl Implementation {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_implementation_name() {
+    let impl_ = Implementation::default();
+    assert_eq!(impl_.name(), "");
+  }
+
+  #[test]
+  fn http_api_name() {
+    let mut api_impl = HttpApiImpl::default();
+    api_impl.name = "test".to_string();
+    let implementation = PublishHttpApi(api_impl);
+    assert_eq!(implementation.name(), "test");
+  }
+}

@@ -46,6 +46,13 @@ impl Datasource {
       ),
     }
   }
+
+  pub fn name(&self) -> String {
+    match self {
+      Datasource::MySql(config) => format!("mysql_{}", config.database),
+      Datasource::Postgres(config) => format!("postgres_{}", config.database),
+    }
+  }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -133,5 +140,17 @@ mod tests {
     assert_eq!(datasource.url(),
       "mysql://username:password@localhost:3306/database"
     );
+  }
+
+  #[test]
+  fn test_datasource_name() {
+    let datasource = Datasource::MySql(MySqlDatasource {
+      host: "localhost".to_string(),
+      port: 3306,
+      username: "username".to_string(),
+      password: "password".to_string(),
+      database: "database".to_string(),
+    });
+    assert_eq!(datasource.name(), "mysql_database");
   }
 }

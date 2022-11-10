@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Aggregate, BoundedContext, ContextMap, Entity, Environment, Implementation, ValueObject};
+use crate::{Aggregate, BoundedContext, ContextMap, Datasource, Entity, Environment, Implementation, SourceSet, ValueObject};
 use crate::tactic::struct_::Struct;
 
 /// SymbolType combines all DDD types and some other top level types
@@ -14,6 +14,8 @@ pub enum SymbolType<'a> {
   Struct(Box<&'a Struct>),
   Implementation(Box<&'a Implementation>),
   Environment(Box<&'a Environment>),
+  SourceSet(Box<&'a SourceSet>),
+  DataSource(Box<&'a Datasource>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -57,6 +59,8 @@ impl<'a> Symbol<'a> {
       SymbolType::Struct(struct_) => format!("struct_{}", struct_.name),
       SymbolType::Implementation(implementation) => format!("implementation_{}", implementation.name()),
       SymbolType::Environment(environment) => format!("environment_{}", environment.name),
+      SymbolType::SourceSet(source_set) => format!("source_set_{}", source_set.name),
+      SymbolType::DataSource(data_source) => format!("data_source_{}", data_source.name()),
     };
 
     Symbol { name, symbol_type }
