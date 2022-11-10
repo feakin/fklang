@@ -21,6 +21,7 @@ pub(crate) async fn index(conf: &State<MockServerConfig>) -> Json<ContextMap> {
 pub struct MockServerConfig {
   pub port: u32,
   pub context_map: ContextMap,
+  pub symbol_table: Vec<Struct>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

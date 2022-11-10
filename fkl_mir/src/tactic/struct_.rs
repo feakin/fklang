@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use crate::tactic::block::Field;
+use crate::Field;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
-pub struct ValueObject {
+pub struct Struct {
     pub name: String,
     pub fields: Vec<Field>,
 }

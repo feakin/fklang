@@ -4,6 +4,7 @@ pub mod implementation;
 pub mod binding;
 pub mod flow;
 pub mod default_config;
+pub mod symbol_table;
 
 pub use strategy::context_map::*;
 pub use strategy::domain::*;

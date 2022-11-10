@@ -6,6 +6,7 @@ pub mod aggregate;
 pub mod entity;
 pub mod value_object;
 pub mod service;
+pub mod struct_;
 
 pub mod block;
 
