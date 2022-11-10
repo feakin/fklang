@@ -29,19 +29,7 @@ impl<'a> SymbolTable<'a> {
   }
 
   pub fn add(&mut self, symbol_type: SymbolType<'a>) {
-    let name = match &symbol_type {
-      SymbolType::ContextMap(context_map) => context_map.name.clone(),
-      SymbolType::BoundedContext(bounded_context) => bounded_context.name.clone(),
-      SymbolType::Aggregate(aggregate) => aggregate.name.clone(),
-      SymbolType::Entity(entity) => entity.name.clone(),
-      SymbolType::ValueObject(value_object) => value_object.name.clone(),
-      SymbolType::Struct(struct_) => struct_.name.clone(),
-      SymbolType::Implementation(implementation) => implementation.name(),
-      SymbolType::Environment(environment) => environment.name.clone(),
-      SymbolType::SourceSet(source_set) => source_set.name.clone(),
-      SymbolType::DataSource(data_source) => data_source.name(),
-    };
-
+    let name = Symbol::name(&symbol_type);
     self.symbols.insert(name.clone(), Symbol { name, symbol_type });
   }
 
@@ -63,6 +51,11 @@ impl<'a> Symbol<'a> {
   /// `Entity Ticket {}` will have symbol name `entity_ticket`
   /// `ValueObject Ticket {}` will have symbol name `value_object_ticket`
   pub fn new(symbol_type: SymbolType<'a>) -> Self {
+    let name = Self::name(&symbol_type);
+    Symbol { name, symbol_type }
+  }
+
+  fn name(symbol_type: &SymbolType) -> String {
     let name = match &symbol_type {
       SymbolType::ContextMap(map) => format!("context_map_{}", map.name),
       SymbolType::BoundedContext(bc) => format!("bounded_context_{}", bc.name),
@@ -75,8 +68,7 @@ impl<'a> Symbol<'a> {
       SymbolType::SourceSet(source_set) => format!("source_set_{}", source_set.name),
       SymbolType::DataSource(data_source) => format!("data_source_{}", data_source.name()),
     };
-
-    Symbol { name, symbol_type }
+    name
   }
 }
 
@@ -101,13 +93,10 @@ mod tests {
   fn test_symbol_table() {
     let mut symbol_table = SymbolTable::default();
     let context_map = ContextMap::default();
-    let symbol = Symbol {
-      name: "context_map".to_string(),
-      symbol_type: SymbolType::ContextMap(Box::new(&context_map)),
-    };
-    symbol_table.add_symbol(symbol);
+
+    symbol_table.add(SymbolType::ContextMap(Box::new(&context_map)));
     assert_eq!(symbol_table.symbols.len(), 1);
-    assert_eq!(symbol_table.symbols.get("context_map").unwrap().name, "context_map");
+    assert_eq!(symbol_table.symbols.get("context_map_").unwrap().name, "context_map_");
   }
 
   #[test]
@@ -116,9 +105,9 @@ mod tests {
     let mut context_map = ContextMap::default();
     context_map.name = "demo".to_string();
 
-    let symbol = Symbol::new(SymbolType::ContextMap(Box::new(&context_map)));
-    symbol_table.add_symbol(symbol);
+    symbol_table.add(SymbolType::ContextMap(Box::new(&context_map)));
     assert_eq!(symbol_table.symbols.len(), 1);
+
     assert_eq!(symbol_table.symbols.get("context_map_demo").unwrap().name, "context_map_demo");
   }
 }
