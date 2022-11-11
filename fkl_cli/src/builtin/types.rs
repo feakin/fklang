@@ -18,8 +18,8 @@ pub enum BuiltinType {
 
 
 impl BuiltinType {
-  pub fn from(s: &str) -> Self {
-    let lower = s.to_lowercase();
+  pub fn from(origin: &str) -> Self {
+    let lower = origin.to_lowercase();
     let s = lower.as_str();
 
     let is_array = s.starts_with("list<") && s.ends_with('>');
@@ -50,7 +50,7 @@ impl BuiltinType {
       "date" => BuiltinType::Date,
       "datetime" => BuiltinType::DateTime,
       "timestamp" => BuiltinType::Timestamp,
-      _ => BuiltinType::Special(s.to_owned()),
+      _ => BuiltinType::Special(origin.to_owned()),
     }
   }
 }

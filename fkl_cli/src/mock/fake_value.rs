@@ -1,10 +1,11 @@
+use std::collections::HashMap;
 use chrono::{DateTime, NaiveDate, Utc};
 use indexmap::IndexMap;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use sqlx::types::uuid;
 
-use fkl_mir::Field;
+use fkl_mir::{Field, Struct};
 
 use crate::builtin::types::BuiltinType;
 use crate::mock::mock_type::MockType;
@@ -30,8 +31,31 @@ impl FakeValue {
     map
   }
 
-  pub fn fields(fields: &Vec<Field>) -> IndexMap<String, MockType> {
+  pub fn fake(fields: &Vec<Field>) -> IndexMap<String, MockType> {
     FakeValue::fake_values(&FakeValue::builtin_type(fields))
+  }
+
+  pub fn fake_with_custom(fields: &Vec<Field>, struct_map: &HashMap<String, Struct>) -> IndexMap<String, MockType> {
+    let to_types = FakeValue::builtin_type(fields);
+    let mut result = IndexMap::new();
+    for (key, value) in to_types {
+      match &value {
+        BuiltinType::Special(special) => {
+          if let Some(got_struct) = struct_map.get(special) {
+            let struct_fields = got_struct.fields.clone();
+            let fake_value = FakeValue::fake_with_custom(&struct_fields, struct_map);
+            result.insert(key.clone(), MockType::Map(fake_value));
+          } else {
+            result.insert(key, FakeValue::convert_type(&value));
+          }
+        }
+        _ => {
+          result.insert(key, FakeValue::convert_type(&value));
+        }
+      }
+    }
+
+    result
   }
 
   fn convert_type(field: &BuiltinType) -> MockType {
@@ -195,19 +219,19 @@ mod tests {
   #[test]
   fn test_range_number() {
     let n = RandomValue::range_number(1, 10);
-    assert!(n.integer() >= 1);
+    assert!(n.as_integer() >= 1);
   }
 
   #[test]
   fn test_range_float() {
     let n = RandomValue::range_float(1.0, 10.0);
-    assert!(n.float() >= 1.0);
+    assert!(n.as_float() >= 1.0);
   }
 
   #[test]
   fn test_range_string() {
     let n = RandomValue::range_string(1, 10);
-    assert!(n.string().len() >= 1);
+    assert!(n.as_string().len() >= 1);
   }
 
   #[test]
@@ -218,7 +242,7 @@ mod tests {
 
   #[test]
   fn test_datetime() {
-    let n = RandomValue::datetime().datetime();
+    let n = RandomValue::datetime().as_datetime();
     let datetime_format = "%Y-%m-%d %H:%M:%S UTC";
     let dt = NaiveDate::parse_from_str(&*n, datetime_format).unwrap();
     assert!(dt.year() >= 1970);
@@ -226,7 +250,7 @@ mod tests {
 
   #[test]
   fn test_date() {
-    let n = RandomValue::date().date();
+    let n = RandomValue::date().as_date();
     let date_format = "%Y-%m-%dUTC";
     let dt = NaiveDate::parse_from_str(&*n, date_format).unwrap();
     assert!(dt.year() >= 1970);
@@ -235,14 +259,14 @@ mod tests {
   #[test]
   fn test_timestamp() {
     let n = RandomValue::timestamp();
-    assert!(n.timestamp() >= 0);
+    assert!(n.as_timestamp() >= 0);
   }
 
   #[test]
   fn test_uuid() {
     let n = RandomValue::uuid();
     let uuid_validate_regex = regex::Regex::new(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$").unwrap();
-    assert!(uuid_validate_regex.is_match(&*n.uuid()));
+    assert!(uuid_validate_regex.is_match(&*n.as_uuid()));
   }
 
   #[test]

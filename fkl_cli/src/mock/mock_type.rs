@@ -25,59 +25,73 @@ pub enum MockType {
 
 #[allow(dead_code)]
 impl MockType {
-  pub fn integer(&self) -> i64 {
+  pub fn as_integer(&self) -> i64 {
     match self {
       MockType::Integer(i) => *i,
       _ => panic!("cannot convert to integer"),
     }
   }
 
-  pub fn float(&self) -> f64 {
+  pub fn as_float(&self) -> f64 {
     match self {
       MockType::Float(f) => *f,
       _ => panic!("cannot convert to float"),
     }
   }
 
-  pub fn string(&self) -> String {
+  pub fn as_string(&self) -> String {
     match self {
       MockType::String(s) => s.clone(),
       _ => panic!("cannot convert to string"),
     }
   }
 
-  pub(crate) fn boolean(&self) -> bool {
+  pub(crate) fn as_boolean(&self) -> bool {
     match self {
       MockType::Boolean(b) => *b,
       _ => panic!("cannot convert to boolean"),
     }
   }
 
-  pub(crate) fn datetime(&self) -> String {
+  pub(crate) fn as_datetime(&self) -> String {
     match self {
       MockType::DateTime(dt) => dt.to_string(),
       _ => panic!("cannot convert to datetime"),
     }
   }
 
-  pub(crate) fn date(&self) -> String {
+  pub(crate) fn as_date(&self) -> String {
     match self {
       MockType::Date(d) => d.to_string(),
       _ => panic!("cannot convert to date"),
     }
   }
 
-  pub(crate) fn timestamp(&self) -> i64 {
+  pub(crate) fn as_timestamp(&self) -> i64 {
     match self {
       MockType::Timestamp(t) => *t,
       _ => panic!("cannot convert to timestamp"),
     }
   }
 
-  pub(crate) fn uuid(&self) -> String {
+  pub(crate) fn as_uuid(&self) -> String {
     match self {
       MockType::Uuid(u) => u.clone(),
       _ => panic!("cannot convert to uuid"),
+    }
+  }
+
+  pub(crate) fn as_array(&self) -> Vec<MockType> {
+    match self {
+      MockType::Array(a) => a.clone(),
+      _ => panic!("cannot convert to array"),
+    }
+  }
+
+  pub(crate) fn as_map(&self) -> IndexMap<String, MockType> {
+    match self {
+      MockType::Map(m) => m.clone(),
+      _ => panic!("cannot convert to map"),
     }
   }
 }

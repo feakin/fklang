@@ -1,8 +1,10 @@
 use indexmap::IndexMap;
-use rocket::{get, post, put, delete, State};
+use rocket::{delete, get, post, put, State};
 use rocket::response::status::NotFound;
 use rocket::serde::json::Json;
+
 use fkl_mir::{ContextMap, Entity};
+
 use crate::mock::fake_value::FakeValue;
 use crate::mock::mock_type::MockType;
 use crate::mock::stub_server::{ApiError, MockServerConfig};
@@ -125,15 +127,16 @@ pub async fn delete_entity(
   return Ok(Json(vec![map]));
 }
 
-fn mock_value_from_entity(entity: &Entity, _context_map: &ContextMap) -> IndexMap<String, MockType> {
+fn mock_value_from_entity(entity: &Entity, bcs: &ContextMap) -> IndexMap<String, MockType> {
   let fields = &entity.fields;
-  let map = FakeValue::fields(fields);
-  map
+  FakeValue::fake_with_custom(fields, &bcs.structs)
 }
 
 #[cfg(test)]
 mod tests {
   use crate::builtin::funcs::mir_from_str;
+  use crate::mock::mock_type::MockType;
+  use crate::mock::stub_aggregate_api::mock_value_from_entity;
 
   #[test]
   fn simple_entity() {
@@ -164,7 +167,11 @@ struct Address {
 }
     ");
 
-    let _entity = context_map.get_entity("User").unwrap();
-    let _child = context_map.get_struct("Address").unwrap();
+    let entity = context_map.get_entity("User").unwrap();
+    let from_entity = mock_value_from_entity(&entity, &context_map);
+
+    assert_eq!(from_entity.len(), 7);
+    let address: &MockType = from_entity.get("address").unwrap();
+    assert_eq!(address.as_map().len(), 4);
   }
 }

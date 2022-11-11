@@ -14,7 +14,7 @@ impl MockCompositeType {
     let mut email = String::new();
 
     let mock_type = RandomValue::range_string(1, n);
-    email.push_str(mock_type.string().as_str());
+    email.push_str(mock_type.as_string().as_str());
 
     email.push('@');
     email.push_str(EMAIL_PROVIDERS[rng.gen_range(0..EMAIL_PROVIDERS.len())]);
