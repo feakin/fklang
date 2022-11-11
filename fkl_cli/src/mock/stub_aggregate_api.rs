@@ -137,7 +137,12 @@ mod tests {
 
   #[test]
   fn simple_entity() {
-    let context_map = mir_from_str("Entity User {
+    let context_map = mir_from_str("
+ContextMap { Account <-> Sample }
+
+Context Account {
+  Aggregate Account {
+    Entity User {
       struct {
         id: String
         name: String
@@ -148,17 +153,18 @@ mod tests {
         updated_at: DateTime
       }
     }
+  }
+}
 
-    struct Address {
-      street: String
-      city: String
-      state: String
-      zip: String
-    }
+struct Address {
+  street: String
+  city: String
+  state: String
+  zip: String
+}
     ");
 
-    // todo: use symbol table to get entity
-    // let entity = context_map.get_entity("User").unwrap();
-    // println!("{:?}", entity);
+    let _entity = context_map.get_entity("User").unwrap();
+    let _child = context_map.get_struct("Address").unwrap();
   }
 }

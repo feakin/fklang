@@ -3,7 +3,7 @@ use std::fmt::Display;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::{BoundedContext, ConnectionDirection, ContextRelation, LayeredArchitecture, SourceSets, Step, Struct};
+use crate::{BoundedContext, ConnectionDirection, ContextRelation, Entity, LayeredArchitecture, SourceSets, Step, Struct};
 use crate::environment::Environment;
 use crate::implementation::Implementation;
 
@@ -27,6 +27,26 @@ pub struct ContextMap {
   pub source_sets: Option<SourceSets>,
   pub envs: Vec<Environment>,
   pub structs: HashMap<String, Struct>,
+}
+
+impl ContextMap {
+  pub fn get_entity(&self, entity_name: &str) -> Option<Entity> {
+    for bc in &self.contexts {
+      for aggregate in &bc.aggregates {
+        for entity in &aggregate.entities {
+          if entity.name.to_lowercase() == entity_name.to_lowercase() {
+            return Some(entity.clone());
+          }
+        }
+      }
+    }
+
+    None
+  }
+
+  pub fn get_struct(&self, struct_name: &str) -> Option<Struct> {
+    self.structs.get(struct_name).map(|s| s.clone())
+  }
 }
 
 #[allow(dead_code)]
@@ -147,7 +167,7 @@ mod tests {
       layered: None,
       source_sets: None,
       envs: vec![],
-      structs: Default::default()
+      structs: Default::default(),
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)
