@@ -27,21 +27,27 @@ pub struct ContextMap {
   pub source_sets: Option<SourceSets>,
   pub envs: Vec<Environment>,
   pub structs: HashMap<String, Struct>,
+  // todo: create a symbol table for the context map
+
 }
 
 impl ContextMap {
   pub fn get_entity(&self, entity_name: &str) -> Option<Entity> {
-    for bc in &self.contexts {
-      for aggregate in &bc.aggregates {
-        for entity in &aggregate.entities {
-          if entity.name.to_lowercase() == entity_name.to_lowercase() {
-            return Some(entity.clone());
-          }
-        }
-      }
-    }
+    return self.contexts.iter().find_map(|bc| {
+      bc.aggregates.iter().find_map(|aggregate| {
+        aggregate.entities.iter().find_map(|entity| {
+          Self::filter_by_name(entity_name, entity)
+        })
+      })
+    })
+  }
 
-    None
+  fn filter_by_name(entity_name: &str, entity: &Entity) -> Option<Entity> {
+    if entity.name.to_lowercase() == entity_name.to_lowercase() {
+      Some(entity.clone())
+    } else {
+      None
+    }
   }
 
   pub fn get_struct(&self, struct_name: &str) -> Option<Struct> {
