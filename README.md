@@ -7,8 +7,8 @@
 origin idea from [Forming](https://github.com/inherd/forming), but it's too complex. So I decide to rewrite it with
 TypeFlow
 
-> Fklang 是一个基于[软件开发工业化](https://book.feakin.com/design-principles)思想，设计的架构设计
-> DSL。以确保软件系统描述与实现的一致性。通过显式化的软件架构设计，用于支持 AI 代码生成系统的嵌入
+> Fklang，一个基于[软件开发工业化](https://book.feakin.com/design-principles)思想设计的架构 DSL。
+> 通过显式化的软件架构设计，以确保软件系统描述与实现的一致性，并探索结合 AI 代码生成。
 
 Try it: [Feakin Quick Start](https://book.feakin.com/quick-start.html)
 
@@ -36,7 +36,7 @@ cargo install fkl_cli
 - Plugin System
   - fkl_ext_loader. load external plugins for fkl.
   - fkl_ext_api. the api for external plugins.
-  - Plugins
+  - plugins
     - [ ] ext_kafka. the plugin for kafka.
     - [ ] ext_computing. the plugin for computing.
     - [ ] ext_codegen_aws. the plugin for aws codegen.
