@@ -28,7 +28,6 @@ pub struct ContextMap {
   pub envs: Vec<Environment>,
   pub structs: HashMap<String, Struct>,
   // todo: create a symbol table for the context map
-
 }
 
 impl ContextMap {

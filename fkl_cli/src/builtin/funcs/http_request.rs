@@ -1,24 +1,25 @@
-use std::collections::HashMap;
-
 use log::info;
 use reqwest::blocking::{Client, Response};
 use reqwest::header;
 use reqwest::header::HeaderMap;
 
-use fkl_mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation};
+use fkl_mir::{ContextMap, HttpApiImpl, HttpEndpoint, HttpMethod, Implementation, Struct};
 use fkl_mir::authorization::HttpAuthorization;
 
 use crate::highlighter::Highlighter;
 use crate::mock::fake_user_agent::UserAgent;
+use crate::mock::fake_value::FakeValue;
 use crate::RunFuncName;
 
 pub struct EndpointRunner {
   endpoint: HttpEndpoint,
+  request_struct: Option<Struct>,
 }
 
 pub(crate) fn endpoint_runner(context_map: &ContextMap, func_name: &RunFuncName, impl_name: &str) {
   let mut apis: Vec<HttpApiImpl> = vec![];
-  context_map.implementations.iter().for_each(|implementation| {
+
+  let _ = &context_map.implementations.iter().for_each(|implementation| {
     if let Implementation::PublishHttpApi(api) = implementation {
       if api.name == impl_name {
         apis.push(api.clone());
@@ -31,10 +32,18 @@ pub(crate) fn endpoint_runner(context_map: &ContextMap, func_name: &RunFuncName,
     return;
   }
 
-  let endpoint = apis[0].endpoint.clone();
+  let endpoint = &apis[0].endpoint;
+
   match func_name {
     RunFuncName::HttpRequest => {
-      let runner = EndpointRunner::new(endpoint);
+      let mut runner = EndpointRunner::new(endpoint.clone());
+
+      if let Some(req) = &endpoint.request {
+        if let Some(struct_) = &context_map.get_struct(&req.name) {
+          runner.request_struct = Some(struct_.clone());
+        }
+      }
+
       runner.send_request().expect("TODO: panic message");
     }
     _ => {}
@@ -44,7 +53,8 @@ pub(crate) fn endpoint_runner(context_map: &ContextMap, func_name: &RunFuncName,
 impl EndpointRunner {
   pub fn new(endpoint: HttpEndpoint) -> Self {
     EndpointRunner {
-      endpoint
+      endpoint,
+      request_struct: None,
     }
   }
 
@@ -54,7 +64,7 @@ impl EndpointRunner {
 
     info!("headers: {:?}", headers.clone());
 
-    let body = self.request_to_hashmap();
+    let body = self.create_request_body();
     let resp = self.do_request(headers, body);
 
     self.handle_response(resp);
@@ -85,7 +95,7 @@ impl EndpointRunner {
     }
   }
 
-  fn do_request(&self, headers: HeaderMap, _req: HashMap<String, String>) -> Response {
+  fn do_request(&self, headers: HeaderMap, request: Option<String>) -> Response {
     let client = Client::builder()
       .default_headers(headers)
       .build()
@@ -99,7 +109,12 @@ impl EndpointRunner {
           .expect("Failed to send request");
       }
       HttpMethod::POST => {
+        if let Some(req) = &request {
+          info!("body: {:?}", req.clone());
+        }
+
         resp = client.post(&self.endpoint.path)
+          .body(request.unwrap_or("".to_string()))
           .send()
           .expect("Failed to send request");
       }
@@ -148,15 +163,19 @@ impl EndpointRunner {
     headers
   }
 
-  fn request_to_hashmap(&self) -> HashMap<String, String> {
-    let map = HashMap::new();
-    // todo: convert request
-    map
+  fn create_request_body(&self) -> Option<String> {
+    return if let Some(req) = &self.request_struct {
+      let map = FakeValue::fake(&req.fields);
+      Some(serde_json::to_string(&map).unwrap())
+    } else {
+      None
+    }
   }
 }
 
 #[cfg(test)]
 mod tests {
+  use fkl_mir::{Field, Request};
   use super::*;
 
   #[test]
@@ -175,20 +194,32 @@ mod tests {
     let _resp = runner.send_request();
   }
 
-  #[ignore]
   #[test]
+  #[should_panic]
   fn http_github() {
     let endpoint = HttpEndpoint {
       name: "".to_string(),
-      method: HttpMethod::GET,
-      path: "https://github.com/feakin/".to_string(),
-      request: None,
+      method: HttpMethod::POST,
+      path: "/sample".to_string(),
+      request: Some(Request {
+        name: "User".to_string(),
+        pre_validate: None
+      }),
       response: None,
       description: "".to_string(),
       auth: None,
     };
 
-    let runner = EndpointRunner::new(endpoint);
+    let mut runner = EndpointRunner::new(endpoint);
+    runner.request_struct = Some(Struct {
+      name: "User".to_string(),
+      fields: vec![Field {
+        name: "name".to_string(),
+        initializer: None,
+        type_type: "String".to_string(),
+      }],
+    });
+
     let _resp = runner.send_request();
   }
 }
