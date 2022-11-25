@@ -94,6 +94,11 @@ impl UserUpdated {
   }
 }
 
+struct UpdateUser {
+  id: UUID;
+  name: String;
+}
+
 env Local {
   datasource {
     driver: postgresql
