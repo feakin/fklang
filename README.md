@@ -57,11 +57,10 @@ cargo install fkl_cli
   - [ ] database integration
     - [x] MySQL
     - [x] PostgresSQL
-    - [ ] SQLite
   - [ ] database schema generation
   - [ ] database migration
 - plugin system
-  - [ ] plugin api
+  - [x] plugin api
   - [ ] plugin registry
 - simple expr
   - [ ] Expr
