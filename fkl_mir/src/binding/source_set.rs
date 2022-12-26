@@ -53,11 +53,9 @@ impl SourceSetType {
       "uml" => SourceSetType::StructUml,
       "puml" => SourceSetType::StructUml,
       "json_schema" => SourceSetType::StructJsonSchema,
-      "jsonschema" => SourceSetType::StructJsonSchema,
       "protobuf" => SourceSetType::StructProtobuf,
       "avro" => SourceSetType::StructAvro,
       "open_api" => SourceSetType::OpenApi,
-      "openapi" => SourceSetType::OpenApi,
       "csv" => SourceSetType::Csv,
       _ => SourceSetType::None,
     }

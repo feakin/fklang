@@ -10,6 +10,7 @@ pub struct Environment {
   pub name: String,
   pub datasources: Vec<Datasource>,
   pub server: ServerConfig,
+  // todo: make it flattern
   pub customs: Vec<CustomEnv>,
 }
 
