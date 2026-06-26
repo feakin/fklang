@@ -7,6 +7,7 @@ use log::info;
 
 use fkl_mir::{ContextMap, Environment};
 use fkl_parser::parse;
+use init::{init_project, InitOptions};
 
 /// parse source code and generate MIR
 pub mod deconstruct;
@@ -25,6 +26,7 @@ mod datasource;
 pub mod mock;
 /// generate feakin code
 pub mod generator;
+mod init;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -50,6 +52,8 @@ enum Commands {
   Gen(GenOpt),
   #[command(about = "run function from fkl file")]
   Run(RunOpt),
+  #[command(about = "initialize a new fkl project from a template")]
+  Init(InitOpt),
 }
 
 #[derive(Debug, Args)]
@@ -87,6 +91,16 @@ struct RunOpt {
   ///```
   #[arg(short, required = false, long = "custom")]
   custom_func: Option<String>,
+}
+
+#[derive(Debug, Args)]
+struct InitOpt {
+  #[arg(short, long, default_value = "Demo")]
+  name: String,
+  #[arg(short, long, default_value = ".")]
+  path: PathBuf,
+  #[arg(short, long)]
+  force: bool,
 }
 
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
@@ -155,6 +169,14 @@ async fn main() {
           builtin::funcs::custom_function_runner(&mir, &env, &func_name).await;
         }
       }
+    }
+    Commands::Init(opt) => {
+      let main = init_project(InitOptions {
+        name: opt.name.clone(),
+        path: opt.path.clone(),
+        force: opt.force,
+      }).expect("failed to initialize fkl project");
+      println!("created {}", main.display());
     }
   }
 }
