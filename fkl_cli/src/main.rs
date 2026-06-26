@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use clap::{Args, Parser, Subcommand};
 use log::info;
 
+use fkl_ext_loader::load_registry;
 use fkl_mir::{ContextMap, Environment};
 use fkl_parser::parse;
 use init::{init_project, InitOptions};
@@ -54,6 +55,8 @@ enum Commands {
   Run(RunOpt),
   #[command(about = "initialize a new fkl project from a template")]
   Init(InitOpt),
+  #[command(about = "list plugins from a local registry directory")]
+  Plugin(PluginOpt),
 }
 
 #[derive(Debug, Args)]
@@ -102,6 +105,12 @@ struct InitOpt {
   path: PathBuf,
   #[arg(short, long)]
   force: bool,
+}
+
+#[derive(Debug, Args)]
+struct PluginOpt {
+  #[arg(short, long, default_value = "plugins")]
+  registry: PathBuf,
 }
 
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
@@ -183,6 +192,11 @@ async fn main() {
         force: opt.force,
       }).expect("failed to initialize fkl project");
       println!("created {}", main.display());
+    }
+    Commands::Plugin(opt) => {
+      for plugin in load_registry(&opt.registry).expect("failed to load plugin registry") {
+        println!("{}\t{:?}\t{}", plugin.name, plugin.kind, plugin.path.display());
+      }
     }
   }
 }

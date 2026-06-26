@@ -28,6 +28,8 @@ fkl_ext_api = { path = "../fkl_ext_api", version = "0.4.0" }
 
 libloading = { version = "0.7" }
 thiserror = "1.0"
+serde = { version = "1", features = ["derive"] }
+toml = "0.5"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }

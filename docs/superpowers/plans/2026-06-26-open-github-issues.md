@@ -93,11 +93,11 @@ Commit: `feat(cli): add init template command`
 - Modify: `fkl_cli/src/main.rs`
 - Test: `fkl_ext_loader` unit tests.
 
-- [ ] Add failing tests for loading plugin manifests from a registry directory.
-- [ ] Implement a manifest type with name, path, and extension kind.
-- [ ] Add CLI listing for available plugins.
-- [ ] Verify with `cargo test -p fkl_ext_loader`.
-- [ ] Commit and push as `feat(plugin): add local plugin registry`.
+- [x] Add failing tests for loading plugin manifests from a registry directory.
+- [x] Implement a manifest type with name, path, and extension kind.
+- [x] Add CLI listing for available plugins.
+- [x] Verify with `cargo test -p fkl_ext_loader`.
+- [x] Commit and push as `feat(plugin): add local plugin registry`.
 
 ### Task 5: Issue #12 Environment Checking DSL MVP
 

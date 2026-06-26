@@ -1,4 +1,8 @@
+use std::fs;
+use std::path::{Path, PathBuf};
+
 use libloading::{Library, Symbol};
+use serde::Deserialize;
 use thiserror::Error;
 use fkl_ext_api::custom_runner::{CreateRunner, CustomRunner};
 
@@ -9,6 +13,47 @@ pub enum ExtLoadError {
   Library(libloading::Error),
   #[error("dynamic library does not contain a valid dynamic ext")]
   Plugin(libloading::Error),
+  #[error("cannot read plugin registry: {0}")]
+  RegistryIo(#[from] std::io::Error),
+  #[error("cannot parse plugin manifest: {0}")]
+  RegistryParse(#[from] toml::de::Error),
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+pub struct PluginManifest {
+  pub name: String,
+  pub kind: PluginKind,
+  pub path: PathBuf,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum PluginKind {
+  CustomRunner,
+  DatasourceConnector,
+  Codegen,
+}
+
+pub fn load_registry(registry_dir: impl AsRef<Path>) -> Result<Vec<PluginManifest>, ExtLoadError> {
+  let registry_dir = registry_dir.as_ref();
+  let mut plugins = Vec::new();
+
+  for entry in fs::read_dir(registry_dir)? {
+    let entry = entry?;
+    let path = entry.path();
+    if path.extension().and_then(|ext| ext.to_str()) != Some("toml") {
+      continue;
+    }
+
+    let mut manifest: PluginManifest = toml::from_str(&fs::read_to_string(&path)?)?;
+    if manifest.path.is_relative() {
+      manifest.path = registry_dir.join(&manifest.path);
+    }
+    plugins.push(manifest);
+  }
+
+  plugins.sort_by(|left, right| left.name.cmp(&right.name));
+  Ok(plugins)
 }
 
 /// links a ext at the given path.
@@ -60,9 +105,36 @@ pub fn ext_path(plugin_name: &str, for_production: bool) -> String {
 mod tests {
   use super::*;
   use std::path::PathBuf;
+  use std::time::{SystemTime, UNIX_EPOCH};
   use fkl_mir::{ContextMap, CustomEnv};
 
+  #[test]
+  fn loads_plugin_manifests_from_registry_directory() {
+    let registry_dir = std::env::temp_dir().join(format!(
+      "fkl-plugin-registry-{}-{}",
+      std::process::id(),
+      SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
+    ));
+    std::fs::create_dir_all(&registry_dir).unwrap();
+    std::fs::write(
+      registry_dir.join("hello.toml"),
+      r#"name = "hello"
+kind = "custom-runner"
+path = "plugins/libhello.dylib"
+"#,
+    ).unwrap();
+
+    let plugins = load_registry(&registry_dir).unwrap();
+
+    std::fs::remove_dir_all(&registry_dir).unwrap();
+    assert_eq!(plugins.len(), 1);
+    assert_eq!(plugins[0].name, "hello");
+    assert_eq!(plugins[0].kind, PluginKind::CustomRunner);
+    assert_eq!(plugins[0].path, registry_dir.join("plugins/libhello.dylib"));
+  }
+
   #[tokio::test]
+  #[ignore = "requires target/debug/libext_hello_world dynamic library"]
   async fn test_load_ext() {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
       .parent().unwrap()
