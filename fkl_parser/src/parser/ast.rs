@@ -30,6 +30,7 @@ pub enum FklDeclaration {
   ValueObject(ValueObjectDecl),
   Implementation(ImplementationDecl),
   Struct(StructDecl),
+  TypeAlias(TypeAliasDecl),
   // Domain(DomainDecl),
   Component(ComponentDecl),
   Layered(LayeredDecl),
@@ -136,6 +137,21 @@ pub struct StructDecl {
   pub inline_doc: String,
   pub fields: Vec<VariableDefinition>,
   pub loc: Loc
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct TypeAliasDecl {
+  pub name: String,
+  pub target: String,
+  pub range: Option<NumericRangeDecl>,
+  pub loc: Loc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct NumericRangeDecl {
+  pub min: i64,
+  pub max: i64,
+  pub loc: Loc,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]

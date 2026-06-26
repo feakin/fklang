@@ -6,7 +6,7 @@ use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 
 use fkl_mir::default_config;
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -80,6 +80,9 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         }
         Rule::struct_decl => {
           decl = FklDeclaration::Struct(consume_struct(p));
+        }
+        Rule::type_alias_decl => {
+          decl = FklDeclaration::TypeAlias(consume_type_alias(p));
         }
         Rule::layered_decl => {
           decl = FklDeclaration::Layered(consume_layered(p));
@@ -630,6 +633,47 @@ fn consume_struct(pair: Pair<Rule>) -> StructDecl {
     };
   }
   return struct_decl;
+}
+
+fn consume_type_alias(pair: Pair<Rule>) -> TypeAliasDecl {
+  let mut type_alias = TypeAliasDecl::default();
+  type_alias.loc = Loc::from_pair(pair.as_span());
+
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        if type_alias.name.is_empty() {
+          type_alias.name = p.as_str().to_string();
+        } else {
+          type_alias.target = p.as_str().to_string();
+        }
+      }
+      Rule::type_range => {
+        type_alias.range = Some(consume_type_range(p));
+      }
+      _ => println!("unreachable type_alias rule: {:?}", p.as_rule())
+    };
+  }
+  return type_alias;
+}
+
+fn consume_type_range(pair: Pair<Rule>) -> NumericRangeDecl {
+  let mut range = NumericRangeDecl::default();
+  range.loc = Loc::from_pair(pair.as_span());
+  let mut values = vec![];
+
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::int => {
+        values.push(p.as_str().parse::<i64>().unwrap());
+      }
+      _ => println!("unreachable type_range rule: {:?}", p.as_rule())
+    };
+  }
+
+  range.min = values[0];
+  range.max = values[1];
+  return range;
 }
 
 fn consume_authorization(pair: Pair<Rule>) -> AuthorizationDecl {

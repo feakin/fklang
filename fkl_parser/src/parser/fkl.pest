@@ -9,6 +9,7 @@ declaration = {
   | entity_decl
   | value_object_decl
   | struct_decl
+  | type_alias_decl
   // ddd
   | component_decl
   | implementation_decl
@@ -103,6 +104,14 @@ constructor_decl = {
 
 struct_decl = {
   ("struct" | "Struct") ~ identifier? ~ "{" ~ fields_decl ~ "}"
+}
+
+type_alias_decl = {
+  "type" ~ identifier ~ "=" ~ identifier ~ type_range? ~ ";"?
+}
+
+type_range = {
+  "range" ~ int ~ ".." ~ int
 }
 
 implementation_decl = {

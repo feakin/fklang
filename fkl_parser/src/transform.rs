@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use indexmap::IndexMap;
 
-use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, PostgresDatasource, Step, ValueObject};
+use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, NumericRange, PostgresDatasource, Step, TypeAlias, ValueObject};
 use fkl_mir as mir;
 use fkl_mir::authorization::HttpAuthorization;
 use fkl_mir::implementation::{HttpEndpoint, Implementation, Request, Response};
@@ -11,7 +11,7 @@ use fkl_mir::tactic::aggregate::Aggregate;
 
 use crate::{ContextMap, ParseError};
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, TypeAliasDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -26,6 +26,7 @@ pub struct MirTransform {
   pub source_sets: Option<fkl_mir::SourceSets>,
   pub envs: Vec<fkl_mir::Environment>,
   pub structs: HashMap<String, fkl_mir::Struct>,
+  pub types: Vec<TypeAlias>,
 }
 
 impl MirTransform {
@@ -42,7 +43,8 @@ impl MirTransform {
       layered: Default::default(),
       source_sets: None,
       envs: vec![],
-      structs: Default::default()
+      structs: Default::default(),
+      types: vec![],
     };
 
     match ast_parse(str) {
@@ -68,6 +70,7 @@ impl MirTransform {
       source_sets: transform.source_sets,
       envs: transform.envs,
       structs: transform.structs,
+      types: transform.types,
     })
   }
 
@@ -141,6 +144,9 @@ impl MirTransform {
             fields,
           });
         }
+        FklDeclaration::TypeAlias(decl) => {
+          self.types.push(Self::transform_type_alias(decl));
+        }
         FklDeclaration::Layered(decl) => {
           self.layered = Some(self.transform_layered(&decl));
         }
@@ -164,6 +170,17 @@ impl MirTransform {
       connection_type: transform_connection(&relation.direction),
       source_type: ContextRelationType::list(&relation.source_types),
       target_type: ContextRelationType::list(&relation.target_types),
+    }
+  }
+
+  fn transform_type_alias(decl: &TypeAliasDecl) -> TypeAlias {
+    TypeAlias {
+      name: decl.name.clone(),
+      target: decl.target.clone(),
+      range: decl.range.as_ref().map(|range| NumericRange {
+        min: range.min,
+        max: range.max,
+      }),
     }
   }
 
@@ -462,7 +479,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, VariableDefinition};
+  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, NumericRange, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, TypeAlias, VariableDefinition};
   use fkl_mir::authorization::HttpAuthorization;
   use fkl_mir::ConnectionDirection::PositiveDirected;
   use fkl_mir::Datasource::Postgres;
@@ -484,6 +501,26 @@ ContextMap {
 
     assert_eq!(context_map.contexts.len(), 2);
     assert_eq!(context_map.relations.len(), 2);
+  }
+
+  #[test]
+  fn type_alias_with_numeric_range() {
+    let str = r#"
+type Percent = Int range 0..100;
+"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+
+    assert_eq!(context_map.types, vec![
+      TypeAlias {
+        name: "Percent".to_string(),
+        target: "Int".to_string(),
+        range: Some(NumericRange {
+          min: 0,
+          max: 100,
+        }),
+      }
+    ]);
   }
 
   #[test]

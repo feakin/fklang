@@ -274,7 +274,8 @@ ValueObject Notifications { }
       layered: None,
       source_sets: None,
       envs: vec![],
-      structs: Default::default()
+      structs: Default::default(),
+      types: vec![],
     });
   }
 }

@@ -65,11 +65,11 @@ Commit: `feat(cli): add init template command`
 - Modify: `fkl_mir/src/lib.rs`
 - Test: parser and MIR transform tests near existing parser tests.
 
-- [ ] Add failing parser tests for `type Percent = Int range 0..100;`.
-- [ ] Add AST and MIR structures for named type aliases with optional numeric range constraints.
-- [ ] Transform parsed type declarations into `ContextMap.types`.
-- [ ] Verify with `cargo test -p fkl_parser type`.
-- [ ] Commit and push as `feat(parser): add type alias declarations`.
+- [x] Add failing parser tests for `type Percent = Int range 0..100;`.
+- [x] Add AST and MIR structures for named type aliases with optional numeric range constraints.
+- [x] Transform parsed type declarations into `ContextMap.types`.
+- [x] Verify with `cargo test -p fkl_parser type`.
+- [x] Commit and push as `feat(parser): add type alias declarations`.
 
 ### Task 3: Issue #4 SQL Generator MVP
 

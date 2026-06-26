@@ -27,6 +27,7 @@ pub struct ContextMap {
   pub source_sets: Option<SourceSets>,
   pub envs: Vec<Environment>,
   pub structs: HashMap<String, Struct>,
+  pub types: Vec<TypeAlias>,
   // todo: create a symbol table for the context map
 }
 
@@ -52,6 +53,19 @@ impl ContextMap {
   pub fn get_struct(&self, struct_name: &str) -> Option<Struct> {
     self.structs.get(struct_name).map(|s| s.clone())
   }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct TypeAlias {
+  pub name: String,
+  pub target: String,
+  pub range: Option<NumericRange>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct NumericRange {
+  pub min: i64,
+  pub max: i64,
 }
 
 #[allow(dead_code)]
@@ -173,6 +187,7 @@ mod tests {
       source_sets: None,
       envs: vec![],
       structs: Default::default(),
+      types: vec![],
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)
