@@ -118,6 +118,7 @@ pub enum RunFuncName {
   HttpRequest,
   Guarding,
   TestConnection,
+  EnvCheck,
   MockServer,
   CustomFunction,
 }
@@ -170,6 +171,16 @@ async fn main() {
 
           let env = env_from_opt(&run, &mir);
           builtin::funcs::test_connection_runner(&env).await;
+        }
+        RunFuncName::EnvCheck => {
+          if mir.envs.len() == 0 {
+            panic!("environment is required");
+          }
+
+          let env = env_from_opt(&run, &mir);
+          let checked = builtin::funcs::validate_environment_checks(&env)
+            .unwrap_or_else(|err| panic!("{}", err));
+          println!("checked {}", checked.join(","));
         }
         RunFuncName::MockServer => {
           builtin::funcs::mock_server_runner(&mir).await;

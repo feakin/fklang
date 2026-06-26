@@ -108,11 +108,11 @@ Commit: `feat(cli): add init template command`
 - Modify: `fkl_cli/src/builtin/funcs`
 - Test: parser and CLI built-in unit tests.
 
-- [ ] Add failing tests for a `check` block under `env`.
-- [ ] Parse and transform checks into MIR.
-- [ ] Reuse existing datasource/server/custom environment runners to execute checks.
-- [ ] Verify with focused parser and CLI tests.
-- [ ] Commit and push as `feat(env): add environment check scene`.
+- [x] Add failing tests for a `check` block under `env`.
+- [x] Parse and transform checks into MIR.
+- [x] Reuse existing datasource/server/custom environment runners to execute checks.
+- [x] Verify with focused parser and CLI tests.
+- [x] Commit and push as `feat(env): add environment check scene`.
 
 ### Task 6: Issue #13 Computation Extension MVP
 

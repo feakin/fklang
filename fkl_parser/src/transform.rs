@@ -11,7 +11,7 @@ use fkl_mir::tactic::aggregate::Aggregate;
 
 use crate::{ContextMap, ParseError};
 use crate::parser::{ast, parse as ast_parse};
-use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, TypeAliasDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, BoundedContextDecl, CustomDecl, DatasourceDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, FklDeclaration, FlowDecl, ImplementationDecl, ImplementationTargetType, LayeredDecl, MethodCallDecl, RelationDirection, ServerDecl, SourceSetsDecl, StepDecl, TypeAliasDecl, VariableDefinition};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MirTransform {
@@ -411,6 +411,9 @@ impl MirTransform {
     environment.customs = decl.customs.iter().map(|custom| {
       self.transform_custom_env(&custom)
     }).collect();
+    environment.checks = decl.checks.iter().map(|check| {
+      self.transform_env_check(&check)
+    }).collect();
 
     environment
   }
@@ -465,6 +468,21 @@ impl MirTransform {
     }).collect();
 
     custom
+  }
+
+  fn transform_env_check(&self, decl: &EnvCheckDecl) -> mir::EnvironmentCheck {
+    let mut check = mir::EnvironmentCheck::default();
+    check.name = decl.name.clone();
+    check.target = decl.target.clone();
+    check.attrs = decl.attributes.iter().map(|attr| {
+      mir::VariableDefinition {
+        name: attr.key.clone(),
+        type_type: "".to_string(),
+        initializer: Some(attr.value[0].clone()),
+      }
+    }).collect();
+
+    check
   }
 }
 
@@ -860,6 +878,7 @@ impl CinemaCreatedEvent {
           port: 9090,
         },
         customs: vec![],
+        checks: vec![],
       }
     ]);
   }
@@ -897,8 +916,23 @@ impl CinemaCreatedEvent {
               }],
           }
         ],
+        checks: vec![],
       }
     ]);
+  }
+
+  #[test]
+  fn env_checks() {
+    let str = r#"env Local {
+  check database {
+    target: datasource
+  }
+}"#;
+
+    let context_map = MirTransform::mir(str).unwrap();
+    assert_eq!(context_map.envs[0].checks.len(), 1);
+    assert_eq!(context_map.envs[0].checks[0].name, "database");
+    assert_eq!(context_map.envs[0].checks[0].target, "datasource");
   }
 
   #[test]

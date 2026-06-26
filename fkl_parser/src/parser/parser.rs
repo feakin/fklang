@@ -6,7 +6,7 @@ use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 
 use fkl_mir::default_config;
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -929,6 +929,9 @@ fn consume_env(pair: Pair<Rule>) -> EnvDecl {
       Rule::custom_decl => {
         env.customs.push(consume_custom_decl(p));
       }
+      Rule::check_decl => {
+        env.checks.push(consume_check_decl(p));
+      }
       _ => println!("unreachable env rule: {:?}", p.as_rule())
     };
   }
@@ -1000,6 +1003,29 @@ fn consume_custom_decl(pair: Pair<Rule>) -> CustomDecl {
         decl.attributes.push(consume_attribute(p));
       }
       _ => println!("unreachable server rule: {:?}", p.as_rule())
+    };
+  }
+
+  decl
+}
+
+fn consume_check_decl(pair: Pair<Rule>) -> EnvCheckDecl {
+  let mut decl = EnvCheckDecl::default();
+  decl.loc = Loc::from_pair(pair.as_span());
+
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        decl.name = p.as_str().to_string();
+      }
+      Rule::attr_decl => {
+        let attr = consume_attribute(p);
+        if attr.key == "target" {
+          decl.target = attr.value[0].clone();
+        }
+        decl.attributes.push(attr);
+      }
+      _ => println!("unreachable check rule: {:?}", p.as_rule())
     };
   }
 
@@ -1877,6 +1903,7 @@ env Local {
       }),
       server: None,
       customs: vec![],
+      checks: vec![],
       loc: Loc(1, 174)
     }));
   }
@@ -1900,6 +1927,7 @@ env Local {
         loc: Loc(15, 42)
       }),
       customs: vec![],
+      checks: vec![],
       loc: Loc(1, 44)
     }));
   }
@@ -1937,8 +1965,28 @@ env Local {
           loc: Loc(15, 63)
         }
       ],
+      checks: vec![],
       loc: Loc(1, 65)
     }));
+  }
+
+  #[test]
+  fn env_check_decl() {
+    let decls = parse(r#"
+env Local {
+  check database {
+    target: datasource
+  }
+}"#).unwrap();
+
+    let env = match &decls[0] {
+      FklDeclaration::Env(env) => env,
+      _ => panic!("expected env declaration"),
+    };
+
+    assert_eq!(env.checks.len(), 1);
+    assert_eq!(env.checks[0].name, "database");
+    assert_eq!(env.checks[0].target, "datasource");
   }
 
   #[test]

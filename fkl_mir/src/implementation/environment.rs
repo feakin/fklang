@@ -12,6 +12,7 @@ pub struct Environment {
   pub server: ServerConfig,
   // todo: make it flattern
   pub customs: Vec<CustomEnv>,
+  pub checks: Vec<EnvironmentCheck>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -31,3 +32,9 @@ pub struct CustomEnv {
   pub attrs: Vec<VariableDefinition>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq, Eq)]
+pub struct EnvironmentCheck {
+  pub name: String,
+  pub target: String,
+  pub attrs: Vec<VariableDefinition>,
+}

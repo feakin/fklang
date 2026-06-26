@@ -404,6 +404,7 @@ pub struct EnvDecl {
   pub datasource: Option<DatasourceDecl>,
   pub server: Option<ServerDecl>,
   pub customs: Vec<CustomDecl>,
+  pub checks: Vec<EnvCheckDecl>,
   pub loc: Loc,
 }
 
@@ -430,6 +431,14 @@ pub struct ServerDecl {
 pub struct CustomDecl {
   pub name: String,
   pub inline_doc: String,
+  pub attributes: Vec<AttributeDefinition>,
+  pub loc: Loc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct EnvCheckDecl {
+  pub name: String,
+  pub target: String,
   pub attributes: Vec<AttributeDefinition>,
   pub loc: Loc,
 }
