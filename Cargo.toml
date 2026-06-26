@@ -1,9 +1,5 @@
 [workspace]
 
-exclude = [
-  "extensions/ext_computing",
-]
-
 members = [
   "fkl_cli",
   "fkl_lsp",

@@ -8,14 +8,7 @@ edition = "2021"
 [dependencies]
 fkl_ext_api = { path = "../../fkl_ext_api", version = "0.4.0" }
 fkl_mir = { path = "../../fkl_mir", version = "0.4.0" }
-
-salsa = { git = "https://github.com/salsa-rs/salsa", package = "salsa-2022" }
-
-[dev-dependencies]
-actix-web = "4"
-tokio = { version = "1", features = ["full"] }
-futures = "0.3.18"
-exprtk_rs="0.1.0"
+async-trait = "0.1.58"
 
 #pest = "2.3.1"
 #pest_derive = "2.3.1"

@@ -122,12 +122,12 @@ Commit: `feat(cli): add init template command`
 - Modify: `extensions/ext_computing/src/function_type.rs`
 - Test: `extensions/ext_computing` unit tests.
 
-- [ ] Replace the unresolved `salsa-2022` git dependency with a buildable expression evaluator path.
-- [ ] Add failing tests for integer addition, division precedence, and `sum` over numeric values.
-- [ ] Implement expression evaluation behind the extension API.
-- [ ] Re-include `extensions/ext_computing` in the workspace once it builds.
-- [ ] Verify with `cargo test -p fkl_ext_computing` and `cargo test -p fkl_lsp`.
-- [ ] Commit and push as `feat(computing): add simple math evaluator`.
+- [x] Replace the unresolved `salsa-2022` git dependency with a buildable expression evaluator path.
+- [x] Add failing tests for integer addition, division precedence, and `sum` over numeric values.
+- [x] Implement expression evaluation behind the extension API.
+- [x] Re-include `extensions/ext_computing` in the workspace once it builds.
+- [x] Verify with `cargo test -p fkl_ext_computing` and `cargo test -p fkl_lsp`.
+- [x] Commit and push as `feat(computing): add simple math evaluator`.
 
 ## Verification Policy
 
