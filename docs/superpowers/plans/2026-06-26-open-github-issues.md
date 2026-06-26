@@ -51,7 +51,7 @@ Run: `cargo test -p fkl_cli init::tests`
 
 Expected: tests pass.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 Commit: `feat(cli): add init template command`
 
