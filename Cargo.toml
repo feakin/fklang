@@ -13,6 +13,7 @@ members = [
   # codegen
   "fkl_codegen_dot",
   "fkl_codegen_java",
+  "fkl_codegen_sql",
   # extension
   "fkl_ext_api",
   "fkl_ext_loader",

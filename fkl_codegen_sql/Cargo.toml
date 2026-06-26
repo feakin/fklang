@@ -1,0 +1,16 @@
+[package]
+name = "fkl_codegen_sql"
+version = "0.4.0"
+authors = ["Phodal Huang <h@phodal.com>"]
+description = "SQL schema generator for Feakin."
+repository = "https://github.com/feakin/fklang"
+categories = ["command-line-interface", "parsing"]
+keywords = [
+  "architecture",
+  "parser"
+]
+license = "MPL-2.0"
+edition = "2021"
+
+[dependencies]
+fkl_mir = { path = "../fkl_mir", version = "0.4.0" }

@@ -69,6 +69,7 @@ struct GenOpt {
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
 pub enum SupportedFramework {
   Spring,
+  Sql,
 }
 
 #[derive(Debug, Args)]
@@ -128,7 +129,12 @@ async fn main() {
     }
     Commands::Gen(opt) => {
       let parent = &opt.main.parent().unwrap().to_path_buf();
-      builtin::funcs::code_gen::code_gen_by_path(&opt.main, opt.impl_name.clone(), &parent);
+      builtin::funcs::code_gen::code_gen_by_path(
+        &opt.main,
+        opt.impl_name.clone(),
+        &parent,
+        &opt.framework,
+      );
     }
     Commands::Run(run) => {
       let root = match &run.path {

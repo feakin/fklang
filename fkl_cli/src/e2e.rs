@@ -3,6 +3,7 @@ mod tests {
   use std::fs;
   use std::path::PathBuf;
   use crate::builtin::funcs::code_gen;
+  use crate::SupportedFramework;
 
   #[test]
   #[ignore]
@@ -22,7 +23,12 @@ mod tests {
     let mut input_path = d.clone();
     input_path.push(format!("spring.fkl"));
 
-    code_gen::code_gen_by_path(&input_path, Some("HelloGot".to_string()), &base_path);
+    code_gen::code_gen_by_path(
+      &input_path,
+      Some("HelloGot".to_string()),
+      &base_path,
+      &SupportedFramework::Spring,
+    );
 
     let controller = "test_data/spring/src/main/java/com/feakin/demo/rest/HelloController.java";
     let output = fs::read_to_string(controller).expect("Something went wrong reading the file");
@@ -61,7 +67,12 @@ public class HelloController {
     let mut input_path = d.clone();
     input_path.push(format!("spring.fkl"));
 
-    code_gen::code_gen_by_path(&input_path, Some("index".to_string()), &base_path);
+    code_gen::code_gen_by_path(
+      &input_path,
+      Some("index".to_string()),
+      &base_path,
+      &SupportedFramework::Spring,
+    );
   }
 
   fn reset_test(controller: &str) {

@@ -80,11 +80,11 @@ Commit: `feat(cli): add init template command`
 - Modify: `fkl_cli/src/main.rs`
 - Test: SQL generator unit tests and a CLI-level smoke test.
 
-- [ ] Add failing tests for mapping an entity with `String`, `Int`, and `UUID` fields to `CREATE TABLE`.
-- [ ] Implement a small SQL generator crate from existing MIR entities.
-- [ ] Add `fkl gen --framework sql`.
-- [ ] Verify with `cargo test -p fkl_codegen_sql` and focused CLI tests.
-- [ ] Commit and push as `feat(codegen): add sql schema generator`.
+- [x] Add failing tests for mapping an entity with `String`, `Int`, and `UUID` fields to `CREATE TABLE`.
+- [x] Implement a small SQL generator crate from existing MIR entities.
+- [x] Add `fkl gen --framework sql`.
+- [x] Verify with `cargo test -p fkl_codegen_sql` and focused CLI tests.
+- [x] Commit and push as `feat(codegen): add sql schema generator`.
 
 ### Task 4: Issue #10 Plugin Registry MVP
 

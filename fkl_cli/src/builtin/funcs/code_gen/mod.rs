@@ -4,15 +4,17 @@ use std::path::PathBuf;
 use log::info;
 
 use fkl_codegen_java::gen_http_api;
+use fkl_codegen_sql::gen_schema;
 use fkl_mir::{ContextMap, Implementation};
 
-use crate::deconstruct::code_construct::CodeConstruct;
-use crate::deconstruct::java_construct::JavaConstruct;
 use crate::builtin::funcs;
 use crate::builtin::funcs::LayerMap;
 use crate::builtin::funcs::LayerPathBuilder;
+use crate::deconstruct::code_construct::CodeConstruct;
+use crate::deconstruct::java_construct::JavaConstruct;
 use crate::inserter::inserter::Inserter;
 use crate::inserter::java_inserter::JavaInserter;
+use crate::SupportedFramework;
 
 pub mod layer_map;
 pub mod layer_path_builder;
@@ -31,13 +33,30 @@ pub enum DddLayer {
   Infrastructure,
 }
 
-pub fn code_gen_by_path(input_path: &PathBuf, filter_impl: Option<String>, base_path: &PathBuf) {
+pub fn code_gen_by_path(
+  input_path: &PathBuf,
+  filter_impl: Option<String>,
+  base_path: &PathBuf,
+  framework: &SupportedFramework,
+) {
   let mir = funcs::mir_from_file(input_path);
-  code_gen_by_mir(&mir, filter_impl, base_path);
+  code_gen_by_mir(&mir, filter_impl, base_path, framework);
 }
 
 // todo: extract to a separate module
-pub fn code_gen_by_mir(mir: &ContextMap, filter_impl: Option<String>, base_path: &PathBuf) {
+pub fn code_gen_by_mir(
+  mir: &ContextMap,
+  filter_impl: Option<String>,
+  base_path: &PathBuf,
+  framework: &SupportedFramework,
+) {
+  if framework == &SupportedFramework::Sql {
+    let output_path = base_path.join("schema.sql");
+    fs::write(&output_path, gen_schema(mir)).expect("failed to write schema.sql");
+    info!("generated sql schema to {}", output_path.display());
+    return;
+  }
+
   let code_blocks = collect_codes(filter_impl, &mir);
   let has_layered_define = mir.layered.is_some();
   if !code_blocks.is_empty() {
@@ -101,4 +120,46 @@ fn collect_codes(filter_impl: Option<String>, mir: &ContextMap) -> Vec<CodeBlock
     });
 
   codes
+}
+
+#[cfg(test)]
+mod tests {
+  use std::time::{SystemTime, UNIX_EPOCH};
+
+  use fkl_mir::{Aggregate, BoundedContext, Entity, Field};
+
+  use super::*;
+
+  #[test]
+  fn sql_framework_writes_schema_file() {
+    let mut ticket = Entity::new("Ticket");
+    ticket.fields = vec![
+      Field { name: "id".to_string(), type_type: "UUID".to_string(), initializer: None },
+      Field { name: "price".to_string(), type_type: "Int".to_string(), initializer: None },
+    ];
+    let mir = ContextMap {
+      name: "Ticketing".to_string(),
+      contexts: vec![BoundedContext {
+        name: "Sales".to_string(),
+        aggregates: vec![Aggregate {
+          name: "TicketSale".to_string(),
+          entities: vec![ticket],
+          ..Default::default()
+        }],
+      }],
+      ..Default::default()
+    };
+    let output_dir = std::env::temp_dir().join(format!(
+      "fkl-codegen-sql-{}-{}",
+      std::process::id(),
+      SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()
+    ));
+    fs::create_dir_all(&output_dir).unwrap();
+
+    code_gen_by_mir(&mir, None, &output_dir, &SupportedFramework::Sql);
+
+    let schema = fs::read_to_string(output_dir.join("schema.sql")).unwrap();
+    fs::remove_dir_all(&output_dir).unwrap();
+    assert_eq!(schema, "CREATE TABLE ticket (\n  id UUID,\n  price INTEGER\n);\n");
+  }
 }
