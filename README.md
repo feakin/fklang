@@ -72,7 +72,7 @@ cargo install fkl_cli
   - [x] REPL
   - [x] ExprTk with Rust?
 - module support
-  - [ ] module dependency
+  - [x] module dependency
   - [ ] module versioning
 - bootstrapping DDD DSL
   - [x] use type system to describe domain model

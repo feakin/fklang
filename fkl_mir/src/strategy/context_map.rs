@@ -28,6 +28,7 @@ pub struct ContextMap {
   pub envs: Vec<Environment>,
   pub structs: HashMap<String, Struct>,
   pub types: Vec<TypeAlias>,
+  pub module_dependencies: Vec<String>,
   // todo: create a symbol table for the context map
 }
 
@@ -188,6 +189,7 @@ mod tests {
       envs: vec![],
       structs: Default::default(),
       types: vec![],
+      module_dependencies: vec![],
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)

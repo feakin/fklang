@@ -276,6 +276,7 @@ ValueObject Notifications { }
       envs: vec![],
       structs: Default::default(),
       types: vec![],
+      module_dependencies: vec![],
     });
   }
 }

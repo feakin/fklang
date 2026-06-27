@@ -109,7 +109,7 @@ fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::string => {
-        path = p.as_str().to_string();
+        path = p.as_str().trim_matches('"').to_string();
       }
       _ => println!("unreachable content rule: {:?}", p.as_rule())
     };

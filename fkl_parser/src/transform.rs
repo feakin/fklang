@@ -27,6 +27,7 @@ pub struct MirTransform {
   pub envs: Vec<fkl_mir::Environment>,
   pub structs: HashMap<String, fkl_mir::Struct>,
   pub types: Vec<TypeAlias>,
+  pub module_dependencies: Vec<String>,
 }
 
 impl MirTransform {
@@ -45,6 +46,7 @@ impl MirTransform {
       envs: vec![],
       structs: Default::default(),
       types: vec![],
+      module_dependencies: vec![],
     };
 
     match ast_parse(str) {
@@ -71,6 +73,7 @@ impl MirTransform {
       envs: transform.envs,
       structs: transform.structs,
       types: transform.types,
+      module_dependencies: transform.module_dependencies,
     })
   }
 
@@ -153,8 +156,8 @@ impl MirTransform {
         FklDeclaration::SourceSets(decl) => {
           self.source_sets = Some(self.transform_source_sets(&decl));
         }
-        FklDeclaration::Include(_include) => {
-          // todo: resolve include with DAG
+        FklDeclaration::Include(include) => {
+          self.module_dependencies.push(include.path.clone());
         }
         FklDeclaration::Env(decl) => {
           self.envs.push(self.transform_environment(&decl));
@@ -1026,5 +1029,18 @@ impl CinemaCreatedEvent {
         }],
       }
     ]);
+  }
+
+  #[test]
+  fn module_dependencies_from_includes() {
+    let context_map = MirTransform::mir(r#"
+include "./shared.fkl"
+include "../billing.fkl"
+"#).unwrap();
+
+    assert_eq!(
+      context_map.module_dependencies,
+      vec!["./shared.fkl".to_string(), "../billing.fkl".to_string()]
+    );
   }
 }
