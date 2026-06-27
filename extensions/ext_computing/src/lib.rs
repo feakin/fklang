@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use async_trait::async_trait;
 use fkl_ext_api::custom_runner::{Argument, CustomRunner};
 use fkl_mir::{ContextMap, CustomEnv};
@@ -27,8 +29,15 @@ enum Token {
 }
 
 pub fn evaluate_expression(input: &str) -> Result<f64, String> {
+  evaluate_expression_with_vars(input, &HashMap::new())
+}
+
+pub fn evaluate_expression_with_vars(
+  input: &str,
+  variables: &HashMap<String, f64>,
+) -> Result<f64, String> {
   let tokens = tokenize(input)?;
-  let mut parser = ExpressionParser::new(tokens);
+  let mut parser = ExpressionParser::new(tokens, variables);
   let value = parser.parse_expression()?;
   if parser.is_done() {
     Ok(value)
@@ -48,18 +57,30 @@ impl CustomRunner for ComputingRunner {
   async fn execute(&self, _context: &ContextMap, _env: &CustomEnv) {}
 
   async fn send_command(&self, command: &str, args: &[Argument]) -> Option<String> {
-    if command != "eval" {
-      return None;
+    match command {
+      "eval" => {
+        let expression = args.first()?.value.as_str();
+        evaluate_expression(expression)
+          .map(|value| value.to_string())
+          .ok()
+      }
+      "filter" => {
+        let values = args.first()?.value.as_str();
+        let predicate = args.get(1)?.value.as_str();
+        filter_numbers(values, predicate).ok().map(|values| {
+          values
+            .into_iter()
+            .map(|value| value.to_string())
+            .collect::<Vec<_>>()
+            .join(",")
+        })
+      }
+      _ => None,
     }
-
-    let expression = args.first()?.value.as_str();
-    evaluate_expression(expression)
-      .map(|value| value.to_string())
-      .ok()
   }
 
   fn list_commands(&self) -> Vec<String> {
-    vec!["eval".to_string()]
+    vec!["eval".to_string(), "filter".to_string()]
   }
 }
 
@@ -68,14 +89,46 @@ pub unsafe fn _fkl_create_runner() -> *mut dyn CustomRunner {
   Box::into_raw(Box::new(ComputingRunner))
 }
 
-struct ExpressionParser {
-  tokens: Vec<Token>,
-  cursor: usize,
+pub fn filter_numbers(input: &str, predicate: &str) -> Result<Vec<f64>, String> {
+  let mut filtered = Vec::new();
+
+  for value in parse_number_list(input)? {
+    let mut variables = HashMap::new();
+    variables.insert("x".to_string(), value);
+    if is_truthy(evaluate_expression_with_vars(predicate, &variables)?) {
+      filtered.push(value);
+    }
+  }
+
+  Ok(filtered)
 }
 
-impl ExpressionParser {
-  fn new(tokens: Vec<Token>) -> Self {
-    Self { tokens, cursor: 0 }
+fn parse_number_list(input: &str) -> Result<Vec<f64>, String> {
+  input
+    .split(',')
+    .map(str::trim)
+    .filter(|value| !value.is_empty())
+    .map(|value| {
+      value
+        .parse::<f64>()
+        .map_err(|_| format!("invalid filter value: {}", value))
+    })
+    .collect()
+}
+
+struct ExpressionParser<'a> {
+  tokens: Vec<Token>,
+  cursor: usize,
+  variables: &'a HashMap<String, f64>,
+}
+
+impl<'a> ExpressionParser<'a> {
+  fn new(tokens: Vec<Token>, variables: &'a HashMap<String, f64>) -> Self {
+    Self {
+      tokens,
+      cursor: 0,
+      variables,
+    }
   }
 
   fn parse_expression(&mut self) -> Result<f64, String> {
@@ -208,6 +261,7 @@ impl ExpressionParser {
         "true" => Ok(1.0),
         "false" => Ok(0.0),
         _ if self.peek() == Some(&Token::LParen) => self.parse_function(name),
+        _ if self.variables.contains_key(&name) => Ok(self.variables[&name]),
         _ => Err(format!("unknown identifier: {}", name)),
       },
       Some(token) => Err(format!("unexpected token: {:?}", token)),
@@ -420,7 +474,9 @@ where
 
 #[cfg(test)]
 mod tests {
-  use crate::evaluate_expression;
+  use fkl_ext_api::custom_runner::CustomRunner;
+
+  use crate::{evaluate_expression, filter_numbers, ComputingRunner};
 
   #[test]
   fn evaluates_integer_addition_and_precedence() {
@@ -451,5 +507,24 @@ mod tests {
       evaluate_expression("sum(1, 2, 3) == 7 || 3 != 3").unwrap(),
       0.0
     );
+  }
+
+  #[test]
+  fn filters_numbers_with_predicate_expression() {
+    assert_eq!(
+      filter_numbers("1, 2, 3, 4", "x >= 3").unwrap(),
+      vec![3.0, 4.0]
+    );
+    assert_eq!(
+      filter_numbers("1, 2, 3, 4", "x > 1 && x < 4").unwrap(),
+      vec![2.0, 3.0]
+    );
+  }
+
+  #[test]
+  fn lists_filter_command() {
+    assert!(ComputingRunner
+      .list_commands()
+      .contains(&"filter".to_string()));
   }
 }

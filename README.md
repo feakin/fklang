@@ -68,7 +68,7 @@ cargo install fkl_cli
     - [x] logic expr
     - [x] math expr
     - etc.
-  - [ ] Filter
+  - [x] Filter
   - [ ] REPL
   - [ ] ExprTk with Rust?
 - module support
