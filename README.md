@@ -40,7 +40,7 @@ cargo install fkl_cli
   - plugins
     - [x] ext_kafka. the plugin for kafka.
     - [x] ext_computing. the plugin for computing.
-    - [ ] ext_codegen_aws. the plugin for aws codegen.
+    - [x] ext_codegen_aws. the plugin for aws codegen.
     - [ ] ext_sourceset_swagger. the plugin for swagger.
 
 ## Roadmap
