@@ -14,6 +14,7 @@ enum Token {
   Minus,
   Star,
   Slash,
+  Caret,
   Bang,
   AndAnd,
   OrOr,
@@ -79,12 +80,23 @@ impl CustomRunner for ComputingRunner {
         let input = args.first()?.value.as_str();
         run_repl_lines(input).ok().map(|outputs| outputs.join("\n"))
       }
+      "exprtk" => {
+        let expression = args.first()?.value.as_str();
+        evaluate_exprtk_expression(expression, &HashMap::new())
+          .map(|value| value.to_string())
+          .ok()
+      }
       _ => None,
     }
   }
 
   fn list_commands(&self) -> Vec<String> {
-    vec!["eval".to_string(), "filter".to_string(), "repl".to_string()]
+    vec![
+      "eval".to_string(),
+      "filter".to_string(),
+      "repl".to_string(),
+      "exprtk".to_string(),
+    ]
   }
 }
 
@@ -123,6 +135,13 @@ pub fn run_repl_lines(input: &str) -> Result<Vec<String>, String> {
   }
 
   Ok(outputs)
+}
+
+pub fn evaluate_exprtk_expression(
+  input: &str,
+  variables: &HashMap<String, f64>,
+) -> Result<f64, String> {
+  evaluate_expression_with_vars(input, variables)
 }
 
 fn parse_number_list(input: &str) -> Result<Vec<f64>, String> {
@@ -250,20 +269,31 @@ impl<'a> ExpressionParser<'a> {
   }
 
   fn parse_term(&mut self) -> Result<f64, String> {
-    let mut value = self.parse_factor()?;
+    let mut value = self.parse_power()?;
 
     while let Some(token) = self.peek() {
       match token {
         Token::Star => {
           self.advance();
-          value *= self.parse_factor()?;
+          value *= self.parse_power()?;
         }
         Token::Slash => {
           self.advance();
-          value /= self.parse_factor()?;
+          value /= self.parse_power()?;
         }
         _ => break,
       }
+    }
+
+    Ok(value)
+  }
+
+  fn parse_power(&mut self) -> Result<f64, String> {
+    let mut value = self.parse_factor()?;
+
+    while let Some(Token::Caret) = self.peek() {
+      self.advance();
+      value = value.powf(self.parse_factor()?);
     }
 
     Ok(value)
@@ -373,6 +403,10 @@ fn tokenize(input: &str) -> Result<Vec<Token>, String> {
       '/' => {
         chars.next();
         tokens.push(Token::Slash);
+      }
+      '^' => {
+        chars.next();
+        tokens.push(Token::Caret);
       }
       '!' => {
         chars.next();
@@ -496,9 +530,14 @@ where
 
 #[cfg(test)]
 mod tests {
+  use std::collections::HashMap;
+
   use fkl_ext_api::custom_runner::CustomRunner;
 
-  use crate::{evaluate_expression, filter_numbers, run_repl_lines, ComputingRunner};
+  use crate::{
+    evaluate_expression, evaluate_exprtk_expression, filter_numbers, run_repl_lines,
+    ComputingRunner,
+  };
 
   #[test]
   fn evaluates_integer_addition_and_precedence() {
@@ -563,5 +602,25 @@ mod tests {
     assert!(ComputingRunner
       .list_commands()
       .contains(&"repl".to_string()));
+  }
+
+  #[test]
+  fn evaluates_exprtk_expression_with_variables() {
+    let variables = HashMap::from([("x".to_string(), 2.0)]);
+    assert_eq!(
+      evaluate_exprtk_expression(
+        "25 * x^5 - 35 * x^4 - 15 * x^3 + 40 * x^2 - 15 * x + 1",
+        &variables
+      )
+      .unwrap(),
+      251.0
+    );
+  }
+
+  #[test]
+  fn lists_exprtk_command() {
+    assert!(ComputingRunner
+      .list_commands()
+      .contains(&"exprtk".to_string()));
   }
 }
