@@ -23,6 +23,7 @@ pub struct Identifier {
 pub enum FklDeclaration {
   None,
   Include(IncludeDecl),
+  Function(FunctionDecl),
   ContextMap(ContextMapDecl),
   BoundedContext(BoundedContextDecl),
   Aggregate(AggregateDecl),
@@ -42,6 +43,14 @@ pub enum FklDeclaration {
 pub struct IncludeDecl {
   pub path: String,
   pub version: Option<String>,
+  pub loc: Loc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct FunctionDecl {
+  pub name: String,
+  pub parameters: Vec<VariableDefinition>,
+  pub return_type: Option<String>,
   pub loc: Loc,
 }
 

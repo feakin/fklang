@@ -6,7 +6,7 @@ use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 
 use fkl_mir::default_config;
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, FklDeclaration, FlowDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, FklDeclaration, FlowDecl, FunctionDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -93,6 +93,9 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
         Rule::include_decl => {
           decl = FklDeclaration::Include(consume_include(p));
         }
+        Rule::function_decl => {
+          decl = FklDeclaration::Function(consume_function(p));
+        }
         Rule::env_decl => {
           decl = FklDeclaration::Env(consume_env(p));
         }
@@ -122,6 +125,31 @@ fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
   }
 
   return IncludeDecl { path, version, loc };
+}
+
+fn consume_function(pair: Pair<Rule>) -> FunctionDecl {
+  let loc = Loc::from_pair(pair.as_span());
+  let mut function = FunctionDecl {
+    loc,
+    ..Default::default()
+  };
+
+  for p in pair.into_inner() {
+    match p.as_rule() {
+      Rule::identifier => {
+        function.name = p.as_str().to_string();
+      }
+      Rule::parameters_decl => {
+        function.parameters = consume_parameters(p);
+      }
+      Rule::param_type => {
+        function.return_type = Some(p.as_str().to_string());
+      }
+      _ => println!("unreachable function rule: {:?}", p.as_rule())
+    };
+  }
+
+  function
 }
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {

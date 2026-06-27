@@ -4,6 +4,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::{BoundedContext, ConnectionDirection, ContextRelation, Entity, LayeredArchitecture, SourceSets, Step, Struct};
+use crate::binding::VariableDefinition;
 use crate::environment::Environment;
 use crate::implementation::Implementation;
 
@@ -30,6 +31,7 @@ pub struct ContextMap {
   pub types: Vec<TypeAlias>,
   pub module_dependencies: Vec<String>,
   pub module_versions: HashMap<String, String>,
+  pub functions: Vec<Function>,
   // todo: create a symbol table for the context map
 }
 
@@ -62,6 +64,13 @@ pub struct TypeAlias {
   pub name: String,
   pub target: String,
   pub range: Option<NumericRange>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct Function {
+  pub name: String,
+  pub parameters: Vec<VariableDefinition>,
+  pub return_type: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
@@ -192,6 +201,7 @@ mod tests {
       types: vec![],
       module_dependencies: vec![],
       module_versions: Default::default(),
+      functions: vec![],
     };
     let output = format!("{}", context_map);
     assert_eq!(output, r#"ContextMap(Ticket)

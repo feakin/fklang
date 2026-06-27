@@ -29,6 +29,7 @@ pub struct MirTransform {
   pub types: Vec<TypeAlias>,
   pub module_dependencies: Vec<String>,
   pub module_versions: HashMap<String, String>,
+  pub functions: Vec<mir::Function>,
 }
 
 impl MirTransform {
@@ -49,6 +50,7 @@ impl MirTransform {
       types: vec![],
       module_dependencies: vec![],
       module_versions: Default::default(),
+      functions: vec![],
     };
 
     match ast_parse(str) {
@@ -77,6 +79,7 @@ impl MirTransform {
       types: transform.types,
       module_dependencies: transform.module_dependencies,
       module_versions: transform.module_versions,
+      functions: transform.functions,
     })
   }
 
@@ -165,6 +168,9 @@ impl MirTransform {
             self.module_versions.insert(include.path.clone(), version.clone());
           }
         }
+        FklDeclaration::Function(function) => {
+          self.functions.push(self.transform_function(&function));
+        }
         FklDeclaration::Env(decl) => {
           self.envs.push(self.transform_environment(&decl));
         }
@@ -190,6 +196,14 @@ impl MirTransform {
         min: range.min,
         max: range.max,
       }),
+    }
+  }
+
+  fn transform_function(&self, decl: &ast::FunctionDecl) -> mir::Function {
+    mir::Function {
+      name: decl.name.clone(),
+      parameters: self.transform_variables(&decl.parameters),
+      return_type: decl.return_type.clone(),
     }
   }
 
@@ -1060,5 +1074,21 @@ include "./shared.fkl" version "1.2.3"
       context_map.module_versions.get("./shared.fkl"),
       Some(&"1.2.3".to_string())
     );
+  }
+
+  #[test]
+  fn function_signatures_lower_to_mir() {
+    let context_map = MirTransform::mir(r#"
+function calculatePrice(price: Int, count: Int) -> Int {
+}
+"#).unwrap();
+
+    assert_eq!(context_map.functions.len(), 1);
+    let function = &context_map.functions[0];
+    assert_eq!(function.name, "calculatePrice");
+    assert_eq!(function.return_type, Some("Int".to_string()));
+    assert_eq!(function.parameters.len(), 2);
+    assert_eq!(function.parameters[0].name, "price");
+    assert_eq!(function.parameters[0].type_type, "Int");
   }
 }

@@ -79,7 +79,7 @@ cargo install fkl_cli
 - build system inside: cache, incremental build, etc.
   - [x] better code generation
 - general programming language (if possible)
-  - [ ] function support
+  - [x] function support
   - [ ] expression support
 
 ## License

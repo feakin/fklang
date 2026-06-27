@@ -278,6 +278,7 @@ ValueObject Notifications { }
       types: vec![],
       module_dependencies: vec![],
       module_versions: Default::default(),
+      functions: vec![],
     });
   }
 }

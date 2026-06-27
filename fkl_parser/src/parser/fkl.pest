@@ -2,6 +2,7 @@ declarations = _{ SOI ~ declaration* ~ EOI }
 
 declaration = {
   include_decl
+  | function_decl
   | context_map_decl
   | context_decl
   | ext_module_decl
@@ -21,6 +22,10 @@ declaration = {
 }
 
 include_decl = { "include" ~ string ~ ("version" ~ string)? }
+
+function_decl = {
+  ("function" | "fn") ~ identifier ~ "(" ~ parameters_decl? ~ ")" ~ ("->" ~ param_type)? ~ "{" ~ "}"
+}
 
 context_map_decl = {
   "ContextMap" ~ identifier? ~ "{" ~ (context_decl | used_context_node | context_node_rel | inline_doc)* ~ "}"
