@@ -77,7 +77,7 @@ cargo install fkl_cli
 - bootstrapping DDD DSL
   - [x] use type system to describe domain model
 - build system inside: cache, incremental build, etc.
-  - [ ] better code generation
+  - [x] better code generation
 - general programming language (if possible)
   - [ ] function support
   - [ ] expression support

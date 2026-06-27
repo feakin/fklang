@@ -19,12 +19,26 @@ pub fn gen_spring_entity(entity: &Entity, package: &str) -> String {
     .collect::<Vec<String>>()
     .join("\n");
 
+  let constructor = format!("  public {}() {{\n  }}", entity.name);
+  let accessors = entity
+    .fields
+    .iter()
+    .map(gen_accessors)
+    .collect::<Vec<String>>()
+    .join("\n\n");
+
+  let body = vec![fields, constructor, accessors]
+    .into_iter()
+    .filter(|section| !section.is_empty())
+    .collect::<Vec<String>>()
+    .join("\n\n");
+
   format!(
     "package {};\n\n{}\n\n@Entity\npublic class {} {{\n{}\n}}\n",
     package,
     imports.join("\n"),
     entity.name,
-    fields
+    body
   )
 }
 
@@ -43,6 +57,30 @@ fn is_id_field(entity: &Entity, field: &Field) -> bool {
   }
 
   field.name == "id"
+}
+
+fn gen_accessors(field: &Field) -> String {
+  let field_type = java_type(&field.type_type);
+  let suffix = method_suffix(&field.name);
+  format!(
+    "  public {} get{}() {{\n    return {};\n  }}\n\n  public void set{}({} {}) {{\n    this.{} = {};\n  }}",
+    field_type,
+    suffix,
+    field.name,
+    suffix,
+    field_type,
+    field.name,
+    field.name,
+    field.name
+  )
+}
+
+fn method_suffix(name: &str) -> String {
+  let mut chars = name.chars();
+  match chars.next() {
+    Some(first) => format!("{}{}", first.to_ascii_uppercase(), chars.as_str()),
+    None => String::new(),
+  }
 }
 
 fn uses_uuid(entity: &Entity) -> bool {
@@ -107,8 +145,60 @@ public class Ticket {
   private UUID id;
   private String seatName;
   private Integer price;
+
+  public Ticket() {
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
+
+  public String getSeatName() {
+    return seatName;
+  }
+
+  public void setSeatName(String seatName) {
+    this.seatName = seatName;
+  }
+
+  public Integer getPrice() {
+    return price;
+  }
+
+  public void setPrice(Integer price) {
+    this.price = price;
+  }
 }
 "#
     );
+  }
+
+  #[test]
+  fn generates_accessors_for_spring_jpa_entity() {
+    let mut ticket = Entity::new("Ticket");
+    ticket.fields = vec![
+      Field {
+        name: "id".to_string(),
+        type_type: "UUID".to_string(),
+        initializer: None,
+      },
+      Field {
+        name: "seatName".to_string(),
+        type_type: "String".to_string(),
+        initializer: None,
+      },
+    ];
+
+    let output = gen_spring_entity(&ticket, "com.example.domain");
+
+    assert!(output.contains("  public Ticket() {\n  }\n"));
+    assert!(output.contains("  public UUID getId() {\n    return id;\n  }\n"));
+    assert!(output.contains("  public void setId(UUID id) {\n    this.id = id;\n  }\n"));
+    assert!(output.contains("  public String getSeatName() {\n    return seatName;\n  }\n"));
+    assert!(output.contains("  public void setSeatName(String seatName) {\n    this.seatName = seatName;\n  }\n"));
   }
 }
