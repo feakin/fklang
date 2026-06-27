@@ -29,16 +29,17 @@ cargo install fkl_cli
 - CLI. CLI for generator code and IDE support.
   - fkl_cli. the cli for fkl, like code_gen, dot_gen or others.
 - LSP. language server protocol, for IDE/Editor Support
-  - [ ] fkl_lsp. language server for fkl.
+  - [x] fkl_lsp. language server for fkl.
 - CodeGen. code generator for fkl.
   - fkl_codegen_dot. generate Graphviz dot language from fkl source.
   - fkl_codegen_java. generate Java code from fkl source.
+  - fkl_codegen_sql. generate SQL schema from fkl source.
 - Plugin System
   - fkl_ext_loader. load external plugins for fkl.
   - fkl_ext_api. the api for external plugins.
   - plugins
     - [ ] ext_kafka. the plugin for kafka.
-    - [ ] ext_computing. the plugin for computing.
+    - [x] ext_computing. the plugin for computing.
     - [ ] ext_codegen_aws. the plugin for aws codegen.
     - [ ] ext_sourceset_swagger. the plugin for swagger.
 
@@ -57,15 +58,15 @@ cargo install fkl_cli
   - [ ] database integration
     - [x] MySQL
     - [x] PostgresSQL
-  - [ ] database schema generation
+  - [x] database schema generation
   - [ ] database migration
 - plugin system
   - [x] plugin api
-  - [ ] plugin registry
+  - [x] plugin registry
 - simple expr
-  - [ ] Expr
-    - logic expr
-    - math expr
+  - [x] Expr
+    - [ ] logic expr
+    - [x] math expr
     - etc.
   - [ ] Filter
   - [ ] REPL
@@ -74,7 +75,7 @@ cargo install fkl_cli
   - [ ] module dependency
   - [ ] module versioning
 - bootstrapping DDD DSL
-  - [ ] use type system to describe domain model
+  - [x] use type system to describe domain model
 - build system inside: cache, incremental build, etc.
   - [ ] better code generation
 - general programming language (if possible)
