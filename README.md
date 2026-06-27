@@ -48,9 +48,9 @@ cargo install fkl_cli
 - [x] DSL Design
 - [x] IDEA Plugin
 - Code gen
-  - [ ] with Spring
+  - [x] with Spring
     - [x] Controller
-    - [ ] DDD
+    - [x] DDD
 - contract base testing
   - [x] mock server
   - [x] with HTTP API
