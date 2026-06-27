@@ -55,11 +55,11 @@ cargo install fkl_cli
   - [x] mock server
   - [x] with HTTP API
 - database integration: JPA, JDBC, etc.
-  - [ ] database integration
+  - [x] database integration
     - [x] MySQL
     - [x] PostgresSQL
   - [x] database schema generation
-  - [ ] database migration
+  - [x] database migration
 - plugin system
   - [x] plugin api
   - [x] plugin registry

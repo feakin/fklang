@@ -51,9 +51,19 @@ pub fn code_gen_by_mir(
   framework: &SupportedFramework,
 ) {
   if framework == &SupportedFramework::Sql {
+    let schema = gen_schema(mir);
     let output_path = base_path.join("schema.sql");
-    fs::write(&output_path, gen_schema(mir)).expect("failed to write schema.sql");
+    fs::write(&output_path, &schema).expect("failed to write schema.sql");
     info!("generated sql schema to {}", output_path.display());
+
+    let migration_dir = base_path.join("migrations");
+    fs::create_dir_all(&migration_dir).expect("failed to create migrations directory");
+    let migration_path = migration_dir.join("V1__init.sql");
+    fs::write(&migration_path, schema).expect("failed to write initial migration");
+    info!(
+      "generated initial migration to {}",
+      migration_path.display()
+    );
     return;
   }
 
@@ -200,11 +210,13 @@ mod tests {
     code_gen_by_mir(&mir, None, &output_dir, &SupportedFramework::Sql);
 
     let schema = fs::read_to_string(output_dir.join("schema.sql")).unwrap();
+    let migration = fs::read_to_string(output_dir.join("migrations/V1__init.sql")).unwrap();
     fs::remove_dir_all(&output_dir).unwrap();
     assert_eq!(
       schema,
       "CREATE TABLE ticket (\n  id UUID,\n  price INTEGER\n);\n"
     );
+    assert_eq!(migration, schema);
   }
 
   #[test]
