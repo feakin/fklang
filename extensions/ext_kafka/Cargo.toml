@@ -29,6 +29,9 @@ async-trait = "0.1.58"
 
 rdkafka = { version = "0.29.0", features = ["cmake-build"] }
 
+[dev-dependencies]
+tokio = { version = "1.23.0", features = ["macros", "rt"] }
+
 
 [lib]
 crate-type = ["cdylib"]

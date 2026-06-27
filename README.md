@@ -38,7 +38,7 @@ cargo install fkl_cli
   - fkl_ext_loader. load external plugins for fkl.
   - fkl_ext_api. the api for external plugins.
   - plugins
-    - [ ] ext_kafka. the plugin for kafka.
+    - [x] ext_kafka. the plugin for kafka.
     - [x] ext_computing. the plugin for computing.
     - [ ] ext_codegen_aws. the plugin for aws codegen.
     - [ ] ext_sourceset_swagger. the plugin for swagger.
