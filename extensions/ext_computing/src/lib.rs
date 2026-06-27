@@ -12,6 +12,15 @@ enum Token {
   Minus,
   Star,
   Slash,
+  Bang,
+  AndAnd,
+  OrOr,
+  EqualEqual,
+  NotEqual,
+  Less,
+  LessEqual,
+  Greater,
+  GreaterEqual,
   LParen,
   RParen,
   Comma,
@@ -70,6 +79,82 @@ impl ExpressionParser {
   }
 
   fn parse_expression(&mut self) -> Result<f64, String> {
+    self.parse_logical_or()
+  }
+
+  fn parse_logical_or(&mut self) -> Result<f64, String> {
+    let mut value = self.parse_logical_and()?;
+
+    while let Some(Token::OrOr) = self.peek() {
+      self.advance();
+      let rhs = self.parse_logical_and()?;
+      value = bool_to_number(is_truthy(value) || is_truthy(rhs));
+    }
+
+    Ok(value)
+  }
+
+  fn parse_logical_and(&mut self) -> Result<f64, String> {
+    let mut value = self.parse_equality()?;
+
+    while let Some(Token::AndAnd) = self.peek() {
+      self.advance();
+      let rhs = self.parse_equality()?;
+      value = bool_to_number(is_truthy(value) && is_truthy(rhs));
+    }
+
+    Ok(value)
+  }
+
+  fn parse_equality(&mut self) -> Result<f64, String> {
+    let mut value = self.parse_comparison()?;
+
+    while let Some(token) = self.peek() {
+      match token {
+        Token::EqualEqual => {
+          self.advance();
+          value = bool_to_number(value == self.parse_comparison()?);
+        }
+        Token::NotEqual => {
+          self.advance();
+          value = bool_to_number(value != self.parse_comparison()?);
+        }
+        _ => break,
+      }
+    }
+
+    Ok(value)
+  }
+
+  fn parse_comparison(&mut self) -> Result<f64, String> {
+    let mut value = self.parse_additive()?;
+
+    while let Some(token) = self.peek() {
+      match token {
+        Token::Less => {
+          self.advance();
+          value = bool_to_number(value < self.parse_additive()?);
+        }
+        Token::LessEqual => {
+          self.advance();
+          value = bool_to_number(value <= self.parse_additive()?);
+        }
+        Token::Greater => {
+          self.advance();
+          value = bool_to_number(value > self.parse_additive()?);
+        }
+        Token::GreaterEqual => {
+          self.advance();
+          value = bool_to_number(value >= self.parse_additive()?);
+        }
+        _ => break,
+      }
+    }
+
+    Ok(value)
+  }
+
+  fn parse_additive(&mut self) -> Result<f64, String> {
     let mut value = self.parse_term()?;
 
     while let Some(token) = self.peek() {
@@ -113,12 +198,18 @@ impl ExpressionParser {
     match self.advance() {
       Some(Token::Number(value)) => Ok(value),
       Some(Token::Minus) => Ok(-self.parse_factor()?),
+      Some(Token::Bang) => Ok(bool_to_number(!is_truthy(self.parse_factor()?))),
       Some(Token::LParen) => {
         let value = self.parse_expression()?;
         self.expect(Token::RParen)?;
         Ok(value)
       }
-      Some(Token::Ident(name)) => self.parse_function(name),
+      Some(Token::Ident(name)) => match name.as_str() {
+        "true" => Ok(1.0),
+        "false" => Ok(0.0),
+        _ if self.peek() == Some(&Token::LParen) => self.parse_function(name),
+        _ => Err(format!("unknown identifier: {}", name)),
+      },
       Some(token) => Err(format!("unexpected token: {:?}", token)),
       None => Err("unexpected end of expression".to_string()),
     }
@@ -207,6 +298,60 @@ fn tokenize(input: &str) -> Result<Vec<Token>, String> {
         chars.next();
         tokens.push(Token::Slash);
       }
+      '!' => {
+        chars.next();
+        if chars.peek() == Some(&'=') {
+          chars.next();
+          tokens.push(Token::NotEqual);
+        } else {
+          tokens.push(Token::Bang);
+        }
+      }
+      '&' => {
+        chars.next();
+        if chars.peek() == Some(&'&') {
+          chars.next();
+          tokens.push(Token::AndAnd);
+        } else {
+          return Err("expected '&' after '&'".to_string());
+        }
+      }
+      '|' => {
+        chars.next();
+        if chars.peek() == Some(&'|') {
+          chars.next();
+          tokens.push(Token::OrOr);
+        } else {
+          return Err("expected '|' after '|'".to_string());
+        }
+      }
+      '=' => {
+        chars.next();
+        if chars.peek() == Some(&'=') {
+          chars.next();
+          tokens.push(Token::EqualEqual);
+        } else {
+          return Err("expected '=' after '='".to_string());
+        }
+      }
+      '<' => {
+        chars.next();
+        if chars.peek() == Some(&'=') {
+          chars.next();
+          tokens.push(Token::LessEqual);
+        } else {
+          tokens.push(Token::Less);
+        }
+      }
+      '>' => {
+        chars.next();
+        if chars.peek() == Some(&'=') {
+          chars.next();
+          tokens.push(Token::GreaterEqual);
+        } else {
+          tokens.push(Token::Greater);
+        }
+      }
       '(' => {
         chars.next();
         tokens.push(Token::LParen);
@@ -224,6 +369,18 @@ fn tokenize(input: &str) -> Result<Vec<Token>, String> {
   }
 
   Ok(tokens)
+}
+
+fn bool_to_number(value: bool) -> f64 {
+  if value {
+    1.0
+  } else {
+    0.0
+  }
+}
+
+fn is_truthy(value: f64) -> bool {
+  value != 0.0
 }
 
 fn read_number<I>(chars: &mut std::iter::Peekable<I>) -> Result<f64, String>
@@ -278,5 +435,21 @@ mod tests {
   #[test]
   fn evaluates_sum_function() {
     assert_eq!(evaluate_expression("sum(1, 2, 3)").unwrap(), 6.0);
+  }
+
+  #[test]
+  fn evaluates_logic_expressions() {
+    assert_eq!(evaluate_expression("true && false").unwrap(), 0.0);
+    assert_eq!(evaluate_expression("true || false").unwrap(), 1.0);
+    assert_eq!(evaluate_expression("!false").unwrap(), 1.0);
+  }
+
+  #[test]
+  fn evaluates_comparison_expressions() {
+    assert_eq!(evaluate_expression("1 + 2 * 3 > 6 && 4 <= 4").unwrap(), 1.0);
+    assert_eq!(
+      evaluate_expression("sum(1, 2, 3) == 7 || 3 != 3").unwrap(),
+      0.0
+    );
   }
 }

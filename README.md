@@ -65,7 +65,7 @@ cargo install fkl_cli
   - [x] plugin registry
 - simple expr
   - [x] Expr
-    - [ ] logic expr
+    - [x] logic expr
     - [x] math expr
     - etc.
   - [ ] Filter
