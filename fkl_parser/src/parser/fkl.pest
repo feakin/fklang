@@ -20,7 +20,7 @@ declaration = {
   | env_decl
 }
 
-include_decl = { "include" ~ string }
+include_decl = { "include" ~ string ~ ("version" ~ string)? }
 
 context_map_decl = {
   "ContextMap" ~ identifier? ~ "{" ~ (context_decl | used_context_node | context_node_rel | inline_doc)* ~ "}"

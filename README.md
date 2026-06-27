@@ -73,7 +73,7 @@ cargo install fkl_cli
   - [x] ExprTk with Rust?
 - module support
   - [x] module dependency
-  - [ ] module versioning
+  - [x] module versioning
 - bootstrapping DDD DSL
   - [x] use type system to describe domain model
 - build system inside: cache, incremental build, etc.

@@ -105,17 +105,23 @@ fn consume_declarations(pairs: Pairs<Rule>) -> Vec<FklDeclaration> {
 
 fn consume_include(pair: Pair<Rule>) -> IncludeDecl {
   let mut path = String::new();
+  let mut version = None;
   let loc = Loc::from_pair(pair.as_span());
   for p in pair.into_inner() {
     match p.as_rule() {
       Rule::string => {
-        path = p.as_str().trim_matches('"').to_string();
+        let value = p.as_str().trim_matches('"').to_string();
+        if path.is_empty() {
+          path = value;
+        } else {
+          version = Some(value);
+        }
       }
       _ => println!("unreachable content rule: {:?}", p.as_rule())
     };
   }
 
-  return IncludeDecl { path, loc };
+  return IncludeDecl { path, version, loc };
 }
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {

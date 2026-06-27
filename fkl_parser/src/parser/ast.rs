@@ -41,6 +41,7 @@ pub enum FklDeclaration {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IncludeDecl {
   pub path: String,
+  pub version: Option<String>,
   pub loc: Loc,
 }
 

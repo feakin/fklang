@@ -28,6 +28,7 @@ pub struct MirTransform {
   pub structs: HashMap<String, fkl_mir::Struct>,
   pub types: Vec<TypeAlias>,
   pub module_dependencies: Vec<String>,
+  pub module_versions: HashMap<String, String>,
 }
 
 impl MirTransform {
@@ -47,6 +48,7 @@ impl MirTransform {
       structs: Default::default(),
       types: vec![],
       module_dependencies: vec![],
+      module_versions: Default::default(),
     };
 
     match ast_parse(str) {
@@ -74,6 +76,7 @@ impl MirTransform {
       structs: transform.structs,
       types: transform.types,
       module_dependencies: transform.module_dependencies,
+      module_versions: transform.module_versions,
     })
   }
 
@@ -158,6 +161,9 @@ impl MirTransform {
         }
         FklDeclaration::Include(include) => {
           self.module_dependencies.push(include.path.clone());
+          if let Some(version) = &include.version {
+            self.module_versions.insert(include.path.clone(), version.clone());
+          }
         }
         FklDeclaration::Env(decl) => {
           self.envs.push(self.transform_environment(&decl));
@@ -1041,6 +1047,18 @@ include "../billing.fkl"
     assert_eq!(
       context_map.module_dependencies,
       vec!["./shared.fkl".to_string(), "../billing.fkl".to_string()]
+    );
+  }
+
+  #[test]
+  fn module_versions_from_includes() {
+    let context_map = MirTransform::mir(r#"
+include "./shared.fkl" version "1.2.3"
+"#).unwrap();
+
+    assert_eq!(
+      context_map.module_versions.get("./shared.fkl"),
+      Some(&"1.2.3".to_string())
     );
   }
 }
