@@ -6,7 +6,7 @@ use pest::error::Error;
 use pest::iterators::{Pair, Pairs};
 
 use fkl_mir::default_config;
-use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, FklDeclaration, FlowDecl, FunctionDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
+use crate::parser::ast::{AggregateDecl, AttributeDefinition, AuthorizationDecl, BoundedContextDecl, ComponentDecl, ContextMapDecl, ContextRelation, CustomDecl, DatasourceDecl, DomainEventDecl, EndpointDecl, EntityDecl, EnvCheckDecl, EnvDecl, ExpressionStatementDecl, FklDeclaration, FlowDecl, FunctionDecl, HttpRequestDecl, HttpResponseDecl, Identifier, ImplementationDecl, ImplementationTarget, ImplementationTargetType, IncludeDecl, LayerDecl, LayeredDecl, LayerRelationDecl, Loc, MessageDecl, MethodCallDecl, NumericRangeDecl, RelationDirection, ServerDecl, SourceSetDecl, SourceSetsDecl, StepDecl, StructDecl, TypeAliasDecl, UsedDomainObject, ValueObjectDecl, VariableDefinition};
 use crate::parser::parse_result::{ParseError, ParseResult};
 use crate::pest::Parser;
 
@@ -145,11 +145,46 @@ fn consume_function(pair: Pair<Rule>) -> FunctionDecl {
       Rule::param_type => {
         function.return_type = Some(p.as_str().to_string());
       }
+      Rule::function_statement => {
+        if let Some(statement) = consume_function_statement(p) {
+          function.body.push(statement);
+        }
+      }
       _ => println!("unreachable function rule: {:?}", p.as_rule())
     };
   }
 
   function
+}
+
+fn consume_function_statement(pair: Pair<Rule>) -> Option<ExpressionStatementDecl> {
+  let inner = pair.into_inner().next()?;
+  let loc = Loc::from_pair(inner.as_span());
+  match inner.as_rule() {
+    Rule::return_statement => {
+      let expression = inner.into_inner()
+        .find(|p| p.as_rule() == Rule::expression)
+        .map(|p| p.as_str().trim().to_string())
+        .unwrap_or_default();
+      Some(ExpressionStatementDecl {
+        expression,
+        returns: true,
+        loc,
+      })
+    }
+    Rule::expression_statement => {
+      let expression = inner.into_inner()
+        .find(|p| p.as_rule() == Rule::expression)
+        .map(|p| p.as_str().trim().to_string())
+        .unwrap_or_default();
+      Some(ExpressionStatementDecl {
+        expression,
+        returns: false,
+        loc,
+      })
+    }
+    _ => None,
+  }
 }
 
 fn consume_context_map(pair: Pair<Rule>) -> ContextMapDecl {

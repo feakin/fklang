@@ -71,6 +71,13 @@ pub struct Function {
   pub name: String,
   pub parameters: Vec<VariableDefinition>,
   pub return_type: Option<String>,
+  pub body: Vec<ExpressionStatement>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct ExpressionStatement {
+  pub expression: String,
+  pub returns: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Default)]

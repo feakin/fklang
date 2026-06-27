@@ -24,7 +24,23 @@ declaration = {
 include_decl = { "include" ~ string ~ ("version" ~ string)? }
 
 function_decl = {
-  ("function" | "fn") ~ identifier ~ "(" ~ parameters_decl? ~ ")" ~ ("->" ~ param_type)? ~ "{" ~ "}"
+  ("function" | "fn") ~ identifier ~ "(" ~ parameters_decl? ~ ")" ~ ("->" ~ param_type)? ~ "{" ~ function_statement* ~ "}"
+}
+
+function_statement = {
+  return_statement | expression_statement
+}
+
+return_statement = {
+  "return" ~ expression ~ ";"?
+}
+
+expression_statement = {
+  expression ~ ";"?
+}
+
+expression = @{
+  (!(";" | "}") ~ ANY)+
 }
 
 context_map_decl = {

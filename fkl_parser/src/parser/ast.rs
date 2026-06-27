@@ -51,6 +51,14 @@ pub struct FunctionDecl {
   pub name: String,
   pub parameters: Vec<VariableDefinition>,
   pub return_type: Option<String>,
+  pub body: Vec<ExpressionStatementDecl>,
+  pub loc: Loc,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ExpressionStatementDecl {
+  pub expression: String,
+  pub returns: bool,
   pub loc: Loc,
 }
 

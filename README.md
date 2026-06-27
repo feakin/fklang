@@ -80,7 +80,7 @@ cargo install fkl_cli
   - [x] better code generation
 - general programming language (if possible)
   - [x] function support
-  - [ ] expression support
+  - [x] expression support
 
 ## License
 

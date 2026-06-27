@@ -204,6 +204,12 @@ impl MirTransform {
       name: decl.name.clone(),
       parameters: self.transform_variables(&decl.parameters),
       return_type: decl.return_type.clone(),
+      body: decl.body.iter()
+        .map(|statement| mir::ExpressionStatement {
+          expression: statement.expression.clone(),
+          returns: statement.returns,
+        })
+        .collect(),
     }
   }
 
@@ -1090,5 +1096,19 @@ function calculatePrice(price: Int, count: Int) -> Int {
     assert_eq!(function.parameters.len(), 2);
     assert_eq!(function.parameters[0].name, "price");
     assert_eq!(function.parameters[0].type_type, "Int");
+  }
+
+  #[test]
+  fn function_return_expressions_lower_to_mir() {
+    let context_map = MirTransform::mir(r#"
+function calculatePrice(price: Int, count: Int) -> Int {
+  return price * count;
+}
+"#).unwrap();
+
+    let function = &context_map.functions[0];
+    assert_eq!(function.body.len(), 1);
+    assert!(function.body[0].returns);
+    assert_eq!(function.body[0].expression, "price * count");
   }
 }
