@@ -75,12 +75,16 @@ impl CustomRunner for ComputingRunner {
             .join(",")
         })
       }
+      "repl" => {
+        let input = args.first()?.value.as_str();
+        run_repl_lines(input).ok().map(|outputs| outputs.join("\n"))
+      }
       _ => None,
     }
   }
 
   fn list_commands(&self) -> Vec<String> {
-    vec!["eval".to_string(), "filter".to_string()]
+    vec!["eval".to_string(), "filter".to_string(), "repl".to_string()]
   }
 }
 
@@ -101,6 +105,24 @@ pub fn filter_numbers(input: &str, predicate: &str) -> Result<Vec<f64>, String> 
   }
 
   Ok(filtered)
+}
+
+pub fn run_repl_lines(input: &str) -> Result<Vec<String>, String> {
+  let mut outputs = Vec::new();
+
+  for line in input.lines() {
+    let expression = line.trim();
+    if expression.is_empty() {
+      continue;
+    }
+    if expression.eq_ignore_ascii_case("exit") || expression.eq_ignore_ascii_case("quit") {
+      break;
+    }
+
+    outputs.push(evaluate_expression(expression)?.to_string());
+  }
+
+  Ok(outputs)
 }
 
 fn parse_number_list(input: &str) -> Result<Vec<f64>, String> {
@@ -476,7 +498,7 @@ where
 mod tests {
   use fkl_ext_api::custom_runner::CustomRunner;
 
-  use crate::{evaluate_expression, filter_numbers, ComputingRunner};
+  use crate::{evaluate_expression, filter_numbers, run_repl_lines, ComputingRunner};
 
   #[test]
   fn evaluates_integer_addition_and_precedence() {
@@ -526,5 +548,20 @@ mod tests {
     assert!(ComputingRunner
       .list_commands()
       .contains(&"filter".to_string()));
+  }
+
+  #[test]
+  fn evaluates_repl_lines_until_exit() {
+    assert_eq!(
+      run_repl_lines("1 + 2\ntrue && false\nexit\n3 + 4").unwrap(),
+      vec!["3".to_string(), "0".to_string()]
+    );
+  }
+
+  #[test]
+  fn lists_repl_command() {
+    assert!(ComputingRunner
+      .list_commands()
+      .contains(&"repl".to_string()));
   }
 }
