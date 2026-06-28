@@ -11,7 +11,7 @@ export function resolveServerCommand(
 ): string {
   const configured = configuredPath?.trim();
   if (configured) {
-    return path.normalize(configured);
+    return configured;
   }
 
   return path.resolve(

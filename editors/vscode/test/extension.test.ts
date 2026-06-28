@@ -17,7 +17,14 @@ test("resolveServerCommand uses configured server path when present", () => {
 test("resolveServerCommand falls back to workspace debug binary", () => {
   assert.equal(
     resolveServerCommand("", "/workspace/fklang/editors/vscode", "darwin"),
-    path.normalize("/workspace/fklang/target/debug/fkl_lsp"),
+    path.resolve(
+      "/workspace/fklang/editors/vscode",
+      "..",
+      "..",
+      "target",
+      "debug",
+      "fkl_lsp",
+    ),
   );
 });
 
