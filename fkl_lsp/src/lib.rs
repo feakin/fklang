@@ -3,10 +3,10 @@ use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::{
   CompletionItem, CompletionItemKind, CompletionOptions, CompletionResponse, Diagnostic,
   DiagnosticSeverity, DidChangeTextDocumentParams, DidCloseTextDocumentParams,
-  DidOpenTextDocumentParams, Documentation, Hover, HoverContents, HoverProviderCapability,
-  InitializeParams, InitializeResult, InitializedParams, InsertTextFormat, MarkedString,
-  MessageType, Position, Range, ServerCapabilities, TextDocumentSyncCapability,
-  TextDocumentSyncKind, Url,
+  DidOpenTextDocumentParams, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse,
+  Documentation, Hover, HoverContents, HoverProviderCapability, InitializeParams, InitializeResult,
+  InitializedParams, InsertTextFormat, MarkedString, MessageType, OneOf, Position, Range,
+  ServerCapabilities, SymbolKind, TextDocumentSyncCapability, TextDocumentSyncKind, Url,
 };
 use tower_lsp::{Client, LanguageServer};
 
@@ -14,6 +14,13 @@ const FKL_KEYWORDS: &[(&str, &str)] = &[
   (
     "ContextMap",
     "Defines a map of bounded contexts and their relationships.",
+  ),
+  ("include", "Includes declarations from another FKL file."),
+  ("function", "Defines a reusable FKL function."),
+  ("return", "Returns a value from a function body."),
+  (
+    "type",
+    "Defines a named type alias, optionally with constraints.",
   ),
   ("Context", "Defines a bounded context."),
   ("Aggregate", "Defines an aggregate boundary."),
@@ -115,6 +122,18 @@ impl LanguageServer for Backend {
     )
   }
 
+  async fn document_symbol(
+    &self,
+    params: DocumentSymbolParams,
+  ) -> Result<Option<DocumentSymbolResponse>> {
+    Ok(
+      self
+        .documents
+        .get(&params.text_document.uri)
+        .map(|text| DocumentSymbolResponse::Nested(document_symbols_for_text(&text))),
+    )
+  }
+
   async fn shutdown(&self) -> Result<()> {
     Ok(())
   }
@@ -125,6 +144,7 @@ pub fn server_capabilities() -> ServerCapabilities {
     text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
     completion_provider: Some(CompletionOptions::default()),
     hover_provider: Some(HoverProviderCapability::Simple(true)),
+    document_symbol_provider: Some(OneOf::Left(true)),
     ..ServerCapabilities::default()
   }
 }
@@ -144,6 +164,13 @@ pub fn diagnostics_for_text(text: &str) -> Vec<Diagnostic> {
 
 pub fn completion_items() -> Vec<CompletionItem> {
   vec![
+    keyword("include", "include \"${1:./module.fkl}\""),
+    keyword(
+      "function",
+      "function ${1:name}(${2:input}: ${3:Type}) -> ${4:ReturnType} {\n  return ${5:input};\n}",
+    ),
+    keyword("return", "return ${1:value};"),
+    keyword("type", "type ${1:Alias} = ${2:String};"),
     keyword("ContextMap", "ContextMap ${1:Name} {\n  ${0}\n}"),
     keyword("Context", "Context ${1:Name} {\n  ${0}\n}"),
     keyword("Aggregate", "Aggregate ${1:Name} {\n  ${0}\n}"),
@@ -176,6 +203,27 @@ pub fn completion_items() -> Vec<CompletionItem> {
   ]
 }
 
+pub fn document_symbols_for_text(text: &str) -> Vec<DocumentSymbol> {
+  let mut symbols = Vec::new();
+  let mut brace_depth = 0_i32;
+
+  for (line_index, line) in text.lines().enumerate() {
+    let depth_at_line_start = brace_depth;
+    if depth_at_line_start == 0 {
+      if let Some(declaration) = top_level_declaration(line) {
+        symbols.push(document_symbol_from_declaration(
+          line_index as u32,
+          line,
+          declaration,
+        ));
+      }
+    }
+    brace_depth = update_brace_depth(brace_depth, line);
+  }
+
+  symbols
+}
+
 pub fn hover_for_position(text: &str, position: Position) -> Option<Hover> {
   let word = word_at_position(text, position)?;
   let (_, description) = FKL_KEYWORDS.iter().find(|(keyword, _)| *keyword == word)?;
@@ -199,6 +247,153 @@ fn keyword(label: &str, insert_text: &str) -> CompletionItem {
     insert_text_format: Some(InsertTextFormat::SNIPPET),
     ..CompletionItem::default()
   }
+}
+
+#[derive(Debug, Clone, Copy)]
+struct SymbolDeclaration<'a> {
+  keyword: &'a str,
+  name: &'a str,
+  kind: SymbolKind,
+  name_start: usize,
+}
+
+fn top_level_declaration(line: &str) -> Option<SymbolDeclaration<'_>> {
+  let trimmed = line.trim_start();
+  if trimmed.is_empty() || trimmed.starts_with("//") {
+    return None;
+  }
+
+  let offset = line.len() - trimmed.len();
+
+  if let Some((name, name_start)) =
+    quoted_name(trimmed, offset).filter(|_| trimmed.starts_with("include "))
+  {
+    return Some(SymbolDeclaration {
+      keyword: "include",
+      name,
+      kind: SymbolKind::FILE,
+      name_start,
+    });
+  }
+
+  for (keyword, kind) in [
+    ("ContextMap", SymbolKind::NAMESPACE),
+    ("Context", SymbolKind::NAMESPACE),
+    ("Aggregate", SymbolKind::CLASS),
+    ("Entity", SymbolKind::CLASS),
+    ("ValueObject", SymbolKind::STRUCT),
+    ("VO", SymbolKind::STRUCT),
+    ("Struct", SymbolKind::STRUCT),
+    ("struct", SymbolKind::STRUCT),
+    ("impl", SymbolKind::METHOD),
+    ("layered", SymbolKind::MODULE),
+    ("layer", SymbolKind::MODULE),
+    ("SourceSet", SymbolKind::PACKAGE),
+    ("env", SymbolKind::MODULE),
+    ("function", SymbolKind::FUNCTION),
+    ("type", SymbolKind::TYPE_PARAMETER),
+  ] {
+    if let Some((name, name_start)) = identifier_after_keyword(trimmed, offset, keyword) {
+      return Some(SymbolDeclaration {
+        keyword,
+        name,
+        kind,
+        name_start,
+      });
+    }
+  }
+
+  None
+}
+
+fn document_symbol_from_declaration(
+  line_index: u32,
+  line: &str,
+  declaration: SymbolDeclaration<'_>,
+) -> DocumentSymbol {
+  let line_len = line.chars().count() as u32;
+  let name_start = declaration.name_start as u32;
+  let name_end = name_start + declaration.name.chars().count() as u32;
+  let range = Range::new(
+    Position::new(line_index, 0),
+    Position::new(line_index, line_len),
+  );
+
+  DocumentSymbol {
+    name: declaration.name.to_string(),
+    detail: Some(declaration.keyword.to_string()),
+    kind: declaration.kind,
+    tags: None,
+    #[allow(deprecated)]
+    deprecated: None,
+    range,
+    selection_range: Range::new(
+      Position::new(line_index, name_start),
+      Position::new(line_index, name_end),
+    ),
+    children: None,
+  }
+}
+
+fn quoted_name(line: &str, line_offset: usize) -> Option<(&str, usize)> {
+  let quote_start = line.find('"')?;
+  let name_start = quote_start + 1;
+  let quote_end = line[name_start..].find('"')? + name_start;
+  Some((&line[name_start..quote_end], line_offset + name_start))
+}
+
+fn identifier_after_keyword<'a>(
+  line: &'a str,
+  line_offset: usize,
+  keyword: &str,
+) -> Option<(&'a str, usize)> {
+  if !line.starts_with(keyword) {
+    return None;
+  }
+
+  let after_keyword = keyword.len();
+  let keyword_boundary = line[after_keyword..]
+    .chars()
+    .next()
+    .map(|ch| ch.is_ascii_whitespace() || ch == '{')
+    .unwrap_or(true);
+  if !keyword_boundary {
+    return None;
+  }
+
+  let remainder = line[after_keyword..].trim_start();
+  if remainder.is_empty() {
+    return Some((&line[..keyword.len()], line_offset));
+  }
+
+  let whitespace_len = line[after_keyword..].len() - remainder.len();
+  let name_start = after_keyword + whitespace_len;
+  let name_len = remainder
+    .chars()
+    .take_while(|ch| is_word_char(*ch) || *ch == '.' || *ch == '/' || *ch == '-')
+    .map(char::len_utf8)
+    .sum::<usize>();
+
+  if name_len == 0 {
+    return Some((&line[..keyword.len()], line_offset));
+  }
+
+  Some((
+    &line[name_start..name_start + name_len],
+    line_offset + name_start,
+  ))
+}
+
+fn update_brace_depth(depth: i32, line: &str) -> i32 {
+  let mut next_depth = depth;
+  for ch in line.chars() {
+    match ch {
+      '{' => next_depth += 1,
+      '}' => next_depth = (next_depth - 1).max(0),
+      _ => {}
+    }
+  }
+  next_depth
 }
 
 fn range_from_parse_error(message: &str, text: &str) -> Range {
@@ -267,11 +462,14 @@ fn is_word_char(ch: char) -> bool {
 #[cfg(test)]
 mod tests {
   use tower_lsp::lsp_types::{
-    CompletionItemKind, DiagnosticSeverity, HoverContents, MarkedString, Position,
-    TextDocumentSyncCapability, TextDocumentSyncKind,
+    CompletionItemKind, DiagnosticSeverity, HoverContents, MarkedString, OneOf, Position,
+    SymbolKind, TextDocumentSyncCapability, TextDocumentSyncKind,
   };
 
-  use crate::{completion_items, diagnostics_for_text, hover_for_position, server_capabilities};
+  use crate::{
+    completion_items, diagnostics_for_text, document_symbols_for_text, hover_for_position,
+    server_capabilities,
+  };
 
   #[test]
   fn advertises_core_fkl_lsp_capabilities() {
@@ -283,6 +481,16 @@ mod tests {
     );
     assert!(capabilities.completion_provider.is_some());
     assert!(capabilities.hover_provider.is_some());
+  }
+
+  #[test]
+  fn advertises_document_symbol_provider() {
+    let capabilities = server_capabilities();
+
+    assert_eq!(
+      capabilities.document_symbol_provider,
+      Some(OneOf::Left(true))
+    );
   }
 
   #[test]
@@ -327,6 +535,63 @@ mod tests {
       .as_ref()
       .expect("insert text")
       .contains("Aggregate ${1:Name}"));
+
+    for label in ["include", "function", "return", "type"] {
+      let item = items
+        .iter()
+        .find(|item| item.label == label)
+        .unwrap_or_else(|| panic!("{label} snippet"));
+      assert_eq!(item.kind, Some(CompletionItemKind::KEYWORD));
+      assert_eq!(
+        item.insert_text_format,
+        Some(tower_lsp::lsp_types::InsertTextFormat::SNIPPET)
+      );
+    }
+  }
+
+  #[test]
+  fn document_symbols_include_top_level_declarations() {
+    let symbols = document_symbols_for_text(
+      r#"include "./shared.fkl"
+
+type Percent = Int range 0..100;
+
+ContextMap TicketBooking {
+  Reservation -> Cinema;
+}
+
+Aggregate Reservation {
+  Entity Reservation;
+}
+
+function calculatePrice(price: Int, count: Int) -> Int {
+  return price * count;
+}
+
+env Local {
+}
+"#,
+    );
+
+    let names: Vec<_> = symbols.iter().map(|symbol| symbol.name.as_str()).collect();
+    assert_eq!(
+      names,
+      vec![
+        "./shared.fkl",
+        "Percent",
+        "TicketBooking",
+        "Reservation",
+        "calculatePrice",
+        "Local"
+      ]
+    );
+
+    let function_symbol = symbols
+      .iter()
+      .find(|symbol| symbol.name == "calculatePrice")
+      .expect("function symbol");
+    assert_eq!(function_symbol.kind, SymbolKind::FUNCTION);
+    assert_eq!(function_symbol.selection_range.start, Position::new(12, 9));
   }
 
   #[test]

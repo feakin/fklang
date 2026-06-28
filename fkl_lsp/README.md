@@ -16,5 +16,6 @@ The server speaks the Language Server Protocol over stdio.
 - syntax diagnostics powered by `fkl_parser`
 - keyword and snippet completions
 - keyword hover documentation
+- document symbols for top-level FKL declarations
 
 Monaco sample reference: https://github.com/silvanshade/tower-lsp-web-demo
