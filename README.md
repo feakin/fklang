@@ -28,6 +28,7 @@ cargo install fkl_cli
   - fkl_parser_wasm. wasm wrapper version of fkl_parser.
 - CLI. CLI for generator code and IDE support.
   - fkl_cli. the cli for fkl, like code_gen, dot_gen or others.
+  - [x] time travel debug trace for implementation flow steps.
 - LSP. language server protocol, for IDE/Editor Support
   - [x] fkl_lsp. language server for fkl.
   - [x] editors/vscode. VSCode extension that launches `fkl_lsp` over stdio.
@@ -84,6 +85,8 @@ cargo install fkl_cli
   - [x] expression support
 - IDE support
   - [x] VSCode LSP extension
+- debugging
+  - [x] Time Travel Debug trace for FKL flows
 
 ## License
 
