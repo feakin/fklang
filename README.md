@@ -30,6 +30,7 @@ cargo install fkl_cli
   - fkl_cli. the cli for fkl, like code_gen, dot_gen or others.
 - LSP. language server protocol, for IDE/Editor Support
   - [x] fkl_lsp. language server for fkl.
+  - [x] editors/vscode. VSCode extension that launches `fkl_lsp` over stdio.
 - CodeGen. code generator for fkl.
   - fkl_codegen_dot. generate Graphviz dot language from fkl source.
   - fkl_codegen_java. generate Java code from fkl source.
@@ -81,6 +82,8 @@ cargo install fkl_cli
 - general programming language (if possible)
   - [x] function support
   - [x] expression support
+- IDE support
+  - [x] VSCode LSP extension
 
 ## License
 

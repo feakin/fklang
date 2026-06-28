@@ -27,5 +27,11 @@ jobs:
       - name: Install Just
         run: cargo install just
 
+      - name: Run VSCode extension tests
+        run: |
+          cd editors/vscode
+          npm ci
+          npm test
+
       - name: Run unit tests
         run: ${{matrix.ENV_VARS}} just tests

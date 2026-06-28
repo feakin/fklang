@@ -43,7 +43,7 @@ cargo test --all
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add docs/superpowers/plans/2026-06-28-lsp-vscode-support.md fkl_lsp/src/lib.rs fkl_lsp/README.md
@@ -61,39 +61,40 @@ git push origin master
 - Create: `editors/vscode/README.md`
 - Modify: `.gitignore`
 - Modify: `README.md`
+- Modify: `.github/workflows/build.yml`
 
-- [ ] **Step 1: Write failing extension tests**
+- [x] **Step 1: Write failing extension tests**
 
 Add tests for resolving a configured server path and fallback workspace binary path.
 
-- [ ] **Step 2: Run focused test to verify it fails**
+- [x] **Step 2: Run focused test to verify it fails**
 
 Run:
 ```bash
 cd editors/vscode
 npm install
-npm test -- --runInBand
+npm test
 ```
 
 Expected: FAIL until extension resolver code exists.
 
-- [ ] **Step 3: Implement extension**
+- [x] **Step 3: Implement extension**
 
 Add activation for `fkl` files, a `vscode-languageclient` stdio client, server path resolution, and a configuration key `fkl.lsp.serverPath`.
 
-- [ ] **Step 4: Run extension and workspace verification**
+- [x] **Step 4: Run extension and workspace verification**
 
 Run:
 ```bash
 cd editors/vscode
-npm test -- --runInBand
+npm test
 npm run compile
 cargo test -p fkl_lsp
 ```
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit and push**
+- [x] **Step 5: Commit and push**
 
 ```bash
 git add editors/vscode .gitignore README.md docs/superpowers/plans/2026-06-28-lsp-vscode-support.md

@@ -1,0 +1,63 @@
+{
+  "name": "fkl-vscode",
+  "displayName": "FKL",
+  "description": "VSCode language support for FKL.",
+  "version": "0.1.0",
+  "publisher": "feakin",
+  "license": "MPL-2.0",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:fkl",
+    "onCommand:fkl.restartLanguageServer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "fkl.restartLanguageServer",
+        "title": "FKL: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "FKL",
+      "properties": {
+        "fkl.lsp.serverPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the fkl_lsp executable. Defaults to ../../target/debug/fkl_lsp from this extension directory."
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "fkl",
+        "aliases": [
+          "FKL",
+          "fkl"
+        ],
+        "extensions": [
+          ".fkl"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "test": "npm run compile && node --test out/test/*.test.js",
+    "vscode:prepublish": "npm run compile"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "1.84.0",
+    "typescript": "^5.4.5"
+  }
+}
