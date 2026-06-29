@@ -35,12 +35,14 @@ mod tests {
           initializer: None,
         }],
         return_type: None,
+        source_span: None,
       }),
       Step::Message(Message {
         from: "Content".to_string(),
         to: "".to_string(),
         topic: "sample:blabla".to_string(),
         message: "hello".to_string(),
+        source_span: None,
       }),
     ]);
 
