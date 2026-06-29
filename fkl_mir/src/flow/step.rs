@@ -3,6 +3,12 @@ use serde::Deserialize;
 use serde::Serialize;
 use crate::binding::VariableDefinition;
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+pub struct SourceSpan {
+  pub start: usize,
+  pub end: usize,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Step {
   MethodCall(MethodCall),
@@ -17,6 +23,7 @@ pub struct MethodCall {
   pub method: String,
   pub parameters: Vec<VariableDefinition>,
   pub return_type: Option<VariableDefinition>,
+  pub source_span: Option<SourceSpan>,
 }
 
 impl MethodCall {
@@ -52,6 +59,7 @@ pub struct Message {
   pub to: String,
   pub topic: String,
   pub message: String,
+  pub source_span: Option<SourceSpan>,
 }
 
 impl Display for Message {
@@ -65,6 +73,7 @@ pub struct RpcCall {
   pub from: String,
   pub to: String,
   pub arguments: Vec<VariableDefinition>,
+  pub source_span: Option<SourceSpan>,
 }
 
 #[cfg(test)]
@@ -94,6 +103,7 @@ mod tests {
         type_type: "type3".to_owned(),
         initializer: None
       }),
+      source_span: None,
     };
     let comment = call.to_string();
     assert_eq!(comment, "get return:type3 from object.method with (param1:type1, param2:type2)");
@@ -118,6 +128,7 @@ mod tests {
         },
       ],
       return_type: None,
+      source_span: None,
     };
     let comment = call.to_string();
     assert_eq!(comment, "call object.method with (param1:type1, param2:type2)");
@@ -130,6 +141,7 @@ mod tests {
       to: "to".to_owned(),
       topic: "event:event".to_owned(),
       message: "content".to_owned(),
+      source_span: None,
     };
     let comment = message.to_string();
     assert_eq!(comment, "send content from object to event:event");

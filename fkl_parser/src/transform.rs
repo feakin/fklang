@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use indexmap::IndexMap;
 
-use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, NumericRange, PostgresDatasource, Step, TypeAlias, ValueObject};
+use fkl_mir::{BoundedContext, ConnectionDirection, ContextRelation, ContextRelationType, Datasource, Entity, Field, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, MySqlDatasource, NumericRange, PostgresDatasource, SourceSpan, Step, TypeAlias, ValueObject};
 use fkl_mir as mir;
 use fkl_mir::authorization::HttpAuthorization;
 use fkl_mir::implementation::{HttpEndpoint, Implementation, Request, Response};
@@ -308,6 +308,10 @@ impl MirTransform {
           method_call.object = call.object.clone();
           method_call.parameters = self.transform_variables(&call.arguments);
           method_call.return_type = self.transform_return_type(&call);
+          method_call.source_span = Some(SourceSpan {
+            start: call.loc.0,
+            end: call.loc.1,
+          });
 
           Step::MethodCall(method_call)
         }
@@ -316,6 +320,10 @@ impl MirTransform {
           message.from = msg.from.clone();
           message.topic = msg.topic.clone();
           message.message = msg.message.clone();
+          message.source_span = Some(SourceSpan {
+            start: msg.loc.0,
+            end: msg.loc.1,
+          });
 
           Step::Message(message)
         }
@@ -526,7 +534,7 @@ fn transform_connection(rd: &RelationDirection) -> ConnectionDirection {
 
 #[cfg(test)]
 mod tests {
-  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, NumericRange, PostgresDatasource, ServerConfig, SourceSet, SourceSets, Step, TypeAlias, VariableDefinition};
+  use fkl_mir::{Aggregate, BoundedContext, ContextRelation, ContextRelationType, CustomEnv, Entity, Environment, Flow, HttpMethod, Layer, LayeredArchitecture, LayerRelation, MethodCall, NumericRange, PostgresDatasource, ServerConfig, SourceSet, SourceSets, SourceSpan, Step, TypeAlias, VariableDefinition};
   use fkl_mir::authorization::HttpAuthorization;
   use fkl_mir::ConnectionDirection::PositiveDirected;
   use fkl_mir::Datasource::Postgres;
@@ -717,6 +725,10 @@ impl CinemaCreatedEvent {
    }
 }"#;
 
+    let get_user_step = "via UserRepository::getUserById receive user: User";
+    let save_user_step = "via UserRepository::save(user: User) receive user: User;";
+    let get_user_start = str.find(get_user_step).unwrap();
+    let save_user_start = str.find(save_user_step).unwrap();
     let context_map = MirTransform::mir(str).unwrap();
     assert_eq!(context_map.implementations[0], Implementation::PublishHttpApi(HttpApiImpl {
       name: "CinemaCreatedEvent".to_string(),
@@ -748,6 +760,10 @@ impl CinemaCreatedEvent {
               type_type: "User".to_string(),
               initializer: None,
             }),
+            source_span: Some(SourceSpan {
+              start: get_user_start,
+              end: save_user_start,
+            }),
           }),
           Step::MethodCall(MethodCall {
             name: "".to_string(),
@@ -763,10 +779,42 @@ impl CinemaCreatedEvent {
               type_type: "User".to_string(),
               initializer: None,
             }),
+            source_span: Some(SourceSpan {
+              start: save_user_start,
+              end: save_user_start + save_user_step.len(),
+            }),
           })],
       }),
     }
     ));
+  }
+
+  #[test]
+  fn flow_steps_keep_source_spans_in_mir() {
+    let source = r#"impl BookTicket {
+   endpoint {
+     POST "/tickets";
+     response: Ticket;
+   }
+
+   flow {
+     via UserRepository::getUserById receive user: User
+   }
+}"#;
+    let context_map = MirTransform::mir(source).unwrap();
+    let Implementation::PublishHttpApi(api) = &context_map.implementations[0] else {
+      panic!("expected http api implementation");
+    };
+    let Step::MethodCall(call) = &api.flow.as_ref().unwrap().steps[0] else {
+      panic!("expected method call");
+    };
+    let step_text = "via UserRepository::getUserById receive user: User";
+    let expected_start = source.find(step_text).unwrap();
+    let span = call.source_span.expect("source span");
+
+    assert_eq!(span.start, expected_start);
+    assert!(span.end >= expected_start + step_text.len());
+    assert!(source[span.start..span.end].contains(step_text));
   }
 
   #[test]
