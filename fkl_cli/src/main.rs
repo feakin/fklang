@@ -6,7 +6,9 @@ use clap::{Args, Parser, Subcommand};
 use log::info;
 
 use fkl_ext_loader::load_registry;
-use fkl_mir::{build_time_travel_trace, ContextMap, Environment, TimeTravelTrace};
+#[cfg(test)]
+use fkl_mir::build_time_travel_trace;
+use fkl_mir::{build_time_travel_trace_with_source, ContextMap, Environment, TimeTravelTrace, TimeTravelVariable};
 use fkl_parser::parse;
 use init::{init_project, InitOptions};
 
@@ -214,10 +216,10 @@ async fn main() {
       }
     }
     Commands::Debug(opt) => {
-      let mir = builtin::funcs::mir_from_file(&opt.main);
+      let trace = debug_trace_from_file(&opt.main);
       match opt.format {
-        DebugOutputFormat::Text => println!("{}", debug_trace_text(&mir)),
-        DebugOutputFormat::Json => println!("{}", debug_trace_json(&mir)),
+        DebugOutputFormat::Text => println!("{}", debug_trace_text(&trace)),
+        DebugOutputFormat::Json => println!("{}", debug_trace_json(&trace)),
       }
     }
     Commands::Init(opt) => {
@@ -251,32 +253,99 @@ fn env_from_opt(run: &RunOpt, mir: &ContextMap) -> Environment {
   env.clone()
 }
 
-fn debug_trace_text(mir: &ContextMap) -> String {
-  let trace = debug_trace(mir);
+fn debug_trace_text(trace: &TimeTravelTrace) -> String {
   let mut output = String::from("# Time Travel Debug Trace\n");
 
-  for frame in trace.frames {
+  for frame in &trace.frames {
     output.push_str(&format!(
       "{} {} {} {}\n",
       frame.index, frame.implementation, frame.endpoint, frame.operation
     ));
+    if let Some(source) = &frame.source {
+      output.push_str(&format!(
+        "  source: {}:{}:{}\n",
+        source.path, source.start_line, source.start_column
+      ));
+    }
     if !frame.reads.is_empty() {
       output.push_str(&format!("  reads: {}\n", frame.reads.join(", ")));
     }
     if !frame.writes.is_empty() {
       output.push_str(&format!("  writes: {}\n", frame.writes.join(", ")));
     }
+    output.push_str(&format!(
+      "  state before: [{}]\n",
+      format_debug_variables(&frame.state_before.variables)
+    ));
+    if !frame.state_diff.read.is_empty() {
+      output.push_str(&format!(
+        "  read: {}\n",
+        format_debug_variables(&frame.state_diff.read)
+      ));
+    }
+    if !frame.state_diff.created.is_empty() {
+      output.push_str(&format!(
+        "  created: {}\n",
+        format_debug_variables(&frame.state_diff.created)
+      ));
+    }
+    if !frame.state_diff.updated.is_empty() {
+      output.push_str(&format!(
+        "  updated: {}\n",
+        format_debug_variables(&frame.state_diff.updated)
+      ));
+    }
+    output.push_str(&format!(
+      "  state after: [{}]\n",
+      format_debug_variables(&frame.state_after.variables)
+    ));
   }
 
   output
 }
 
-fn debug_trace_json(mir: &ContextMap) -> String {
-  serde_json::to_string_pretty(&debug_trace(mir)).expect("failed to serialize debug trace")
+fn debug_trace_json(trace: &TimeTravelTrace) -> String {
+  serde_json::to_string_pretty(trace).expect("failed to serialize debug trace")
 }
 
+#[cfg(test)]
 fn debug_trace(mir: &ContextMap) -> TimeTravelTrace {
   build_time_travel_trace(&mir.implementations)
+}
+
+fn debug_trace_from_file(path: &PathBuf) -> TimeTravelTrace {
+  let source = fs::read_to_string(path).expect("Something went wrong reading the file");
+  let mir = parse(&source).expect("failed to parse fkl file");
+  build_time_travel_trace_with_source(
+    &mir.implementations,
+    Some(&path.display().to_string()),
+    Some(&source),
+  )
+}
+
+#[cfg(test)]
+fn debug_trace_text_for_source(path: &str, source: &str) -> String {
+  let mir = parse(source).expect("failed to parse fkl source");
+  let trace = build_time_travel_trace_with_source(
+    &mir.implementations,
+    Some(path),
+    Some(source),
+  );
+  debug_trace_text(&trace)
+}
+
+fn format_debug_variables(variables: &[TimeTravelVariable]) -> String {
+  variables
+    .iter()
+    .map(|variable| {
+      let label = format!("{}:{}", variable.name, variable.type_name);
+      match &variable.value {
+        Some(value) => format!("{}={}", label, value),
+        None => label,
+      }
+    })
+    .collect::<Vec<String>>()
+    .join(", ")
 }
 
 fn gen_to_dot(path: &PathBuf) {
@@ -315,7 +384,7 @@ mod tests {
   use crate::builtin::types::BuiltinType;
   use crate::mock::fake_value::FakeValue;
   use crate::RunFuncName;
-  use crate::{debug_trace_text, Cli, Commands};
+  use crate::{debug_trace, debug_trace_text, debug_trace_text_for_source, Cli, Commands};
   use clap::Parser;
 
   #[test]
@@ -444,7 +513,8 @@ Entity Ticket {
 }"#;
     let context_map: ContextMap = parse(source).unwrap();
 
-    let output = debug_trace_text(&context_map);
+    let trace = debug_trace(&context_map);
+    let output = debug_trace_text(&trace);
 
     assert!(output.contains("# Time Travel Debug Trace"));
     assert!(output.contains("0 BookTicket POST /tickets UserRepository.getUserById"));
@@ -452,5 +522,26 @@ Entity Ticket {
     assert!(output.contains("1 BookTicket POST /tickets TicketRepository.save"));
     assert!(output.contains("reads: user:User"));
     assert!(output.contains("writes: ticket:Ticket"));
+  }
+
+  #[test]
+  fn renders_time_travel_debug_trace_with_source_and_state() {
+    let source = r#"impl BookTicket {
+  endpoint {
+    POST "/tickets";
+    response: Ticket;
+  }
+
+  flow {
+    via UserRepository::getUserById receive user: User
+  }
+}"#;
+
+    let output = debug_trace_text_for_source("booking.fkl", source);
+
+    assert!(output.contains("source: booking.fkl:8:5"));
+    assert!(output.contains("state before: []"));
+    assert!(output.contains("created: user:User=UserRepository.getUserById#0"));
+    assert!(output.contains("state after: [user:User=UserRepository.getUserById#0]"));
   }
 }

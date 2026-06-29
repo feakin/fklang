@@ -43,7 +43,29 @@ cargo install fkl_cli
     - [x] ext_kafka. the plugin for kafka.
     - [x] ext_computing. the plugin for computing.
     - [x] ext_codegen_aws. the plugin for aws codegen.
-    - [x] ext_sourceset_swagger. the plugin for swagger.
+  - [x] ext_sourceset_swagger. the plugin for swagger.
+
+## Time Travel Debug
+
+Print a replayable flow trace with source locations, symbolic state snapshots, and state diffs:
+
+```bash
+fkl debug --main docs/samples/impl.fkl --format text
+```
+
+Example output:
+
+```text
+# Time Travel Debug Trace
+0 UserCreated POST /user/{id} UserRepository.getUserById
+  source: docs/samples/impl.fkl:82:5
+  writes: user:User
+  state before: []
+  created: user:User=UserRepository.getUserById#0
+  state after: [user:User=UserRepository.getUserById#0]
+```
+
+Use `--format json` to feed the same trace into IDE, DAP, or other tooling.
 
 ## Roadmap
 
