@@ -67,6 +67,15 @@ Example output:
 
 Use `--format json` to feed the same trace into IDE, DAP, or other tooling.
 
+Start the Debug Adapter Protocol server over stdio:
+
+```bash
+fkl dap --main docs/samples/impl.fkl
+```
+
+The adapter supports `initialize`, `launch`, `threads`, `stackTrace`, `scopes`, `variables`,
+`next`, `continue`, `disconnect`, plus `timeTravelTrace` and `timeTravelSeek` for replay tooling.
+
 ## Roadmap
 
 - [x] DSL Design

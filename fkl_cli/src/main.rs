@@ -29,6 +29,7 @@ mod datasource;
 pub mod mock;
 /// generate feakin code
 pub mod generator;
+mod debug_adapter;
 mod init;
 
 #[derive(Parser)]
@@ -57,6 +58,8 @@ enum Commands {
   Run(RunOpt),
   #[command(about = "print a time-travel debug trace for fkl flow steps")]
   Debug(DebugOpt),
+  #[command(about = "start the fkl time-travel Debug Adapter Protocol server")]
+  Dap(DapOpt),
   #[command(about = "initialize a new fkl project from a template")]
   Init(InitOpt),
   #[command(about = "list plugins from a local registry directory")]
@@ -108,6 +111,13 @@ struct DebugOpt {
   main: PathBuf,
   #[arg(short, long = "format", default_value = "text")]
   format: DebugOutputFormat,
+}
+
+#[derive(Debug, Args)]
+struct DapOpt {
+  /// main file of feakin. DAP launch requests may also provide this as `main` or `program`.
+  #[arg(short, long, required = false)]
+  main: Option<PathBuf>,
 }
 
 #[derive(clap::ValueEnum, PartialEq, Debug, Clone)]
@@ -221,6 +231,9 @@ async fn main() {
         DebugOutputFormat::Text => println!("{}", debug_trace_text(&trace)),
         DebugOutputFormat::Json => println!("{}", debug_trace_json(&trace)),
       }
+    }
+    Commands::Dap(opt) => {
+      debug_adapter::run_stdio(opt.main.clone()).expect("failed to run debug adapter");
     }
     Commands::Init(opt) => {
       let main = init_project(InitOptions {
@@ -495,6 +508,19 @@ Entity Ticket {
         assert_eq!(opt.main, PathBuf::from("docs/samples/impl.fkl"));
       }
       _ => panic!("expected debug command"),
+    }
+  }
+
+  #[test]
+  fn parses_dap_subcommand_for_time_travel_debug() {
+    let cli = Cli::try_parse_from(["fkl", "dap", "--main", "docs/samples/impl.fkl"])
+      .expect("dap command");
+
+    match cli.command {
+      Commands::Dap(opt) => {
+        assert_eq!(opt.main, Some(PathBuf::from("docs/samples/impl.fkl")));
+      }
+      _ => panic!("expected dap command"),
     }
   }
 
