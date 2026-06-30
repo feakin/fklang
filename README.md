@@ -116,6 +116,7 @@ The adapter supports `initialize`, `launch`, `threads`, `stackTrace`, `scopes`, 
   - [x] expression support
 - IDE support
   - [x] VSCode LSP extension
+  - [x] VSCode Time Travel Debug adapter
 - debugging
   - [x] Time Travel Debug trace for FKL flows
 
