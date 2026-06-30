@@ -13,7 +13,8 @@
   ],
   "activationEvents": [
     "onLanguage:fkl",
-    "onCommand:fkl.restartLanguageServer"
+    "onCommand:fkl.restartLanguageServer",
+    "onDebug"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -30,9 +31,42 @@
           "type": "string",
           "default": "",
           "description": "Path to the fkl_lsp executable. Defaults to ../../target/debug/fkl_lsp from this extension directory."
+        },
+        "fkl.debug.adapterPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the fkl CLI executable used as the Debug Adapter. Defaults to ../../target/debug/fkl from this extension directory."
         }
       }
     },
+    "debuggers": [
+      {
+        "type": "fkl",
+        "label": "FKL Time Travel Debug",
+        "languages": [
+          "fkl"
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [],
+            "properties": {
+              "main": {
+                "type": "string",
+                "description": "Path to the main .fkl file. Defaults to the active FKL editor file."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "fkl",
+            "request": "launch",
+            "name": "Debug FKL Time Travel",
+            "main": "${file}"
+          }
+        ]
+      }
+    ],
     "languages": [
       {
         "id": "fkl",
