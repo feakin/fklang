@@ -22,4 +22,5 @@ lcov.info
 plugins/
 editors/vscode/node_modules/
 editors/vscode/out/
+editors/vscode/.vscode-test/
 editors/vscode/*.vsix

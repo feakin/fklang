@@ -16,7 +16,7 @@
     "onCommand:fkl.restartLanguageServer",
     "onDebug"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/src/extension.js",
   "contributes": {
     "commands": [
       {
@@ -84,6 +84,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "test": "npm run compile && node --test out/test/*.test.js",
+    "test:integration": "npm run compile && cargo build -p fkl_cli -p fkl_lsp && node out/test/integration/runTest.js",
     "vscode:prepublish": "npm run compile"
   },
   "dependencies": {
@@ -92,6 +93,7 @@
   "devDependencies": {
     "@types/node": "^20.11.30",
     "@types/vscode": "1.84.0",
+    "@vscode/test-electron": "^2.5.2",
     "typescript": "^5.4.5"
   }
 }
